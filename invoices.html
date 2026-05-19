@@ -1,0 +1,950 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الفواتير</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.58rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s; border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: var(--off-white); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Main / Topbar */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
+    .topbar-search:hover { border-color: var(--border-mid); }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); transform: translateY(-1px); }
+
+    /* Content / Cards / Table */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .card-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 0.83rem; font-weight: 700; color: var(--ink); }
+    .card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1rem; text-align: right; font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .data-table td { padding: 0.75rem 1rem; font-size: 0.78rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: rgba(247,246,243,0.7); }
+    .case-name { font-weight: 600; color: var(--ink); font-size: 0.8rem; }
+    .case-id { font-size: 0.6rem; color: var(--ink-muted); margin-top: 2px; font-family: monospace; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; white-space: nowrap; }
+    .pill::before { content: ''; width: 4px; height: 4px; border-radius: 50%; }
+    .pill-paid     { background: var(--green-dim); color: var(--green); border: 1px solid rgba(22,163,74,0.18); } .pill-paid::before { background: var(--green); }
+    .pill-pending  { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(184,149,42,0.2); } .pill-pending::before { background: var(--gold); }
+    .pill-overdue  { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(220,38,38,0.18); } .pill-overdue::before { background: var(--red); animation: blink 1.2s infinite; }
+    .pill-cancelled{ background: rgba(100,116,139,0.09); color: var(--ink-muted); border: 1px solid rgba(100,116,139,0.12); } .pill-cancelled::before { background: var(--ink-muted); }
+    @keyframes blink { 50%{opacity:0.25} }
+    .date-cell  { font-size: 0.73rem; color: var(--ink-light); }
+    .date-urgent{ color: var(--red); font-weight: 600; font-size: 0.7rem; }
+    .row-btn { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 2px 9px; border-radius: 5px; font-size: 0.63rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .row-btn-print:hover { border-color: var(--ink-mid); color: var(--ink-mid); }
+    .action-pair { display: flex; gap: 0.35rem; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+    /* Page header + Filters */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.3px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+    .filters-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.2rem; flex-wrap: wrap; }
+    .filter-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; flex: 1; min-width: 200px; max-width: 280px; transition: border-color 0.15s; }
+    .filter-search:focus-within { border-color: var(--accent-border); }
+    .filter-search input { border: none; background: transparent; outline: none; font-family: 'Cairo', sans-serif; font-size: 0.78rem; color: var(--ink); width: 100%; }
+    .filter-search input::placeholder { color: var(--ink-muted); }
+    .filter-select { background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem 0.42rem 1.8rem; font-size: 0.78rem; color: var(--ink-light); font-family: 'Cairo', sans-serif; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.6rem center; transition: border-color 0.15s; }
+    .filter-select:hover, .filter-select:focus { border-color: var(--border-mid); color: var(--ink); }
+    .btn-reset { background: none; border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.75rem; font-size: 0.72rem; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; white-space: nowrap; }
+    .btn-reset:hover { border-color: rgba(220,38,38,0.35); color: var(--red); }
+    .no-results { text-align: center; padding: 3rem 1.5rem; color: var(--ink-muted); font-size: 0.82rem; }
+    .no-results-icon { font-size: 2rem; margin-bottom: 0.6rem; line-height: 1; }
+    .no-results-title { font-size: 0.88rem; font-weight: 700; color: var(--ink-mid); margin-bottom: 0.3rem; }
+    .no-results-sub { font-size: 0.74rem; color: var(--ink-muted); }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } }
+
+    /* KPI cards */
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+    .kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.3rem; }
+    .kpi-label { font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.55rem; }
+    .kpi-val { font-size: 1.3rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .kpi-unit { font-size: 0.72rem; font-weight: 600; color: var(--ink-muted); }
+    .kpi-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 0.35rem; }
+    .kpi-up { color: var(--green); font-weight: 700; }
+    .kpi-pct { color: var(--gold); font-weight: 700; }
+    .kpi-warn { color: var(--gold); font-weight: 700; }
+    .kpi-danger { color: var(--red); font-weight: 700; }
+    @media (max-width: 1024px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+
+    /* Amount cells */
+    .amount-cell { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); font-size: 0.78rem; }
+    .amount-vat  { font-size: 0.62rem; color: var(--ink-muted); margin-top: 1px; }
+    .amount-total{ font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+    /* ZATCA bar */
+    .zatca-bar { background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 10px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 0.85rem; }
+    .zatca-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .zatca-text { font-size: 0.8rem; color: var(--accent); font-weight: 600; }
+    .zatca-badges { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.45rem; }
+    .zatca-badge { font-size: 0.6rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; background: var(--accent); color: white; letter-spacing: 0.2px; }
+
+    /* Modal + Toast */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--white); border-radius: 12px; width: 100%; max-width: 560px; box-shadow: 0 24px 64px rgba(15,20,25,0.2); transform: translateY(18px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: linear-gradient(to bottom, var(--off-white), var(--white)); }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1; flex-shrink: 0; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .form-input, .form-select, .form-textarea { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .form-textarea { resize: vertical; }
+    input[type="date"], input[type="number"] { appearance: none; -webkit-appearance: none; }
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .modal-note { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; color: var(--accent); padding: 0.65rem 1.4rem; background: rgba(28,94,62,0.05); border-top: 1px solid var(--accent-border); }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .btn-submit-full { width: 100%; padding: 0.9rem; font-size: 0.9rem; }
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 600px) { .modal-card { max-width: 95vw; } .form-row { grid-template-columns: 1fr; } }
+
+    /* VAT live preview */
+    .vat-preview { background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 8px; padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.5rem; }
+    .vat-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+    .vat-row .lbl { color: var(--ink-light); }
+    .vat-row .val { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .vat-row-total { border-top: 1px solid var(--accent-border); padding-top: 0.3rem; margin-top: 0.1rem; }
+    .vat-row-total .lbl { color: var(--accent); font-weight: 700; }
+    .vat-row-total .val { color: var(--accent); font-weight: 700; font-size: 0.85rem; }
+
+    /* Visual Polish */
+    body { line-height: 1.75; }
+    .nav-section { font-size: 0.68rem; }
+    .card-title, .topbar-title, .ph-title { letter-spacing: -0.5px; }
+    .data-table td { font-size: 0.83rem; }
+    .card { border-radius: 14px; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .kpi-card { border-radius: 14px; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .kpi-card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .modal-card { box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); border-radius: 14px; }
+    .btn-new { letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-new:hover { box-shadow: 0 4px 12px rgba(28,94,62,0.28); }
+    .row-btn, .btn-cancel { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .data-table th { border-bottom-width: 2px; }
+    .data-table tbody tr { transition: background 0.1s ease; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .nav-item { transition: all 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .nav-item:hover { background: rgba(28,94,62,0.04); }
+    .nav-item.active { border-radius: 0 8px 8px 0; }
+    .topbar { box-shadow: 0 1px 0 var(--border); }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 768px) { .btn-new, .row-btn { min-height: 44px; } }
+    @media (max-width: 480px) { .modal-overlay { align-items: flex-end; } .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; } }
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    .loading-dots { animation: dotsFade 1s ease infinite; }
+
+    /* ── z-index stacking fix ── */
+    .modal-overlay {
+      position: fixed !important;
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      z-index: 9999 !important;
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 2rem 1rem !important;
+    }
+    .modal-overlay.open { display: flex !important; }
+    .modal-card {
+      position: relative !important;
+      z-index: 10000 !important;
+      margin: auto !important;
+      flex-shrink: 0 !important;
+    }
+    .kpi-card, .card { isolation: isolate; }
+    .kpi-card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+    .card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+
+    /* KPI accent top bars */
+    .kpi-card { position: relative; overflow: hidden; }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: transparent; }
+    .kpi-card.success::before { background: var(--green); }
+    .kpi-card.gold::before    { background: var(--gold); }
+    .kpi-card.danger::before  { background: var(--red); }
+
+    /* Invoice view modal */
+    .inv-modal { max-width: 700px; }
+    .inv-head-banner { background: var(--ink); color: white; padding: 1.4rem 1.8rem; border-radius: 12px 12px 0 0; }
+    .inv-firm-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; color: white; }
+    .inv-type-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-bottom: 0.7rem; }
+    .inv-hdg-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
+    .inv-badge { font-size: 0.58rem; font-weight: 700; padding: 2px 9px; border-radius: 2rem; letter-spacing: 0.3px; }
+    .inv-badge-gold  { background: rgba(184,149,42,0.25); color: #F0C040; border: 1px solid rgba(184,149,42,0.3); }
+    .inv-badge-green { background: rgba(110,231,183,0.12); color: #6EE7B7; border: 1px solid rgba(110,231,183,0.25); }
+    .inv-meta-strip { display: flex; gap: 1.5rem; padding: 0.85rem 1.8rem; background: var(--off-white); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .inv-meta-item { display: flex; flex-direction: column; gap: 1px; }
+    .inv-meta-lbl { font-size: 0.56rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .inv-meta-val { font-size: 0.75rem; font-weight: 600; color: var(--ink); font-family: monospace; }
+    .inv-body { padding: 1.3rem 1.8rem; display: flex; flex-direction: column; gap: 1.1rem; }
+    .inv-section-title { font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.55rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
+    .inv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .inv-party { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 1rem; }
+    .inv-party-role { font-size: 0.56rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
+    .inv-party-name { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 0.2rem; }
+    .inv-party-detail { font-size: 0.68rem; color: var(--ink-light); line-height: 1.7; }
+    .inv-svc-table { width: 100%; border-collapse: collapse; font-size: 0.73rem; }
+    .inv-svc-table th { text-align: right; padding: 0.42rem 0.65rem; background: var(--off-white); border: 1px solid var(--border); font-size: 0.6rem; font-weight: 700; color: var(--ink-muted); }
+    .inv-svc-table td { padding: 0.5rem 0.65rem; border: 1px solid var(--border); color: var(--ink-mid); }
+    .inv-totals { display: flex; flex-direction: column; gap: 0.25rem; min-width: 240px; }
+    .inv-total-row { display: flex; justify-content: space-between; font-size: 0.73rem; padding: 0.18rem 0; color: var(--ink-mid); }
+    .inv-total-row.grand { border-top: 2px solid var(--ink); padding-top: 0.45rem; margin-top: 0.2rem; font-size: 0.92rem; font-weight: 900; color: var(--ink); }
+    .inv-qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; padding: 0.9rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; width: fit-content; }
+    .inv-qr-caption { font-size: 0.6rem; color: var(--ink-muted); text-align: center; }
+    .inv-tech { background: rgba(15,20,25,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; flex: 1; min-width: 180px; }
+    .inv-tech-row { display: flex; gap: 0.5rem; font-size: 0.62rem; margin-bottom: 0.22rem; align-items: flex-start; }
+    .inv-tech-row:last-child { margin-bottom: 0; }
+    .inv-tech-lbl { color: var(--ink-muted); flex-shrink: 0; min-width: 100px; }
+    .inv-tech-val { color: var(--ink-light); font-family: monospace; word-break: break-all; }
+    .inv-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.8rem; border-top: 1px solid var(--border); }
+    .btn-disabled { opacity: 0.45; cursor: not-allowed !important; position: relative; }
+    .btn-fatoora { background: var(--gold) !important; }
+    .btn-fatoora:hover { background: #9a7d22 !important; }
+  </style>
+  <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item active" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">الفواتير والأتعاب</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في الفواتير...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+        <button class="btn-new" id="btnNewInvoice">+ فاتورة جديدة</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">الفواتير والأتعاب</div>
+          <div class="ph-sub">إجمالي 0 فاتورة</div>
+        </div>
+        <button class="btn-new" id="btnNewInvoice2">+ فاتورة جديدة</button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card success">
+          <div class="kpi-label">محصّل هذا الشهر</div>
+          <div class="kpi-val" id="kpiPaidVal">٠ ر.س</div>
+          <div class="kpi-sub kpi-up">✓ مدفوع بالكامل</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-label">معلّق</div>
+          <div class="kpi-val" id="kpiPendingVal">٠ ر.س</div>
+          <div class="kpi-sub kpi-warn">في انتظار السداد</div>
+        </div>
+        <div class="kpi-card danger">
+          <div class="kpi-label">متأخر</div>
+          <div class="kpi-val" id="kpiOverdueVal">٠ ر.س</div>
+          <div class="kpi-sub kpi-danger">يحتاج متابعة عاجلة</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card">
+        <div class="filters-bar">
+          <div class="filter-search">
+            <span style="color:var(--ink-muted);font-size:0.82rem;">🔍</span>
+            <input type="text" id="iSearch" placeholder="ابحث باسم الموكل أو رقم الفاتورة...">
+          </div>
+          <select class="filter-select" id="iStatus">
+            <option value="">الحالة — الكل</option>
+            <option value="paid">مدفوعة</option>
+            <option value="pending">معلقة</option>
+            <option value="overdue">متأخرة</option>
+            <option value="cancelled">ملغاة</option>
+          </select>
+          <select class="filter-select" id="iLawyer">
+            <option value="">المحامي — الكل</option>
+            <option value="khalid">خالد العتيبي</option>
+            <option value="sarah">سارة المحمد</option>
+            <option value="mohammed">محمد الرشيد</option>
+            <option value="noura">نورة الأحمد</option>
+          </select>
+          <select class="filter-select" id="iMonth">
+            <option value="">الشهر — الكل</option>
+            <option value="يناير">يناير</option>
+            <option value="فبراير">فبراير</option>
+            <option value="مارس">مارس</option>
+            <option value="أبريل">أبريل</option>
+            <option value="مايو">مايو</option>
+            <option value="يونيو">يونيو</option>
+            <option value="يوليو">يوليو</option>
+            <option value="أغسطس">أغسطس</option>
+            <option value="سبتمبر">سبتمبر</option>
+            <option value="أكتوبر">أكتوبر</option>
+            <option value="نوفمبر">نوفمبر</option>
+            <option value="ديسمبر">ديسمبر</option>
+          </select>
+          <button class="btn-reset" id="iReset">إعادة ضبط</button>
+          <span id="iCount" style="font-size:0.7rem;color:var(--ink-muted);margin-right:auto;"></span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">قائمة الفواتير</div>
+            <div class="card-sub">جميع الفواتير المُصدَرة في النظام</div>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>رقم الفاتورة</th>
+              <th>الموكل</th>
+              <th>القضية</th>
+              <th>الأتعاب</th>
+              <th>VAT 15%</th>
+              <th>الإجمالي</th>
+              <th>تاريخ الإصدار</th>
+              <th>تاريخ الاستحقاق</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="invoicesBody">
+            <tr id="iNoResults">
+              <td colspan="10" class="no-results"><div class="no-results-icon">🧾</div><div class="no-results-title">لا توجد فواتير بعد</div><div class="no-results-sub">ابدأ بإصدار فاتورة جديدة من زر «+ فاتورة جديدة»</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ZATCA Compliance Bar -->
+      <div class="zatca-bar">
+        <div class="zatca-icon">🏛️</div>
+        <div>
+          <div class="zatca-text">✓ جميع الفواتير متوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك</div>
+          <div class="zatca-badges">
+            <span class="zatca-badge">ZATCA Phase 2</span>
+            <span class="zatca-badge">تنسيق متوافق مع الفوترة الإلكترونية</span>
+            <span class="zatca-badge">جاهزة للإرسال عبر Fatoora في النسخة الإنتاجية</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- New Invoice Modal -->
+  <div class="modal-overlay" id="iModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-title">فاتورة جديدة</span>
+        <button class="modal-close" id="iModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ifClient">الموكل *</label>
+            <select class="form-select" id="ifClient">
+              <option value="">— اختر الموكل —</option>
+              <option value="عبدالرحمن المالكي">عبدالرحمن المالكي</option>
+              <option value="سلطان الغامدي">سلطان الغامدي</option>
+              <option value="فيصل الشهري">فيصل الشهري</option>
+              <option value="ناصر العمري">ناصر العمري</option>
+              <option value="سعد السبيعي">سعد السبيعي</option>
+              <option value="منال الزهراني">منال الزهراني</option>
+              <option value="إبراهيم القحطاني">إبراهيم القحطاني</option>
+              <option value="خالد الدوسري">خالد الدوسري</option>
+              <option value="رياض المطيري">رياض المطيري</option>
+              <option value="لطيفة الحربي">لطيفة الحربي</option>
+              <option value="منصور العتيبي">منصور العتيبي</option>
+              <option value="سلمى الشمري">سلمى الشمري</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ifCase">القضية</label>
+            <select class="form-select" id="ifCase">
+              <option value="قضية تجارية" data-id="#2025-0142">قضية تجارية — المالكي (#2025-0142)</option>
+              <option value="قضية عمالية" data-id="#2025-0138">قضية عمالية — الغامدي (#2025-0138)</option>
+              <option value="قضية عقارية" data-id="#2025-0135">قضية عقارية — الشهري (#2025-0135)</option>
+              <option value="قضية إدارية" data-id="#2025-0130">قضية إدارية — العمري (#2025-0130)</option>
+              <option value="قضية جزائية" data-id="#2025-0128">قضية جزائية — السبيعي (#2025-0128)</option>
+              <option value="قضية تجارية" data-id="#2025-0125">قضية تجارية — الزهراني (#2025-0125)</option>
+              <option value="قضية عمالية" data-id="#2025-0122">قضية عمالية — القحطاني (#2025-0122)</option>
+              <option value="قضية عقارية" data-id="#2025-0118">قضية عقارية — الدوسري (#2025-0118)</option>
+              <option value="قضية إدارية" data-id="#2025-0114">قضية إدارية — المطيري (#2025-0114)</option>
+              <option value="قضية تجارية" data-id="#2025-0110">قضية تجارية — الحربي (#2025-0110)</option>
+              <option value="قضية جزائية" data-id="#2025-0106">قضية جزائية — العتيبي (#2025-0106)</option>
+              <option value="قضية عقارية" data-id="#2025-0102">قضية عقارية — الشمري (#2025-0102)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ifService">بند الخدمة</label>
+          <input class="form-input" id="ifService" type="text" placeholder="أتعاب محاماة — قضية تجارية">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ifAmount">مبلغ الأتعاب (ر.س) *</label>
+          <input class="form-input" id="ifAmount" type="number" placeholder="0" min="0" step="500">
+          <div class="vat-preview">
+            <div class="vat-row"><span class="lbl">الأتعاب</span><span class="val" id="pvBase">— ر.س</span></div>
+            <div class="vat-row"><span class="lbl">VAT 15%</span><span class="val" id="pvVat">— ر.س</span></div>
+            <div class="vat-row vat-row-total"><span class="lbl">الإجمالي</span><span class="val" id="pvTotal">— ر.س</span></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ifIssueDate">📅 تاريخ الإصدار *</label>
+            <input class="form-input" id="ifIssueDate" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ifDueDate">📅 تاريخ الاستحقاق</label>
+            <input class="form-input" id="ifDueDate" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ifStatus">الحالة *</label>
+          <select class="form-select" id="ifStatus">
+            <option value="pending">معلقة — في انتظار السداد</option>
+            <option value="paid">مدفوعة — تم التحصيل</option>
+            <option value="overdue">متأخرة — تجاوزت الاستحقاق</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ifNotes">ملاحظات <span style="color:var(--ink-muted);font-weight:400">(اختياري)</span></label>
+          <textarea class="form-textarea" id="ifNotes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+        </div>
+      </div>
+      <div class="modal-note">✓ سيتم توليد رقم الفاتورة وQR Code ZATCA تلقائياً عند الإنشاء</div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="iModalCancel">إلغاء</button>
+        <button class="btn-new btn-submit-full" id="iFormSubmit">إصدار الفاتورة</button>
+      </div>
+    </div>
+  </div>
+  <!-- Invoice View Modal -->
+  <div class="modal-overlay" id="invViewModal">
+    <div class="modal-card inv-modal">
+      <div id="invViewContent"></div>
+      <div class="inv-foot">
+        <button class="btn-new btn-disabled" disabled title="متاح في النسخة الإنتاجية">⬇ تحميل PDF</button>
+        <button class="btn-new btn-fatoora btn-disabled" disabled title="متاح في النسخة الإنتاجية">إرسال إلى Fatoora</button>
+        <button class="btn-cancel" id="invViewClose">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  /* ── Filters ── */
+  (function() {
+    var countEl = document.getElementById('iCount');
+    var search  = document.getElementById('iSearch');
+    var status  = document.getElementById('iStatus');
+    var lawyer  = document.getElementById('iLawyer');
+    var month   = document.getElementById('iMonth');
+    var noRes   = document.getElementById('iNoResults');
+
+    function filter() {
+      var rows = document.querySelectorAll('#invoicesBody tr[data-search]');
+      var q = search.value.trim().toLowerCase();
+      var st = status.value, lw = lawyer.value, mo = month.value;
+      var visible = 0;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var show = (!q  || r.getAttribute('data-search').toLowerCase().indexOf(q) !== -1)
+                && (!st || r.getAttribute('data-status') === st)
+                && (!lw || r.getAttribute('data-lawyer') === lw)
+                && (!mo || r.getAttribute('data-month')  === mo);
+        r.style.display = show ? '' : 'none';
+        if (show) visible++;
+      }
+      noRes.style.display = visible === 0 ? '' : 'none';
+      countEl.textContent = visible + ' فاتورة';
+    }
+
+    search.addEventListener('input',  filter);
+    status.addEventListener('change', filter);
+    lawyer.addEventListener('change', filter);
+    month.addEventListener('change',  filter);
+    document.getElementById('iReset').addEventListener('click', function() {
+      search.value = ''; status.value = ''; lawyer.value = ''; month.value = '';
+      filter();
+    });
+    filter();
+  })();
+
+  /* ── Utilities ── */
+  function fmtNum(n) {
+    var x = parseFloat((+n).toFixed(2));
+    return x.toLocaleString('en-US');
+  }
+  function genUUID() {
+    var c = '0123456789abcdef', r = '';
+    for (var i = 0; i < 8; i++) r += c[Math.floor(Math.random() * 16)];
+    return r;
+  }
+  function genFakeHash(seed) {
+    var c = '0123456789abcdef', h = 5381, r = '';
+    for (var i = 0; i < seed.length; i++) h = ((h * 33) ^ seed.charCodeAt(i)) >>> 0;
+    for (var i = 0; i < 64; i++) { h = ((h * 1664525) + 1013904223) >>> 0; r += c[h % 16]; }
+    return r;
+  }
+  function genQRSvg(seed) {
+    var cs = 7, n = 21, W = n * cs;
+    var h = 5381;
+    for (var i = 0; i < seed.length; i++) h = ((h * 33) ^ seed.charCodeAt(i)) >>> 0;
+    function next() { h = ((h * 1664525) + 1013904223) >>> 0; return h / 4294967295; }
+    var grid = [], fixed = {};
+    for (var i = 0; i < n * n; i++) grid[i] = 0;
+    function finder(r0, c0) {
+      for (var r = 0; r < 7; r++) for (var c = 0; c < 7; c++) {
+        var b = r===0||r===6||c===0||c===6, k = r>=2&&r<=4&&c>=2&&c<=4;
+        var idx = (r0+r)*n+(c0+c);
+        grid[idx] = (b||k) ? 1 : 0; fixed[idx] = 1;
+      }
+    }
+    finder(0,0); finder(0,14); finder(14,0);
+    for (var i = 0; i < n*n; i++) if (!fixed[i]) grid[i] = next() > 0.45 ? 1 : 0;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+W+'" viewBox="0 0 '+W+' '+W+'" style="display:block;border-radius:4px">';
+    svg += '<rect width="'+W+'" height="'+W+'" fill="#fff"/>';
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++)
+      if (grid[r*n+c]) svg += '<rect x="'+(c*cs)+'" y="'+(r*cs)+'" width="'+cs+'" height="'+cs+'" fill="#0F1419"/>';
+    return svg + '</svg>';
+  }
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = '✓ ' + msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  /* ── KPI update ── */
+  function updateInvoiceKPIs() {
+    var paid = 0, pending = 0, overdue = 0, count = 0;
+    document.querySelectorAll('#invoicesBody tr').forEach(function(tr) {
+      if (tr.id === 'iNoResults') return;
+      var pill = tr.querySelector('.pill'); if (!pill) return;
+      var totalEl = tr.querySelector('.amount-total');
+      var amount = totalEl ? parseFloat(totalEl.getAttribute('data-amount') || '0') : 0;
+      count++;
+      if (pill.classList.contains('pill-paid'))    paid    += amount;
+      else if (pill.classList.contains('pill-overdue'))  overdue  += amount;
+      else if (pill.classList.contains('pill-pending'))  pending  += amount;
+    });
+    function fmt(n) { return n > 0 ? fmtNum(n) + ' ر.س' : '٠ ر.س'; }
+    var pEl = document.getElementById('kpiPaidVal');
+    var dEl = document.getElementById('kpiPendingVal');
+    var oEl = document.getElementById('kpiOverdueVal');
+    if (pEl) pEl.textContent = fmt(paid);
+    if (dEl) dEl.textContent = fmt(pending);
+    if (oEl) oEl.textContent = fmt(overdue);
+    var phSub = document.querySelector('.ph-sub');
+    if (phSub) phSub.textContent = 'إجمالي ' + count + ' فاتورة';
+  }
+
+  /* ── Save / Load ── */
+  function saveInvoices() {
+    var rows = [];
+    document.querySelectorAll('#invoicesBody tr').forEach(function(tr) {
+      if (tr.id !== 'iNoResults' && !tr.querySelector('.no-results')) rows.push(tr.innerHTML);
+    });
+    localStorage.setItem('invoices_data', JSON.stringify(rows));
+    if (typeof updateSidebarBadges === 'function') updateSidebarBadges();
+  }
+  function loadInvoices() {
+    var saved = localStorage.getItem('invoices_data');
+    if (!saved) { updateInvoiceKPIs(); return; }
+    try {
+      var rows = JSON.parse(saved);
+      if (rows.length > 0) {
+        var tbody = document.getElementById('invoicesBody');
+        var noRes = document.getElementById('iNoResults');
+        rows.forEach(function(html) {
+          var tr = document.createElement('tr');
+          tr.innerHTML = html;
+          var pill = tr.querySelector('.pill');
+          if (pill) {
+            var st = pill.classList.contains('pill-paid') ? 'paid' : pill.classList.contains('pill-overdue') ? 'overdue' : 'pending';
+            tr.setAttribute('data-status', st);
+          }
+          if (!tr.getAttribute('data-search')) {
+            var nm = tr.querySelector('.case-name');
+            tr.setAttribute('data-search', nm ? nm.textContent.trim() : '');
+          }
+          tr.querySelectorAll('.row-btn').forEach(function(b) {
+            if (b.textContent.trim() === 'عرض') { b.textContent = 'عرض الفاتورة'; b.classList.add('view-invoice-btn'); }
+          });
+          tbody.appendChild(tr);
+        });
+        if (noRes) noRes.style.display = 'none';
+      }
+    } catch(e) {}
+    updateInvoiceKPIs();
+  }
+  window.addEventListener('load', loadInvoices);
+
+  /* ── Delete invoice ── */
+  function deleteInvoice(btn) {
+    var tr = btn.closest ? btn.closest('tr') : btn.parentNode.parentNode.parentNode;
+    if (!tr) return;
+    tr.style.transition = 'opacity 0.3s';
+    tr.style.opacity = '0';
+    setTimeout(function() {
+      tr.remove();
+      var rows = document.querySelectorAll('#invoicesBody tr[data-search]');
+      if (rows.length === 0) document.getElementById('iNoResults').style.display = '';
+      saveInvoices();
+      updateInvoiceKPIs();
+    }, 300);
+  }
+
+  /* ── Event delegation (view button) ── */
+  document.getElementById('invoicesBody').addEventListener('click', function(e) {
+    if (e.target.classList.contains('view-invoice-btn')) {
+      var tr = e.target.closest ? e.target.closest('tr') : e.target.parentNode.parentNode.parentNode;
+      if (tr) openInvoiceView(tr);
+    }
+  });
+
+  /* ── Invoice View Modal ── */
+  function openInvoiceView(tr) {
+    var cells = tr.querySelectorAll('td');
+    var nameEl   = cells[0].querySelector('.case-name');
+    var invNum   = nameEl ? nameEl.textContent.trim() : '—';
+    var uuidEl   = cells[0].querySelector('.case-id');
+    var uuid     = uuidEl ? uuidEl.textContent.trim() : genUUID();
+    var client   = cells[1].textContent.trim();
+    var ctEl     = cells[2].querySelector('.case-name');
+    var caseType = ctEl ? ctEl.textContent.trim() : '';
+    var ciEl     = cells[2].querySelector('.case-id');
+    var caseId   = ciEl ? ciEl.textContent.trim() : '';
+    var baseEl   = cells[3].querySelector('.amount-cell');
+    var base     = baseEl ? parseFloat(baseEl.getAttribute('data-amount') || '0') : 0;
+    var svcEl    = cells[3].querySelector('.amount-vat');
+    var service  = svcEl ? svcEl.textContent.trim() : 'أتعاب محاماة';
+    var vat      = parseFloat(cells[4].getAttribute('data-amount') || (base * 0.15).toFixed(2));
+    var totEl    = cells[5].querySelector('.amount-total');
+    var total    = totEl ? parseFloat(totEl.getAttribute('data-amount') || '0') : (base + vat);
+    var issueDateEl = cells[6].querySelector('.date-cell');
+    var issueDate   = issueDateEl ? issueDateEl.textContent.trim() : '—';
+    var dueDateEl   = cells[7].querySelector('.date-cell');
+    var dueDate     = dueDateEl ? dueDateEl.textContent.trim() : '—';
+    var statusPill  = cells[8].querySelector('.pill');
+    var statusText  = statusPill ? statusPill.textContent.trim() : 'معلقة';
+    var statusCls   = statusPill
+      ? (statusPill.className.indexOf('paid') !== -1 ? 'paid'
+        : statusPill.className.indexOf('overdue') !== -1 ? 'overdue' : 'pending')
+      : 'pending';
+
+    var firmData = null;
+    try { firmData = JSON.parse(localStorage.getItem('firm_data') || 'null'); } catch(e) {}
+    var firmName  = (firmData && firmData.firmName) ? firmData.firmName : 'نظام إدارة المحاماة';
+    var firmCity  = (firmData && firmData.city)     ? firmData.city     : 'الرياض';
+    var firmPhone = (firmData && firmData.phone)    ? firmData.phone    : '05XXXXXXXX';
+    var taxNum    = '3XXXXXXXXXXXXX3';
+
+    var timestamp = new Date().toISOString();
+    var fakeHash  = genFakeHash(invNum + uuid);
+    var qrSvg     = genQRSvg(invNum + client + String(total));
+
+    document.getElementById('invViewContent').innerHTML = [
+      '<div class="inv-head-banner">',
+        '<div class="inv-firm-name">' + firmName + '</div>',
+        '<div class="inv-type-lbl">فاتورة ضريبية إلكترونية</div>',
+        '<div class="inv-hdg-badges">',
+          '<span class="inv-badge inv-badge-gold">🔒 موقّعة رقمياً</span>',
+          '<span class="inv-badge inv-badge-green">✓ متوافقة مع معايير ZATCA Phase 2</span>',
+        '</div>',
+      '</div>',
+      '<div class="inv-meta-strip">',
+        '<div class="inv-meta-item"><div class="inv-meta-lbl">رقم الفاتورة</div><div class="inv-meta-val">' + invNum + '</div></div>',
+        '<div class="inv-meta-item"><div class="inv-meta-lbl">المعرّف الفريد</div><div class="inv-meta-val">' + uuid + '</div></div>',
+        '<div class="inv-meta-item"><div class="inv-meta-lbl">تاريخ الإصدار</div><div class="inv-meta-val">' + issueDate + '</div></div>',
+        '<div class="inv-meta-item"><div class="inv-meta-lbl">تاريخ الاستحقاق</div><div class="inv-meta-val">' + dueDate + '</div></div>',
+        '<div class="inv-meta-item"><div class="inv-meta-lbl">الحالة</div><div class="inv-meta-val"><span class="pill pill-' + statusCls + '">' + statusText + '</span></div></div>',
+      '</div>',
+      '<div class="inv-body">',
+        '<div>',
+          '<div class="inv-section-title">أطراف العقد</div>',
+          '<div class="inv-parties">',
+            '<div class="inv-party">',
+              '<div class="inv-party-role">المُصدِر</div>',
+              '<div class="inv-party-name">' + firmName + '</div>',
+              '<div class="inv-party-detail">الرقم الضريبي: ' + taxNum + '<br>المدينة: ' + firmCity + '<br>الجوال: ' + firmPhone + '</div>',
+            '</div>',
+            '<div class="inv-party">',
+              '<div class="inv-party-role">المُستلِم</div>',
+              '<div class="inv-party-name">' + client + '</div>',
+              '<div class="inv-party-detail">نوع الموكل: فرد<br>القضية: ' + caseType + '<br>المرجع: ' + (caseId || '—') + '</div>',
+            '</div>',
+          '</div>',
+        '</div>',
+        '<div>',
+          '<div class="inv-section-title">تفاصيل الخدمة</div>',
+          '<table class="inv-svc-table">',
+            '<thead><tr><th>البيان</th><th>الكمية</th><th>سعر الوحدة (ر.س)</th><th>الإجمالي (ر.س)</th></tr></thead>',
+            '<tbody><tr><td>' + service + '</td><td>1</td><td>' + fmtNum(base) + '</td><td>' + fmtNum(base) + '</td></tr></tbody>',
+          '</table>',
+          '<div style="display:flex;justify-content:flex-end;margin-top:0.8rem">',
+            '<div class="inv-totals">',
+              '<div class="inv-total-row"><span>المجموع الفرعي</span><span>' + fmtNum(base) + ' ر.س</span></div>',
+              '<div class="inv-total-row"><span>ضريبة القيمة المضافة (15%)</span><span>' + fmtNum(vat) + ' ر.س</span></div>',
+              '<div class="inv-total-row grand"><span>الإجمالي النهائي</span><span>' + fmtNum(total) + ' ر.س</span></div>',
+            '</div>',
+          '</div>',
+        '</div>',
+        '<div style="display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap">',
+          '<div class="inv-qr-wrap">' + qrSvg + '<div class="inv-qr-caption">امسح للتحقق من الفاتورة</div></div>',
+          '<div class="inv-tech">',
+            '<div class="inv-section-title">بيانات تقنية</div>',
+            '<div class="inv-tech-row"><span class="inv-tech-lbl">الرقم التسلسلي:</span><span class="inv-tech-val">' + uuid + '</span></div>',
+            '<div class="inv-tech-row"><span class="inv-tech-lbl">تاريخ الإصدار:</span><span class="inv-tech-val">' + timestamp + '</span></div>',
+            '<div class="inv-tech-row"><span class="inv-tech-lbl">توقيع رقمي:</span><span class="inv-tech-val" style="font-size:0.55rem">' + fakeHash + '</span></div>',
+            '<div class="inv-tech-row" style="margin-top:0.5rem"><span style="color:var(--accent);font-size:0.6rem;line-height:1.5">✓ تنسيق متوافق مع الفوترة الإلكترونية — جاهز للإرسال عبر Fatoora في النسخة الإنتاجية</span></div>',
+          '</div>',
+        '</div>',
+      '</div>'
+    ].join('');
+
+    document.getElementById('invViewModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeViewModal() {
+    document.getElementById('invViewModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('invViewClose').addEventListener('click', closeViewModal);
+  document.getElementById('invViewModal').addEventListener('click', function(e) { if (e.target === this) closeViewModal(); });
+
+  /* ── New Invoice Modal ── */
+  (function() {
+    var overlay = document.getElementById('iModal');
+
+    function dateFmt(d) {
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    function arabicDate(val) {
+      var d = new Date(val + 'T00:00:00');
+      var m = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    function setDefaults() {
+      var today = new Date(), due = new Date(today);
+      due.setDate(due.getDate() + 30);
+      document.getElementById('ifIssueDate').value = dateFmt(today);
+      document.getElementById('ifDueDate').value   = dateFmt(due);
+    }
+
+    document.getElementById('ifAmount').addEventListener('input', function() {
+      var base = parseFloat(this.value) || 0;
+      var vat  = Math.round(base * 15) / 100;
+      var tot  = parseFloat((base + vat).toFixed(2));
+      document.getElementById('pvBase').textContent  = base ? fmtNum(base) + ' ر.س' : '— ر.س';
+      document.getElementById('pvVat').textContent   = base ? fmtNum(vat)  + ' ر.س' : '— ر.س';
+      document.getElementById('pvTotal').textContent = base ? fmtNum(tot)  + ' ر.س' : '— ر.س';
+    });
+
+    function openModal() { setDefaults(); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      ['ifClient','ifService','ifNotes'].forEach(function(id) { document.getElementById(id).value = ''; });
+      document.getElementById('ifClient').style.borderColor = '';
+      document.getElementById('ifAmount').value = '';
+      document.getElementById('ifAmount').style.borderColor = '';
+      document.getElementById('ifStatus').value = 'pending';
+      document.getElementById('ifCase').selectedIndex = 0;
+      document.getElementById('pvBase').textContent  = '— ر.س';
+      document.getElementById('pvVat').textContent   = '— ر.س';
+      document.getElementById('pvTotal').textContent = '— ر.س';
+    }
+
+    document.getElementById('btnNewInvoice').addEventListener('click',  openModal);
+    document.getElementById('btnNewInvoice2').addEventListener('click', openModal);
+    document.getElementById('iModalClose').addEventListener('click',  closeModal);
+    document.getElementById('iModalCancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (document.getElementById('invViewModal').classList.contains('open')) closeViewModal();
+        else if (overlay.classList.contains('open')) closeModal();
+      }
+    });
+
+    var invCounter = parseInt(localStorage.getItem('inv_counter') || '1', 10);
+
+    document.getElementById('iFormSubmit').addEventListener('click', function() {
+      var clientSel = document.getElementById('ifClient');
+      var amountEl  = document.getElementById('ifAmount');
+      var valid = true;
+      if (!clientSel.value) { clientSel.style.borderColor = 'var(--red)'; valid = false; } else { clientSel.style.borderColor = ''; }
+      if (!amountEl.value || parseFloat(amountEl.value) <= 0) { amountEl.style.borderColor = 'var(--red)'; valid = false; } else { amountEl.style.borderColor = ''; }
+      if (!valid) return;
+
+      var btn = this;
+      btn.disabled = true;
+      btn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
+      btn.classList.add('btn-loading');
+
+      var client    = clientSel.value;
+      var caseSel   = document.getElementById('ifCase');
+      var caseId    = caseSel.options[caseSel.selectedIndex].getAttribute('data-id') || '';
+      var caseType  = caseSel.options[caseSel.selectedIndex].value || 'قضية';
+      var service   = document.getElementById('ifService').value.trim() || 'أتعاب محاماة';
+      var base      = parseFloat(amountEl.value);
+      var vat       = Math.round(base * 15) / 100;
+      var total     = parseFloat((base + vat).toFixed(2));
+      var statusVal = document.getElementById('ifStatus').value;
+      var statusLabels = { paid: 'مدفوعة', pending: 'معلقة', overdue: 'متأخرة' };
+      var statusLabel  = statusLabels[statusVal] || 'معلقة';
+      var issueVal  = document.getElementById('ifIssueDate').value;
+      var dueVal    = document.getElementById('ifDueDate').value;
+      var uuid      = genUUID();
+      var year      = new Date().getFullYear();
+      var invNum    = 'INV-' + year + '-' + String(invCounter).padStart(4, '0');
+      invCounter++;
+      localStorage.setItem('inv_counter', String(invCounter));
+      var months     = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      var issueMonth = issueVal ? months[new Date(issueVal+'T00:00:00').getMonth()] : months[new Date().getMonth()];
+      var issueFmt   = issueVal ? arabicDate(issueVal) : arabicDate(dateFmt(new Date()));
+      var dueFmt     = dueVal   ? arabicDate(dueVal)   : arabicDate(dateFmt(new Date(Date.now()+30*86400000)));
+
+      setTimeout(function() {
+        var tbody = document.getElementById('invoicesBody');
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-search', client + ' ' + invNum);
+        tr.setAttribute('data-status', statusVal);
+        tr.setAttribute('data-lawyer', 'khalid');
+        tr.setAttribute('data-month',  issueMonth);
+        tr.innerHTML =
+          '<td><div class="case-name">' + invNum + '</div><div class="case-id">' + uuid + '</div></td>' +
+          '<td>' + client + '</td>' +
+          '<td><div class="case-name" style="font-size:0.75rem">' + caseType + '</div><div class="case-id">' + caseId + '</div></td>' +
+          '<td><div class="amount-cell" data-amount="' + base + '">' + fmtNum(base) + '</div><div class="amount-vat">' + service + '</div></td>' +
+          '<td class="amount-cell" data-amount="' + vat + '">' + fmtNum(vat) + '</td>' +
+          '<td><div class="amount-total" data-amount="' + total + '">' + fmtNum(total) + ' ر.س</div></td>' +
+          '<td><div class="date-cell">' + issueFmt + '</div></td>' +
+          '<td><div class="date-cell">' + dueFmt + '</div></td>' +
+          '<td><span class="pill pill-' + statusVal + '">' + statusLabel + '</span></td>' +
+          '<td><div class="action-pair"><button class="row-btn view-invoice-btn">عرض الفاتورة</button><button class="row-btn" style="color:var(--red)" onclick="deleteInvoice(this)">حذف</button></div></td>';
+
+        document.getElementById('iNoResults').style.display = 'none';
+        tbody.insertBefore(tr, tbody.firstChild);
+        saveInvoices();
+        updateInvoiceKPIs();
+
+        btn.disabled = false;
+        btn.innerHTML = 'إصدار الفاتورة';
+        btn.classList.remove('btn-loading');
+        closeModal();
+        showToast('تم إصدار الفاتورة ' + invNum + ' بنجاح');
+      }, 800);
+    });
+  })();
+  </script>
+
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>

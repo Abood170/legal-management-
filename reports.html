@@ -1,0 +1,639 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — التقارير</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Main / Topbar */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--border); }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+    .btn-export { background: var(--white); color: var(--accent); border: 1px solid var(--accent-border); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; white-space: nowrap; }
+    .btn-export:hover { background: var(--accent-dim); }
+
+    /* Content */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* Card */
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .card-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, var(--off-white), var(--white)); }
+    .card-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1px; }
+    .card-badge { font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+
+    /* Page header */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+
+    /* Period tabs */
+    .period-tabs { display: flex; align-items: center; gap: 0.3rem; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 4px; box-shadow: 0 1px 3px rgba(15,20,25,0.04); }
+    .tab-btn { background: none; border: none; padding: 0.38rem 0.9rem; border-radius: 7px; font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.18s; white-space: nowrap; }
+    .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 1px 4px rgba(28,94,62,0.25); }
+    .tab-btn:not(.active):hover { background: var(--accent-dim); color: var(--accent); }
+
+    /* KPI cards */
+    .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+    .kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.3rem; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); transition: box-shadow 0.2s; isolation: isolate; }
+    .kpi-card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.08); }
+    .kpi-card::before { content:''; position:absolute; top:0; right:0; left:0; height:3px; background: var(--border); }
+    .kpi-card.kc-green::before { background: var(--green); }
+    .kpi-card.kc-gold::before  { background: var(--gold); }
+    .kpi-card.kc-accent::before{ background: var(--accent); }
+    .kpi-card.kc-blue::before  { background: #2563EB; }
+    .kpi-label { font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.45rem; }
+    .kpi-val { font-size: 1.75rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; line-height: 1; margin-bottom: 0.35rem; }
+    .kpi-change { font-size: 0.68rem; }
+    .kpi-change.up   { color: var(--green); }
+    .kpi-change.neutral { color: var(--ink-muted); }
+
+    /* Section label */
+    .section-label { font-size: 0.72rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1.5px; padding-right: 0.2rem; }
+
+    /* Two-col grid */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Bar chart */
+    .chart-wrap { padding: 1.2rem 1.4rem 0.6rem; }
+    .chart-area { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .chart-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent-dim); border: 1px solid var(--accent-border); min-height: 4px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .chart-bar.bar-accent { background: var(--accent); border-color: var(--accent); opacity: 0.85; }
+    .chart-bar.bar-forecast { background: none; border: 1.5px dashed var(--accent-border); opacity: 0.6; }
+    .chart-bar.bar-gold { background: var(--gold-dim); border-color: rgba(184,149,42,0.3); }
+    .chart-lbl { font-size: 0.5rem; color: var(--ink-muted); white-space: nowrap; }
+    .chart-lbl.lbl-active { color: var(--accent); font-weight: 700; }
+    .chart-mini-stats { display: flex; gap: 1.5rem; padding: 0.9rem 1.4rem; border-top: 1px solid var(--border); background: var(--off-white); }
+    .cms-item { display: flex; flex-direction: column; gap: 1px; }
+    .cms-label { font-size: 0.6rem; color: var(--ink-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .cms-val { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
+    .cms-val.green { color: var(--accent); }
+    .cms-val.red   { color: var(--red); }
+
+    /* Horizontal bar chart (distribution) */
+    .h-chart { padding: 1rem 1.4rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .hb-row { display: flex; flex-direction: column; gap: 4px; }
+    .hb-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .hb-label { font-size: 0.75rem; color: var(--ink-mid); font-weight: 600; }
+    .hb-pct { font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); }
+    .hb-track { height: 8px; background: var(--off-white); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+    .hb-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .fill-accent  { background: var(--accent); }
+    .fill-gold    { background: var(--gold); }
+    .fill-blue    { background: #2563EB; }
+    .fill-purple  { background: #7c3aed; }
+    .fill-red     { background: var(--red); }
+    .fill-teal    { background: #0d9488; }
+
+    /* Lawyer table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .data-table td { padding: 0.8rem 1.2rem; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background 0.1s ease; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .lawyer-chip { display: flex; align-items: center; gap: 0.5rem; }
+    .av-sm { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .lawyer-name { font-weight: 700; color: var(--ink); font-size: 0.8rem; }
+    .workload-bar { height: 5px; border-radius: 3px; background: var(--off-white); border: 1px solid var(--border); overflow: hidden; width: 80px; margin-top: 4px; }
+    .workload-fill { height: 100%; border-radius: 3px; }
+    .stars { display: flex; gap: 2px; }
+    .star { width: 8px; height: 8px; border-radius: 50%; }
+    .star-on-green  { background: var(--green); }
+    .star-on-gold   { background: var(--gold); }
+    .star-off { background: var(--border-mid); }
+    .win-pct { font-weight: 700; font-size: 0.8rem; }
+    .fee-amt { font-variant-numeric: tabular-nums; direction: ltr; text-align: right; font-weight: 700; color: var(--accent); }
+
+    /* Sessions timeline */
+    .sessions-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; padding: 1rem 1.4rem; }
+    .sess-stat { text-align: center; }
+    .sess-val { font-size: 1.6rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; }
+    .sess-lbl { font-size: 0.62rem; color: var(--ink-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sess-val.green { color: var(--accent); }
+    .timeline-wrap { padding: 0 1.4rem 1.2rem; }
+    .timeline-label { font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; }
+    .timeline-row { display: flex; gap: 0.4rem; }
+    .day-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .day-label { font-size: 0.58rem; color: var(--ink-muted); text-align: center; font-weight: 600; }
+    .day-block { height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; text-align: center; line-height: 1.3; padding: 2px; }
+    .db-green  { background: var(--green-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .db-gold   { background: var(--gold-dim);  color: var(--gold);   border: 1px solid rgba(184,149,42,0.2); }
+    .db-red    { background: var(--red-dim);   color: var(--red);    border: 1px solid rgba(220,38,38,0.15); }
+    .db-empty  { background: var(--off-white); border: 1px solid var(--border); }
+
+    /* Alert cards */
+    .alert-item { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); border-right: 3px solid transparent; transition: background 0.15s; }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-item:hover { background: var(--off-white); }
+    .alert-item.al-green { border-right-color: var(--green); }
+    .alert-item.al-gold  { border-right-color: var(--gold); }
+    .alert-item.al-red   { border-right-color: var(--red); }
+    .alert-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+    .ai-green { background: var(--green-dim); border: 1px solid rgba(22,163,74,0.15); }
+    .ai-gold  { background: var(--gold-dim);  border: 1px solid rgba(184,149,42,0.18); }
+    .ai-red   { background: var(--red-dim);   border: 1px solid rgba(220,38,38,0.15); }
+    .alert-title { font-size: 0.78rem; font-weight: 700; color: var(--ink); margin-bottom: 0.15rem; }
+    .alert-desc  { font-size: 0.7rem; color: var(--ink-light); line-height: 1.45; }
+
+    /* Print */
+    @media print {
+      .sidebar, .topbar, .period-tabs, .btn-export, .btn-new { display: none !important; }
+      .main { overflow: visible; }
+      .content { padding: 0; overflow: visible; }
+      body { background: white; }
+    }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } .kpi-row { grid-template-columns: 1fr 1fr; } .two-col { grid-template-columns: 1fr; } .sessions-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) { .btn-new { min-height: 44px; } }
+    @media (max-width: 600px) { .kpi-row { grid-template-columns: 1fr 1fr; } .sessions-grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+  <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item active" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">التقارير والإحصائيات</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في التقارير...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+        <button class="btn-export" id="btnExport">تصدير التقرير ↓</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Page Header + Period Tabs -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">التقارير والإحصائيات</div>
+          <div class="ph-sub">نظرة شاملة على أداء المكتب</div>
+        </div>
+        <div class="period-tabs">
+          <button class="tab-btn active" data-period="month">هذا الشهر</button>
+          <button class="tab-btn" data-period="quarter">هذا الربع</button>
+          <button class="tab-btn" data-period="year">هذه السنة</button>
+          <button class="tab-btn" data-period="custom">مخصص</button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card kc-accent">
+          <div class="kpi-label">إجمالي القضايا</div>
+          <div class="kpi-val" id="kpiCases">0</div>
+          <div class="kpi-change neutral" id="kpiCasesSub">لا توجد بيانات بعد</div>
+        </div>
+        <div class="kpi-card kc-green">
+          <div class="kpi-label">نسبة الفوز</div>
+          <div class="kpi-val" id="kpiWin">—</div>
+          <div class="kpi-change neutral" id="kpiWinSub">لا توجد بيانات بعد</div>
+        </div>
+        <div class="kpi-card kc-gold">
+          <div class="kpi-label">متوسط مدة القضية</div>
+          <div class="kpi-val" id="kpiDuration">—</div>
+          <div class="kpi-change neutral" id="kpiDurationSub">لا توجد بيانات بعد</div>
+        </div>
+        <div class="kpi-card kc-blue">
+          <div class="kpi-label">إجمالي الأتعاب</div>
+          <div class="kpi-val" id="kpiFees">0</div>
+          <div class="kpi-change neutral" id="kpiFeesSub">لا توجد بيانات بعد</div>
+        </div>
+      </div>
+
+      <!-- Section 1: Financial Performance -->
+      <div class="section-label">📈 الأداء المالي</div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">الأتعاب الشهرية</div>
+            <div class="card-sub" id="chartSubtitle">يناير — ديسمبر 2024</div>
+          </div>
+          <span class="card-badge" id="chartBadge">السنة الكاملة</span>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-area" id="finChart">
+            <!-- Built by JS -->
+          </div>
+        </div>
+        <div class="chart-mini-stats">
+          <div class="cms-item">
+            <div class="cms-label">أعلى شهر</div>
+            <div class="cms-val green" id="statHigh">—</div>
+          </div>
+          <div class="cms-item">
+            <div class="cms-label">أدنى شهر</div>
+            <div class="cms-val red" id="statLow">—</div>
+          </div>
+          <div class="cms-item">
+            <div class="cms-label">المتوسط الشهري</div>
+            <div class="cms-val" id="statAvg">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Lawyer Performance -->
+      <div class="section-label">👨‍💼 أداء المحامين</div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">أداء فريق المحامين</div>
+            <div class="card-sub">مقارنة بالأداء المستهدف</div>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>المحامي</th>
+              <th>القضايا النشطة</th>
+              <th>القضايا المغلقة</th>
+              <th>نسبة الفوز</th>
+              <th>الأتعاب المحصّلة</th>
+              <th>التقييم</th>
+              <th>عبء العمل</th>
+            </tr>
+          </thead>
+          <tbody id="lawyerTable">
+            <tr>
+              <td colspan="7" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد بيانات بعد</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section 3: Case Distribution -->
+      <div class="section-label">⚖️ توزيع القضايا</div>
+      <div class="two-col">
+        <!-- By type -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">توزيع القضايا حسب النوع</div>
+              <div class="card-sub" id="typeChartSub">لا توجد بيانات بعد</div>
+            </div>
+          </div>
+          <div class="h-chart" id="typeChart">
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">تجارية</span><span class="hb-pct" id="t1">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-accent" id="t1b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">عمالية</span><span class="hb-pct" id="t2">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-gold" id="t2b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">عقارية</span><span class="hb-pct" id="t3">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-blue" id="t3b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">إدارية</span><span class="hb-pct" id="t4">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-purple" id="t4b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">جزائية</span><span class="hb-pct" id="t5">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-red" id="t5b" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- By court -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">توزيع القضايا حسب المحكمة</div>
+              <div class="card-sub" id="courtChartSub">لا توجد بيانات بعد</div>
+            </div>
+          </div>
+          <div class="h-chart" id="courtChart">
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">محكمة التجارة</span><span class="hb-pct" id="c1">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-accent" id="c1b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">المحكمة العمالية</span><span class="hb-pct" id="c2">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-gold" id="c2b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">محكمة الاستئناف</span><span class="hb-pct" id="c3">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-blue" id="c3b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">ديوان المظالم</span><span class="hb-pct" id="c4">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-teal" id="c4b" style="width:0%"></div></div>
+            </div>
+            <div class="hb-row">
+              <div class="hb-top"><span class="hb-label">محاكم أخرى</span><span class="hb-pct" id="c5">0%</span></div>
+              <div class="hb-track"><div class="hb-fill fill-purple" id="c5b" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Sessions Report -->
+      <div class="section-label">📅 تقرير الجلسات</div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">إحصائيات الجلسات</div>
+            <div class="card-sub" id="sessSubtitle">يناير 2025</div>
+          </div>
+          <span class="card-badge" style="background:var(--border);color:var(--ink-muted);border-color:var(--border)">لا توجد بيانات</span>
+        </div>
+        <div class="sessions-grid">
+          <div class="sess-stat">
+            <div class="sess-val" id="sessTot">0</div>
+            <div class="sess-lbl">إجمالي الجلسات</div>
+          </div>
+          <div class="sess-stat">
+            <div class="sess-val green" id="sessDone">0</div>
+            <div class="sess-lbl">جلسات منتهية</div>
+          </div>
+          <div class="sess-stat">
+            <div class="sess-val" id="sessUpcoming" style="color:var(--gold)">0</div>
+            <div class="sess-lbl">جلسات قادمة</div>
+          </div>
+          <div class="sess-stat">
+            <div class="sess-val green">—</div>
+            <div class="sess-lbl">معدل الحضور</div>
+          </div>
+        </div>
+        <div class="timeline-wrap">
+          <div class="timeline-label">جلسات هذا الأسبوع</div>
+          <div class="timeline-row">
+            <div class="day-col">
+              <div class="day-label">السبت</div>
+              <div class="day-block db-empty"></div>
+            </div>
+            <div class="day-col">
+              <div class="day-label">الأحد</div>
+              <div class="day-block db-empty"></div>
+            </div>
+            <div class="day-col">
+              <div class="day-label">الاثنين</div>
+              <div class="day-block db-empty"></div>
+            </div>
+            <div class="day-col">
+              <div class="day-label">الثلاثاء</div>
+              <div class="day-block db-empty"></div>
+            </div>
+            <div class="day-col">
+              <div class="day-label">الأربعاء</div>
+              <div class="day-block db-empty"></div>
+            </div>
+            <div class="day-col">
+              <div class="day-label">الخميس</div>
+              <div class="day-block db-empty"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Performance Alerts -->
+      <div class="section-label">🔔 تنبيهات الأداء</div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">تنبيهات الأداء الذكية</div>
+            <div class="card-sub">محدّثة تلقائياً بناءً على بيانات المكتب</div>
+          </div>
+        </div>
+        <div style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد بيانات أداء بعد</div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <script>
+  (function() {
+
+    /* ── Data sets per period ── */
+    var DATA = {
+      month: {
+        kpi: { cases: '0', win: '—', duration: '—', fees: '0', winSub: 'لا توجد بيانات بعد', feesSub: 'لا توجد بيانات بعد', durationSub: 'لا توجد بيانات بعد' },
+        chart: { bars: [0,0,0,0], labels: ['س1','س2','س3','س4'], subtitle: 'الأسابيع — هذا الشهر', badge: 'هذا الشهر', high: '—', low: '—', avg: '—' },
+        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
+        sessions: { tot: '0', done: '0', upcoming: '0' },
+        type: ['0%','0%','0%','0%','0%'], court: ['0%','0%','0%','0%','0%'],
+        typeTotal: 'لا توجد بيانات بعد', courtTotal: 'لا توجد بيانات بعد'
+      },
+      quarter: {
+        kpi: { cases: '0', win: '—', duration: '—', fees: '0', winSub: 'لا توجد بيانات بعد', feesSub: 'لا توجد بيانات بعد', durationSub: 'لا توجد بيانات بعد' },
+        chart: { bars: [0,0,0,0], labels: ['أكتوبر','نوفمبر','ديسمبر','يناير'], subtitle: 'هذا الربع', badge: 'هذا الربع', high: '—', low: '—', avg: '—' },
+        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
+        sessions: { tot: '0', done: '0', upcoming: '0' },
+        type: ['0%','0%','0%','0%','0%'], court: ['0%','0%','0%','0%','0%'],
+        typeTotal: 'لا توجد بيانات بعد', courtTotal: 'لا توجد بيانات بعد'
+      },
+      year: {
+        kpi: { cases: '0', win: '—', duration: '—', fees: '0', winSub: 'لا توجد بيانات بعد', feesSub: 'لا توجد بيانات بعد', durationSub: 'لا توجد بيانات بعد' },
+        chart: { bars: [0,0,0,0,0,0,0,0,0,0,0,0], labels: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'], subtitle: 'يناير — ديسمبر', badge: 'السنة الكاملة', high: '—', low: '—', avg: '—' },
+        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
+        sessions: { tot: '0', done: '0', upcoming: '0' },
+        type: ['0%','0%','0%','0%','0%'], court: ['0%','0%','0%','0%','0%'],
+        typeTotal: 'لا توجد بيانات بعد', courtTotal: 'لا توجد بيانات بعد'
+      },
+      custom: {
+        kpi: { cases: '—', win: '—', duration: '—', fees: '—', winSub: 'اختر نطاقاً زمنياً', feesSub: 'حدد الفترة', durationSub: 'حدد الفترة' },
+        chart: { bars: [50,50,50,50], labels: ['أ','ب','ج','د'], subtitle: 'نطاق مخصص', badge: 'مخصص', high: '—', low: '—', avg: '—' },
+        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
+        sessions: { tot: '—', done: '—', upcoming: '—' },
+        type: ['20%','20%','20%','20%','20%'], court: ['20%','20%','20%','20%','20%'],
+        typeTotal: 'اختر نطاقاً', courtTotal: 'اختر نطاقاً'
+      }
+    };
+
+    var currentPeriod = 'year';
+
+    /* ── Build finance chart ── */
+    function buildChart(d) {
+      var area = document.getElementById('finChart');
+      var bars = d.bars;
+      var max = Math.max.apply(null, bars);
+      area.innerHTML = '';
+      bars.forEach(function(val, i) {
+        var isLast = i === bars.length - 1;
+        var isMax  = val === max && !isLast;
+        var pct = Math.round((val / max) * 100);
+        var col = document.createElement('div');
+        col.className = 'chart-col';
+        var barCls = isLast ? 'chart-bar bar-forecast' : isMax ? 'chart-bar bar-accent' : 'chart-bar';
+        col.innerHTML =
+          '<div class="' + barCls + '" style="height:' + pct + '%"></div>' +
+          '<div class="chart-lbl' + (isMax ? ' lbl-active' : '') + '">' + (d.labels[i] || '') + '</div>';
+        area.appendChild(col);
+      });
+    }
+
+    /* ── Apply data set ── */
+    function applyPeriod(key) {
+      var d = DATA[key];
+      currentPeriod = key;
+
+      /* KPI */
+      document.getElementById('kpiCases').textContent    = d.kpi.cases;
+      document.getElementById('kpiWin').textContent      = d.kpi.win;
+      document.getElementById('kpiDuration').textContent = d.kpi.duration;
+      document.getElementById('kpiFees').textContent     = d.kpi.fees;
+      document.getElementById('kpiWinSub').textContent   = d.kpi.winSub;
+      document.getElementById('kpiFeesSub').textContent  = d.kpi.feesSub;
+      document.getElementById('kpiDurationSub').textContent = d.kpi.durationSub;
+
+      /* Chart */
+      buildChart(d.chart);
+      document.getElementById('chartSubtitle').textContent = d.chart.subtitle;
+      document.getElementById('chartBadge').textContent    = d.chart.badge;
+      document.getElementById('statHigh').textContent      = d.chart.high;
+      document.getElementById('statLow').textContent       = d.chart.low;
+      document.getElementById('statAvg').textContent       = d.chart.avg;
+
+      /* Lawyers */
+      var ids = ['l1','l2','l3','l4'];
+      ids.forEach(function(id, i) {
+        var row = d.lawyers[i];
+        document.getElementById(id + 'active').textContent = row[0];
+        document.getElementById(id + 'closed').textContent = row[1];
+        document.getElementById(id + 'win').textContent    = row[2];
+        document.getElementById(id + 'fee').textContent    = row[3];
+        var wlEl = document.getElementById(id + 'wl');
+        var wlPctEl = document.getElementById(id + 'wlpct');
+        if (wlEl) { wlEl.style.width = row[4]; }
+        if (wlPctEl) { wlPctEl.textContent = row[4]; }
+      });
+
+      /* Sessions */
+      document.getElementById('sessTot').textContent      = d.sessions.tot;
+      document.getElementById('sessDone').textContent     = d.sessions.done;
+      document.getElementById('sessUpcoming').textContent = d.sessions.upcoming;
+      document.getElementById('sessSubtitle').textContent = key === 'month' ? 'يناير 2025' : key === 'quarter' ? 'أكتوبر — يناير 2025' : key === 'year' ? 'يناير — ديسمبر 2024' : 'نطاق مخصص';
+
+      /* Type distribution */
+      var typeIds = ['t1','t2','t3','t4','t5'];
+      typeIds.forEach(function(id, i) {
+        var pct = d.type[i];
+        document.getElementById(id).textContent = pct;
+        document.getElementById(id + 'b').style.width = pct;
+      });
+      document.getElementById('typeChartSub').textContent = d.typeTotal;
+
+      /* Court distribution */
+      var courtIds = ['c1','c2','c3','c4','c5'];
+      courtIds.forEach(function(id, i) {
+        var pct = d.court[i];
+        document.getElementById(id).textContent = pct;
+        document.getElementById(id + 'b').style.width = pct;
+      });
+      document.getElementById('courtChartSub').textContent = d.courtTotal;
+    }
+
+    /* ── Period tabs ── */
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        applyPeriod(btn.dataset.period);
+      });
+    });
+
+    /* ── Export ── */
+    document.getElementById('btnExport').addEventListener('click', function() {
+      window.print();
+    });
+
+    /* ── Init ── */
+    applyPeriod('year');
+
+  })();
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>

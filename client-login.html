@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة المحاماة — بوابة الموكل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #ffffff;
+  --off-white: #F7F6F3;
+  --ink: #0F1419;
+  --ink-mid: #2D3748;
+  --ink-light: #64748B;
+  --ink-muted: #94A3B8;
+  --accent: #1C5E3E;
+  --accent-light: #24764E;
+  --accent-dim: rgba(28,94,62,0.08);
+  --accent-border: rgba(28,94,62,0.15);
+  --gold: #B8952A;
+  --border: rgba(15,20,25,0.08);
+  --border-mid: rgba(15,20,25,0.12);
+  --error: #DC2626;
+  --error-dim: rgba(220,38,38,0.07);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--off-white);
+  color: var(--ink);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.75;
+}
+
+/* ── BRAND PANEL ── */
+.brand-panel {
+  background: var(--ink);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 420px; height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28,94,62,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-panel::after {
+  content: '';
+  position: absolute;
+  top: -60px; left: -60px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(110,231,183,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.brand-top { position: relative; z-index: 1; }
+
+.brand-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  text-decoration: none;
+  margin-bottom: 3rem;
+}
+
+.brand-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+}
+
+.brand-logo-sub {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(110,231,183,0.7);
+  letter-spacing: 1px;
+  margin-right: 0.3rem;
+  align-self: center;
+}
+
+.brand-logo-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  margin-bottom: 3px;
+}
+
+.brand-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(110,231,183,0.1);
+  border: 1px solid rgba(110,231,183,0.2);
+  border-radius: 2rem;
+  padding: 3px 12px;
+  font-size: 0.63rem;
+  font-weight: 700;
+  color: #6EE7B7;
+  letter-spacing: 1px;
+  margin-bottom: 1.2rem;
+}
+
+.brand-eyebrow::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.brand-headline {
+  font-size: 2rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  margin-bottom: 1rem;
+}
+
+.brand-headline em { font-style: normal; color: #6EE7B7; }
+
+.brand-desc {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+
+/* Case status preview */
+.brand-preview {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.preview-title { font-size: 0.68rem; font-weight: 700; color: rgba(255,255,255,0.6); }
+.preview-dot { width: 6px; height: 6px; border-radius: 50%; background: #6EE7B7; animation: pulse 2s infinite; }
+
+.preview-case-num { font-size: 0.6rem; color: rgba(255,255,255,0.35); font-family: monospace; margin-bottom: 0.5rem; }
+.preview-case-title { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 1rem; }
+
+.preview-timeline { display: flex; flex-direction: column; gap: 0.5rem; }
+.preview-tl-item { display: flex; align-items: center; gap: 0.65rem; font-size: 0.65rem; }
+.preview-tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.preview-tl-done { background: #6EE7B7; }
+.preview-tl-next { background: #6EE7B7; animation: pulse 1.4s infinite; box-shadow: 0 0 0 3px rgba(110,231,183,0.2); }
+.preview-tl-future { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); }
+.preview-tl-label { color: rgba(255,255,255,0.55); flex: 1; }
+.preview-tl-label.active { color: rgba(255,255,255,0.9); font-weight: 700; }
+.preview-tl-date { color: rgba(255,255,255,0.3); font-size: 0.58rem; }
+.preview-tl-date.active { color: #6EE7B7; }
+
+/* Brand bottom */
+.brand-bottom {
+  position: relative;
+  z-index: 1;
+}
+
+.brand-bottom-note {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.6;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 1rem;
+}
+
+.brand-bottom-note strong { color: rgba(255,255,255,0.5); }
+
+/* ── FORM PANEL ── */
+.form-panel {
+  background: var(--white);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.form-inner {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.form-header { margin-bottom: 2.5rem; }
+
+.form-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.form-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.form-subtitle {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  line-height: 1.6;
+}
+
+/* Field */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.78rem 1rem;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: 'Cairo', sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  transition: all 0.15s;
+  outline: none;
+}
+
+.field-input::placeholder { color: var(--ink-muted); }
+
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(28,94,62,0.08);
+}
+
+/* Password */
+.password-wrap { position: relative; }
+
+.password-toggle {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  padding: 0;
+  font-family: 'Cairo', sans-serif;
+  transition: color 0.15s;
+}
+
+.password-toggle:hover { color: var(--accent); }
+
+/* Error state */
+.error-msg {
+  display: none;
+  background: var(--error-dim);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  color: var(--error);
+  margin-bottom: 1.2rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Submit */
+.btn-submit {
+  width: 100%;
+  padding: 0.95rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(28,94,62,0.2);
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-submit:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(28,94,62,0.22);
+}
+
+/* Loading spinner */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Help note */
+.help-note {
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  line-height: 1.7;
+  text-align: center;
+}
+
+.help-note strong { color: var(--ink-mid); display: block; margin-bottom: 0.2rem; font-size: 0.8rem; }
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Back to lawyer login */
+.back-link {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 1.5rem;
+}
+
+.back-link a {
+  color: var(--ink-light);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.back-link a:hover { color: var(--accent); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  body { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+  .form-panel { padding: 2rem 1.5rem; }
+}
+
+button, a { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 768px) { .btn-submit { min-height: 44px; } }
+</style>
+<style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}</style>
+</head>
+<body>
+
+<!-- BRAND PANEL -->
+<div class="brand-panel">
+  <div class="brand-grid"></div>
+
+  <div class="brand-top">
+    <a href="index.html" class="brand-logo">
+      <span class="brand-logo-text">نظام إدارة المحاماة</span>
+      <div class="brand-logo-dot"></div>
+      <span class="brand-logo-sub">بوابة الموكل</span>
+    </a>
+
+    <div class="brand-eyebrow">Client Portal</div>
+
+    <h2 class="brand-headline">
+      تابع قضيتك<br>
+      <em>أينما كنت</em>
+    </h2>
+
+    <p class="brand-desc">
+      أدخل رقم قضيتك وكلمة المرور التي أرسلها لك مكتب المحاماة للاطلاع على آخر المستجدات.
+    </p>
+
+    <!-- Case preview -->
+    <div class="brand-preview">
+      <div class="preview-bar">
+        <div class="preview-title">حالة القضية · Case Status</div>
+        <div class="preview-dot"></div>
+      </div>
+      <div class="preview-case-num">#2025-0142</div>
+      <div class="preview-case-title">قضية تجارية — محكمة التجارة</div>
+      <div class="preview-timeline">
+        <div class="preview-tl-item">
+          <div class="preview-tl-dot preview-tl-done"></div>
+          <span class="preview-tl-label">تقديم الدعوى</span>
+          <span class="preview-tl-date">5 يناير</span>
+        </div>
+        <div class="preview-tl-item">
+          <div class="preview-tl-dot preview-tl-done"></div>
+          <span class="preview-tl-label">جلسة أولى</span>
+          <span class="preview-tl-date">5 يناير</span>
+        </div>
+        <div class="preview-tl-item">
+          <div class="preview-tl-dot preview-tl-next"></div>
+          <span class="preview-tl-label active">جلسة ثانية ← نحن هنا</span>
+          <span class="preview-tl-date active">غداً</span>
+        </div>
+        <div class="preview-tl-item">
+          <div class="preview-tl-dot preview-tl-future"></div>
+          <span class="preview-tl-label">حكم ابتدائي</span>
+          <span class="preview-tl-date">قادم</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-bottom">
+    <div class="brand-bottom-note">
+      <strong>سرية تامة</strong>
+      بياناتك محمية بتشفير AES-256. لا يطلع على قضيتك إلا أنت ومحاميك المسؤول.
+    </div>
+  </div>
+</div>
+
+<!-- FORM PANEL -->
+<div class="form-panel">
+  <div class="form-inner">
+
+    <div class="form-header">
+      <div class="form-eyebrow">بوابة الموكل · Client Portal</div>
+      <h1 class="form-title">مرحباً بك</h1>
+      <p class="form-subtitle">
+        أدخل بيانات الدخول التي أرسلها إليك مكتبك القانوني
+      </p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-msg" id="errorMsg">
+      ⚠️ رقم القضية أو كلمة المرور غير صحيحة
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="caseNumber">رقم القضية</label>
+      <input type="text" class="field-input" id="caseNumber"
+        placeholder="#2025-0142" autocomplete="off" dir="ltr" style="text-align:right">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="password">كلمة المرور</label>
+      <div class="password-wrap">
+        <input type="password" class="field-input" id="password"
+          placeholder="••••••••" style="padding-left:3.5rem" autocomplete="current-password">
+        <button type="button" class="password-toggle" onclick="togglePwd()">إظهار</button>
+      </div>
+      <div style="font-size:0.62rem;color:var(--ink-muted);margin-top:0.4rem;line-height:1.6;">
+        للتجربة: #2025-0142 / 123456
+      </div>
+    </div>
+
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+      <span id="btnText">دخول بوابة الموكل</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+    <div class="divider">مساعدة</div>
+
+    <div class="help-note">
+      <strong>لا تملك بيانات دخول؟</strong>
+      للحصول على بيانات الدخول، تواصل مع مكتبك القانوني — سيرسلون لك رقم القضية وكلمة المرور مباشرة.
+    </div>
+
+    <div class="back-link">
+      محامٍ؟ <a href="login.html">الدخول إلى لوحة تحكم المكتب ←</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function togglePwd() {
+  var inp = document.getElementById('password');
+  var btn = document.querySelector('.password-toggle');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'إخفاء'; }
+  else { inp.type = 'password'; btn.textContent = 'إظهار'; }
+}
+
+function doLogin() {
+  const caseNum = document.getElementById('caseNumber').value.trim();
+  const pwd = document.getElementById('password').value.trim();
+  const errorEl = document.getElementById('errorMsg');
+  const btn = document.getElementById('loginBtn');
+  errorEl.style.display = 'none';
+  if (!caseNum || !pwd) { errorEl.style.display = 'flex'; errorEl.textContent = '⚠️ يرجى إدخال رقم القضية وكلمة المرور'; return; }
+  const allCases = JSON.parse(localStorage.getItem('dynamicCases') || '{}');
+  if (Object.keys(allCases).length === 0) { errorEl.style.display = 'flex'; errorEl.textContent = '⚠️ لا توجد قضايا مسجّلة — يرجى التواصل مع المكتب'; return; }
+  const caseData = allCases[caseNum];
+  if (!caseData || caseData.pwd !== pwd) { errorEl.style.display = 'flex'; errorEl.textContent = '⚠️ رقم القضية أو كلمة المرور غير صحيحة'; return; }
+  btn.disabled = true;
+  btn.textContent = 'جاري التحقق...';
+  sessionStorage.setItem('caseNum', caseNum);
+  sessionStorage.setItem('caseData', JSON.stringify(caseData));
+  setTimeout(() => { window.location.href = 'client.html'; }, 1000);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+window.addEventListener('load', () => {
+  const prefill = sessionStorage.getItem('clientLoginPrefill') || sessionStorage.getItem('prefillCase');
+  if (prefill) {
+    document.getElementById('caseNumber').value = prefill;
+    sessionStorage.removeItem('clientLoginPrefill');
+    sessionStorage.removeItem('prefillCase');
+  }
+});
+</script>
+
+  <script src="sidebar-badges.js"></script>
+</body>
+</html>

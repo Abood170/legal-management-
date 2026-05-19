@@ -1,0 +1,3442 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة المحاماة — نظام إدارة المحاماة السعودي</title>
+<meta name="description" content="منصة متكاملة لإدارة مكاتب المحاماة في المملكة العربية السعودية — القضايا، المواعيد، الفوترة، وتقارير الأداء في منظومة واحدة.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="نظام إدارة المحاماة — نظام إدارة المحاماة السعودي">
+<meta property="og:description" content="منصة متكاملة لإدارة مكاتب المحاماة في المملكة العربية السعودية — القضايا، المواعيد، الفوترة، وتقارير الأداء في منظومة واحدة.">
+<meta property="og:url" content="https://none.sa/">
+<meta property="og:image" content="https://none.sa/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ar_SA">
+<meta property="og:site_name" content="نظام إدارة المحاماة">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="نظام إدارة المحاماة — نظام إدارة المحاماة السعودي">
+<meta name="twitter:description" content="منصة متكاملة لإدارة مكاتب المحاماة في المملكة العربية السعودية.">
+<meta name="twitter:image" content="https://none.sa/og-image.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #ffffff;
+  --off-white: #F6F5F2;
+  --cream: #EEEAE3;
+  --ink: #0D1117;
+  --ink-mid: #28374A;
+  --ink-light: #566578;
+  --ink-muted: #8A9BB0;
+  --accent: #1C5E3E;
+  --accent-light: #24764E;
+  --accent-warm: #1F6843;
+  --accent-dim: rgba(28,94,62,0.08);
+  --accent-border: rgba(28,94,62,0.15);
+  --gold: #A87820;
+  --gold-dim: rgba(168,120,32,0.1);
+  --border: rgba(13,17,23,0.07);
+  --border-mid: rgba(13,17,23,0.13);
+  --shadow-sm: 0 2px 8px rgba(13,17,23,0.06), 0 1px 2px rgba(13,17,23,0.04);
+  --shadow-md: 0 4px 24px rgba(13,17,23,0.08), 0 1px 4px rgba(13,17,23,0.04);
+  --shadow-lg: 0 12px 48px rgba(13,17,23,0.12), 0 4px 12px rgba(13,17,23,0.06);
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--white);
+  color: var(--ink);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4rem;
+  height: 68px;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.45s ease, backdrop-filter 0.45s ease, border-color 0.45s ease, box-shadow 0.3s ease;
+}
+
+nav.scrolled {
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.nav-logo-icon {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+}
+
+.nav-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 0.875rem;
+  color: var(--ink-light);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  letter-spacing: 0.2px;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -3px; right: 0; left: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  transform: scaleX(0);
+  transition: transform 0.2s;
+  transform-origin: right;
+}
+
+.nav-links a:hover { color: var(--ink); }
+.nav-links a:hover::after { transform: scaleX(1); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-lang {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-weight: 500;
+  background: transparent;
+  font-family: 'Cairo', sans-serif;
+}
+
+.nav-lang:hover { color: var(--ink); border-color: var(--ink-mid); }
+
+.nav-cta {
+  background: var(--accent);
+  color: white;
+  padding: 0.55rem 1.4rem;
+  border-radius: 7px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  letter-spacing: 0.2px;
+  box-shadow: 0 1px 3px rgba(26,92,60,0.2);
+}
+
+.nav-cta:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,92,60,0.25); }
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px; height: 2px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* Mobile nav */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 68px; left: 0; right: 0;
+  background: rgba(255,255,255,0.98);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  z-index: 99;
+  padding: 1.2rem 1.5rem;
+  flex-direction: column;
+  gap: 0.2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-nav.open { display: flex; }
+
+.mobile-nav a {
+  padding: 0.8rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.mobile-nav a:hover { background: var(--off-white); color: var(--ink); }
+
+.mobile-nav-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.4rem 0;
+}
+
+.mobile-nav-cta {
+  margin-top: 0.25rem;
+  background: var(--accent) !important;
+  color: white !important;
+  text-align: center;
+  border-radius: 8px;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 6rem 4rem 4rem;
+  gap: 4rem;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 55% at 72% 48%, rgba(26,92,60,0.055) 0%, transparent 100%),
+    radial-gradient(ellipse 40% 50% at 10% 78%, rgba(168,120,32,0.04) 0%, transparent 100%),
+    #ffffff;
+}
+
+/* Dot-grid pattern — left two-thirds only, fades to transparent */
+.hero-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(13,17,23,0.1) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to left, transparent 42%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.5) 100%);
+  mask-image: linear-gradient(to left, transparent 42%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,0.5) 100%);
+}
+
+/* Right panel warm off-white */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 54%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--off-white) 0%, #F0EDE8 100%);
+  z-index: 0;
+}
+
+/* Thin divider line */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 8rem; right: 8%;
+  width: 1px;
+  height: 60%;
+  background: linear-gradient(to bottom, transparent, var(--border-mid), transparent);
+  z-index: 1;
+}
+
+.hero-glow {
+  position: absolute;
+  top: 8%; right: 16%;
+  width: 520px; height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(26,92,60,0.07) 0%, transparent 68%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.1s both;
+  padding: 0.4rem 0.9rem;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: 2rem;
+}
+
+.hero-eyebrow-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.hero-h1 {
+  font-size: clamp(2.4rem, 3.5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.2s both;
+  letter-spacing: -1px;
+}
+
+.hero-h1 em {
+  font-style: normal;
+  color: var(--accent);
+  position: relative;
+}
+
+.hero-h1 em::after {
+  content: '';
+  position: absolute;
+  bottom: 2px; right: 0; left: 0;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+.hero-sub-en {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.25s both;
+}
+
+.hero-desc {
+  font-size: 1.05rem;
+  color: var(--ink-light);
+  line-height: 1.85;
+  font-weight: 400;
+  max-width: 480px;
+  margin-bottom: 2.8rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.4s both;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.btn-primary:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27,67,50,0.2); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-mid);
+  padding: 0.85rem 2rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border-mid);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-ghost:hover { border-color: var(--ink-mid); color: var(--ink); }
+
+.btn-ghost-arrow { transition: transform 0.2s; }
+.btn-ghost:hover .btn-ghost-arrow { transform: translateX(-4px); }
+
+/* TRUST ROW */
+.hero-trust {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--border);
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.5s both;
+}
+
+.trust-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.trust-num {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1;
+  font-feature-settings: 'tnum';
+}
+
+.trust-num span {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.trust-label {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.trust-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border-mid);
+}
+
+/* ── HERO VISUAL ── */
+.hero-visual {
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  animation: fadeIn 0.8s ease 0.5s both;
+}
+
+/* Floating card stack */
+.card-stack {
+  position: relative;
+  width: 100%;
+  max-width: 456px;
+  margin: 0 auto;
+}
+
+.mock-card {
+  background: white;
+  border: 1px solid rgba(13,17,23,0.10);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(13,17,23,0.03),
+    0 1px 2px rgba(13,17,23,0.04),
+    0 4px 12px rgba(13,17,23,0.06),
+    0 16px 40px rgba(13,17,23,0.09),
+    0 32px 64px rgba(13,17,23,0.07);
+}
+
+/* Window chrome bar */
+.mock-chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  background: linear-gradient(to bottom, #F7F7F7, #EFEFEF);
+  border-bottom: 1px solid rgba(0,0,0,0.09);
+}
+
+.chrome-dots { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+.chrome-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 -1px 1px rgba(0,0,0,0.15);
+}
+
+.chrome-dot-r { background: #FF5F57; }
+.chrome-dot-y { background: #FFBD2E; }
+.chrome-dot-g { background: #28C840; }
+
+.chrome-bar {
+  flex: 1;
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 5px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.55rem;
+  gap: 0.3rem;
+}
+
+.chrome-lock { font-size: 0.58rem; color: #8E8E8E; }
+.chrome-url { font-size: 0.58rem; color: #7A7A7A; font-family: 'SF Mono', 'Consolas', monospace; letter-spacing: 0; }
+
+.chrome-actions { display: flex; align-items: center; gap: 0.45rem; }
+
+.chrome-notif {
+  position: relative;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.chrome-badge {
+  position: absolute;
+  top: -4px; left: -4px;
+  width: 13px; height: 13px;
+  background: #EF4444;
+  border-radius: 50%;
+  font-size: 0.48rem;
+  font-weight: 700;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid white;
+  box-shadow: 0 1px 3px rgba(239,68,68,0.35);
+}
+
+.chrome-avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2D9B5C, #1A5C3C);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 1px 3px rgba(26,92,60,0.3);
+}
+
+/* Dashboard layout */
+.mock-body { display: flex; min-height: 0; }
+
+/* Icon sidebar */
+.mock-sidebar {
+  width: 44px;
+  background: linear-gradient(to bottom, #F9F9F9, #F4F4F4);
+  border-left: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.6rem 0 0.6rem;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* Logo mark at top of sidebar */
+.mock-sidebar-logo {
+  width: 26px; height: 26px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 0.55rem;
+  box-shadow: 0 2px 6px rgba(26,92,60,0.3);
+  font-family: 'Playfair Display', serif;
+}
+
+.mock-nav-item {
+  width: 32px; height: 28px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.mock-nav-item:hover { background: rgba(0,0,0,0.05); }
+
+.mock-nav-item.active {
+  background: var(--accent-dim);
+}
+
+/* Active indicator bar (inner edge = left in RTL sidebar) */
+.mock-nav-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%; bottom: 20%;
+  width: 2.5px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Separator line in sidebar */
+.mock-sidebar-sep {
+  width: 20px; height: 1px;
+  background: rgba(0,0,0,0.1);
+  margin: 3px 0;
+}
+
+/* Content area */
+.mock-content {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Main dashboard card — positioning */
+.mock-main { position: relative; z-index: 3; }
+
+.mock-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+.mock-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mock-search {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--off-white);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.55rem;
+  color: var(--ink-muted);
+}
+
+.mock-title { font-size: 0.8rem; font-weight: 700; color: var(--ink); letter-spacing: -0.2px; }
+.mock-date { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+.mock-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-bottom: 0.8rem;
+}
+
+.mock-stat {
+  background: #F8F7F4;
+  border-radius: 7px;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Colored top accent line per stat type */
+.mock-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.35;
+}
+
+.mock-stat.warn-stat {
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.11);
+}
+.mock-stat.warn-stat::before { background: #EF4444; opacity: 0.5; }
+
+.mock-stat.gold-stat {
+  background: rgba(168,120,32,0.04);
+  border: 1px solid rgba(168,120,32,0.13);
+}
+.mock-stat.gold-stat::before { background: var(--gold); opacity: 0.5; }
+
+.mock-stat-icon {
+  font-size: 0.6rem;
+  opacity: 0.55;
+  margin-bottom: 1px;
+  line-height: 1;
+}
+
+.mock-stat-val { font-size: 1.1rem; font-weight: 900; color: var(--ink); line-height: 1; margin-bottom: 2px; letter-spacing: -0.5px; }
+.mock-stat-label { font-size: 0.58rem; color: var(--ink-muted); line-height: 1.2; }
+.mock-stat-up { font-size: 0.58rem; color: var(--accent); margin-top: 3px; font-weight: 700; }
+.mock-stat-up.warn { color: #EF4444; }
+.mock-stat-up.gold-val { color: var(--gold); }
+
+/* Section label */
+.mock-section-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mock-section-label-link {
+  font-size: 0.56rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.8;
+}
+
+.mock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.38rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-size: 0.7rem;
+  gap: 0.4rem;
+}
+
+.mock-row:last-of-type { border-bottom: none; }
+
+.mock-row-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.mock-row-bar {
+  width: 2.5px;
+  border-radius: 2px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.mock-row-bar.urgent { background: #EF4444; }
+.mock-row-bar.active { background: var(--accent); }
+.mock-row-bar.pending { background: var(--gold); }
+
+.mock-row-info { min-width: 0; flex: 1; }
+.mock-row-name { color: var(--ink-mid); font-weight: 600; font-size: 0.68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mock-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 1px;
+}
+.mock-row-court { color: var(--ink-muted); font-size: 0.56rem; }
+.mock-row-id {
+  font-size: 0.52rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  opacity: 0.6;
+  font-family: monospace;
+  letter-spacing: 0;
+}
+
+.mock-row-right {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.mock-lawyer-badge {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.44rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Mini chart */
+.mock-chart {
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.mock-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.58rem;
+  color: var(--ink-muted);
+  margin-bottom: 0.4rem;
+}
+
+.mock-chart-header strong { color: var(--accent); font-weight: 700; font-size: 0.6rem; }
+
+.mock-chart-months {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  margin-top: 0.3rem;
+}
+
+.mock-chart-month {
+  font-size: 0.5rem;
+  color: var(--ink-muted);
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.mock-pill {
+  padding: 2px 8px;
+  border-radius: 2rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pill-g, .fvp-g { background: rgba(27,67,50,0.08); color: var(--accent); }
+.pill-r, .fvp-r { background: rgba(220,38,38,0.07); color: #DC2626; }
+.pill-y, .fvp-y { background: var(--gold-dim); color: var(--gold); }
+.pill-b, .fvp-b { background: rgba(37,99,235,0.07); color: #2563EB; }
+
+/* Floating alert card */
+.mock-alert-card {
+  position: absolute;
+  bottom: -28px;
+  left: -38px;
+  z-index: 4;
+  width: 216px;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.09);
+  border-radius: var(--r-md);
+  padding: 0.85rem 1rem;
+  box-shadow:
+    0 2px 8px rgba(13,17,23,0.06),
+    0 8px 28px rgba(13,17,23,0.10),
+    0 20px 48px rgba(13,17,23,0.08);
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Top row: icon + app name + time */
+.alert-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.alert-wa-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: #25D366;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* WhatsApp SVG icon path */
+.alert-wa-icon svg { width: 13px; height: 13px; fill: white; }
+
+.alert-app-name { font-size: 0.6rem; font-weight: 700; color: var(--ink-muted); }
+.alert-time { font-size: 0.56rem; color: var(--ink-muted); opacity: 0.6; margin-right: auto; }
+
+.alert-card-title { font-size: 0.7rem; font-weight: 700; color: var(--ink); margin-bottom: 0.18rem; line-height: 1.3; }
+.alert-card-sub { font-size: 0.63rem; color: var(--ink-light); line-height: 1.5; }
+
+.alert-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.alert-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  padding: 2px 7px;
+  border-radius: 2rem;
+}
+
+.alert-card-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #25D366;
+}
+
+.alert-read-check { font-size: 0.62rem; color: #25D366; }
+
+/* Floating stat card — win rate with donut ring */
+.mock-stat-card {
+  position: absolute;
+  top: -22px;
+  left: -46px;
+  z-index: 4;
+  width: 158px;
+  background: linear-gradient(135deg, #24764E 0%, var(--accent-warm) 55%, #163F2B 100%);
+  border-radius: var(--r-md);
+  padding: 0.85rem 1rem;
+  box-shadow:
+    0 2px 8px rgba(26,92,60,0.2),
+    0 8px 24px rgba(26,92,60,0.3),
+    0 0 0 1px rgba(255,255,255,0.07) inset;
+  animation: float 4s ease-in-out 2s infinite;
+}
+
+.stat-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card-label { font-size: 0.6rem; color: rgba(255,255,255,0.6); font-weight: 500; }
+
+.stat-card-body {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.stat-card-donut {
+  flex-shrink: 0;
+}
+
+.stat-card-right { flex: 1; }
+.stat-card-val { font-size: 1.6rem; font-weight: 900; color: white; line-height: 1; letter-spacing: -1px; }
+.stat-card-sub { font-size: 0.58rem; color: rgba(255,255,255,0.5); margin-top: 3px; }
+.stat-card-trend { font-size: 0.58rem; color: #6EE7B7; font-weight: 700; margin-top: 2px; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── COMPLIANCE STRIP ── */
+.compliance-strip {
+  background: var(--off-white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.compliance-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ink-light);
+  font-weight: 500;
+}
+
+.compliance-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+/* ── PROBLEMS SECTION ── */
+.problems-wrap {
+  padding: 8rem 4rem;
+  background: var(--white);
+}
+
+.problems-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.section-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+
+.section-h2 {
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  margin-bottom: 1rem;
+}
+
+.section-h2 em { font-style: normal; color: var(--accent); }
+
+.section-p {
+  font-size: 1rem;
+  color: var(--ink-light);
+  line-height: 1.85;
+  font-weight: 400;
+  max-width: 540px;
+  margin-bottom: 4rem;
+}
+
+.problems-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.prob-card {
+  background: var(--white);
+  padding: 2.5rem;
+  transition: background 0.22s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.prob-card:hover { background: var(--off-white); transform: translateY(-3px); box-shadow: 0 6px 24px rgba(13,17,23,0.07); }
+
+.prob-card.dark { background: var(--ink); }
+.prob-card.dark:hover { background: var(--ink-mid); transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.18); }
+
+.prob-num {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  letter-spacing: 2.5px;
+  margin-bottom: 1rem;
+}
+
+.prob-card.dark .prob-num { color: rgba(255,255,255,0.3); }
+
+.prob-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.prob-card.dark .prob-icon { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12); }
+
+.prob-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.prob-card.dark .prob-title { color: white; }
+
+.prob-body {
+  font-size: 0.84rem;
+  color: var(--ink-light);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.prob-card.dark .prob-body { color: rgba(255,255,255,0.5); }
+
+.prob-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 0.38rem 0.85rem;
+  background: var(--accent-dim);
+  border-radius: 2rem;
+  border: 1px solid var(--accent-border);
+}
+
+.prob-card.dark .prob-result {
+  color: white;
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.problems-bottom {
+  margin-top: 2.5rem;
+  padding: 1.5rem 2rem;
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.problems-bottom-text {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.75;
+  max-width: 500px;
+}
+
+.problems-bottom-text strong { color: var(--ink); }
+
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  nav { padding: 0 2rem; }
+  .hero { padding: 6rem 2rem 4rem; gap: 3rem; }
+  .problems-wrap, .features-wrap, .hiw-wrap, .cta-wrap { padding-left: 2rem; padding-right: 2rem; }
+  .compliance-strip, .footer { padding-left: 2rem; padding-right: 2rem; }
+  .cta-inner { gap: 4rem; }
+  .card-stack { max-width: 420px; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 1.5rem; }
+  .nav-links, .nav-lang, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+
+  .hero { grid-template-columns: 1fr; padding: 5.5rem 1.5rem 3rem; gap: 2.5rem; min-height: auto; }
+  .hero::before, .hero::after { display: none; }
+  .hero-glow { display: none; }
+  .hero-h1 { font-size: 2.2rem; letter-spacing: -0.6px; }
+  .card-stack { max-width: 100%; }
+  .mock-stat-card { display: none; }
+  .mock-alert-card { left: 0; width: 188px; }
+  .compliance-strip { padding: 1rem 1.5rem; gap: 1.5rem; flex-wrap: wrap; }
+  .problems-wrap { padding: 4rem 1.5rem; }
+  .problems-grid { grid-template-columns: 1fr; }
+  .problems-bottom { flex-direction: column; align-items: flex-start; }
+  .section-h2 { font-size: 1.9rem; }
+  .cta-h2 { font-size: 1.9rem; }
+}
+
+@media (max-width: 480px) {
+  .hero-h1 { font-size: 2rem; letter-spacing: -0.5px; }
+  .hero-trust { gap: 1.2rem; }
+  .trust-divider { height: 28px; }
+  .trust-num { font-size: 1.3rem; }
+  .mock-alert-card { display: none; }
+  .section-h2 { font-size: 1.8rem; }
+  .cta-h2 { font-size: 1.8rem; }
+  .feat-tab { flex: 1 1 100% !important; }
+}
+
+@media (max-width: 375px) {
+  nav { padding: 0 1rem; }
+  .hero { padding: 5rem 1rem 2.5rem; gap: 2rem; }
+  .hero-h1 { font-size: 1.85rem; letter-spacing: -0.3px; }
+  .hero-desc { font-size: 0.95rem; }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .btn-primary, .btn-ghost { text-align: center; justify-content: center; }
+  .hero-trust { flex-wrap: wrap; gap: 0.75rem; }
+  .trust-divider { display: none; }
+  .trust-num { font-size: 1.2rem; }
+  .mock-alert-card { display: none; }
+  .section-h2 { font-size: 1.7rem; }
+  .cta-h2 { font-size: 1.7rem; }
+  .problems-wrap, .features-wrap, .hiw-wrap, .cta-wrap { padding-left: 1rem; padding-right: 1rem; }
+  .pilot-card { padding: 1.5rem 1.25rem; }
+  .problems-bottom { padding: 1rem; }
+}
+
+/* ── PROB CARD WIDE (card 05) ── */
+.prob-card-wide {
+  grid-column: 1 / -1;
+  border-top: 1.5px solid var(--border);
+}
+
+.prob-card-wide-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.prob-card-wide-main {
+  flex: 1;
+  min-width: 260px;
+}
+
+.prob-card-wide-features {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 2.5rem;
+}
+
+.prob-feature-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.84rem;
+  color: var(--ink-light);
+}
+
+.prob-feature-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* ── FEATURES ── */
+.features-wrap {
+  background: var(--off-white);
+  border-top: 1px solid var(--border);
+  padding: 8rem 4rem;
+}
+
+.features-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.features-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+  margin-bottom: 5rem;
+}
+
+.features-header-right { }
+
+.features-header-left {
+  font-size: 0.92rem;
+  color: var(--ink-light);
+  line-height: 1.85;
+  font-weight: 400;
+}
+
+.features-header-left strong { color: var(--ink); font-weight: 700; }
+
+.feat-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  margin-bottom: 3rem;
+}
+
+.feat-tab {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-align: center;
+  cursor: pointer;
+  border-left: 1px solid var(--border);
+  transition: all 0.2s;
+  font-family: 'Cairo', sans-serif;
+  background: none;
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+}
+
+.feat-tab:first-child { border-left: none; }
+.feat-tab:hover { color: var(--ink); background: var(--off-white); }
+.feat-tab.active { background: var(--accent); color: white; }
+
+.feat-panel { display: none; }
+.feat-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+
+.feat-content { }
+
+.feat-num {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.feat-title {
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 1rem;
+}
+
+.feat-desc {
+  font-size: 0.92rem;
+  color: var(--ink-light);
+  line-height: 1.85;
+  font-weight: 400;
+  margin-bottom: 2rem;
+}
+
+.feat-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.feat-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--ink-mid);
+  line-height: 1.75;
+}
+
+.feat-point-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem;
+  color: var(--accent);
+  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.feat-impact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 1rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 2rem;
+}
+
+.feat-visual {
+  background: white;
+  border: 1px solid var(--border-mid);
+  border-radius: 14px;
+  padding: 1.6rem;
+  box-shadow: 0 4px 24px rgba(15,20,25,0.06);
+}
+
+.feat-visual-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.feat-visual-title { font-size: 0.78rem; font-weight: 700; color: var(--ink); }
+.feat-visual-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2rem;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.fv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+.fv-row:last-child { border-bottom: none; }
+.fv-name { color: var(--ink-mid); font-weight: 600; }
+.fv-sub { color: var(--ink-muted); font-size: 0.65rem; margin-top: 2px; }
+
+.fv-pill {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 2rem;
+}
+
+.fv-bar-wrap { margin-top: 1rem; }
+.fv-bar-label { font-size: 0.65rem; color: var(--ink-muted); margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
+.fv-bar-bg { height: 5px; background: var(--off-white); border-radius: 3px; overflow: hidden; }
+.fv-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+
+.fv-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.fv-stat {
+  background: var(--off-white);
+  border-radius: 8px;
+  padding: 0.7rem;
+  text-align: center;
+}
+
+.fv-stat-val { font-size: 1.15rem; font-weight: 900; color: var(--ink); }
+.fv-stat-lbl { font-size: 0.58rem; color: var(--ink-muted); margin-top: 2px; }
+
+.fv-alert {
+  background: rgba(27,67,50,0.05);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 0.8rem;
+}
+
+.fv-invoice {
+  background: var(--off-white);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.8rem;
+}
+
+.fv-inv-row { display: flex; justify-content: space-between; font-size: 0.72rem; padding: 0.3rem 0; color: var(--ink-light); }
+.fv-inv-total { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: var(--ink); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.3rem; }
+.fv-zatca { font-size: 0.6rem; color: var(--accent); font-weight: 600; margin-top: 0.4rem; }
+
+/* ── HOW IT WORKS ── */
+.hiw-wrap {
+  padding: 8rem 4rem;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+}
+
+.hiw-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.hiw-top {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.hiw-top .section-eyebrow { justify-content: center; }
+.hiw-top .section-eyebrow::before { display: none; }
+
+.hiw-top .section-h2 { margin: 0 auto 1rem; }
+.hiw-top .section-p { margin: 0 auto; text-align: center; }
+
+.hiw-steps {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: start;
+  gap: 0;
+  margin-bottom: 5rem;
+}
+
+.hiw-arrow {
+  padding-top: 2.8rem;
+  color: var(--ink-muted);
+  font-size: 1.4rem;
+  opacity: 0.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+}
+
+.hiw-step {
+  text-align: center;
+  padding: 0 1rem;
+  transition: transform 0.28s ease;
+  will-change: transform;
+}
+
+.hiw-step:hover { transform: translateY(-4px); }
+
+.hiw-step-num {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--ink);
+  margin: 0 auto 1.5rem;
+  position: relative;
+  background: white;
+  transition: all 0.3s;
+}
+
+.hiw-step:hover .hiw-step-num {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.hiw-step-num::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+}
+
+.hiw-step-icon {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.hiw-step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+  line-height: 1.3;
+}
+
+.hiw-step-desc {
+  font-size: 0.84rem;
+  color: var(--ink-light);
+  line-height: 1.8;
+}
+
+.hiw-timeline {
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hiw-timeline-header {
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+}
+
+.hiw-tl-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); }
+.hiw-tl-sub { font-size: 0.72rem; color: var(--ink-muted); }
+
+.hiw-timeline-body {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tl-week {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.tl-week:last-child { border-bottom: none; }
+
+.tl-week-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  letter-spacing: 0.5px;
+  padding-top: 0.1rem;
+}
+
+.tl-week-label span {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.tl-tasks { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.tl-task {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--ink-mid);
+}
+
+.tl-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tl-dot-done { background: var(--accent); }
+.tl-dot-prog { background: var(--gold); }
+.tl-dot-todo { background: var(--border-mid); }
+
+.tl-task-done { color: var(--ink-mid); }
+.tl-task-prog { color: var(--ink); font-weight: 600; }
+.tl-task-todo { color: var(--ink-muted); }
+
+.tl-badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 2rem;
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+.tl-badge-done { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+.tl-badge-prog { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); }
+
+/* ── CTA ── */
+.cta-wrap {
+  background: var(--ink);
+  padding: 8rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-wrap::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(27,67,50,0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.cta-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+.cta-copy { }
+
+.cta-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.cta-eyebrow::before { content: ''; width: 20px; height: 1px; background: rgba(255,255,255,0.3); }
+
+.cta-h2 {
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 900;
+  color: white;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  margin-bottom: 1.2rem;
+}
+
+.cta-h2 em {
+  font-style: normal;
+  color: #6EE7B7;
+}
+
+.cta-desc {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.85;
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+}
+
+.cta-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 2.5rem;
+}
+
+.cta-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.87rem;
+  color: rgba(255,255,255,0.75);
+}
+
+.cta-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(110,231,183,0.15);
+  border: 1px solid rgba(110,231,183,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem;
+  color: #6EE7B7;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-white {
+  background: white;
+  color: var(--ink);
+  padding: 0.9rem 2rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+}
+
+.btn-white:hover { background: var(--off-white); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+.btn-outline-white {
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  padding: 0.9rem 2rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.2s;
+}
+
+.btn-outline-white:hover { border-color: rgba(255,255,255,0.5); color: white; }
+
+.pilot-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 2.5rem;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  will-change: transform;
+}
+.pilot-card:hover {
+  border-color: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.07);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+.pilot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6EE7B7;
+  border: 1px solid rgba(110,231,183,0.25);
+  background: rgba(110,231,183,0.08);
+  padding: 0.35rem 0.9rem;
+  border-radius: 2rem;
+  margin-bottom: 2rem;
+}
+
+.pilot-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.pilot-price-wrap {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.pilot-price {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.pilot-price-sub {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.75;
+}
+
+.pilot-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.pilot-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.75;
+}
+
+.pilot-item-check {
+  color: #6EE7B7;
+  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pilot-note {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.75;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--ink);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 3rem 4rem;
+}
+
+.footer-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.footer-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+}
+
+.footer-compliance {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.footer-badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(110,231,183,0.5);
+}
+
+.footer-copy {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ── RESPONSIVE (features + hiw + cta + footer) ── */
+@media (max-width: 1024px) {
+  .feat-panel.active { gap: 2.5rem; }
+}
+
+@media (max-width: 768px) {
+  .features-wrap { padding: 4rem 1.5rem; }
+  .features-header { grid-template-columns: 1fr; gap: 1.5rem; }
+  .feat-panel.active { grid-template-columns: 1fr; }
+  .feat-tabs { flex-wrap: wrap; }
+  .feat-tab { flex: 1 1 45%; }
+  .hiw-wrap { padding: 4rem 1.5rem; }
+  .hiw-steps { grid-template-columns: 1fr; gap: 2rem; }
+  .hiw-arrow { display: none; }
+  .hiw-step { text-align: right; display: flex; align-items: flex-start; gap: 1rem; }
+  .hiw-step-num { margin: 0; flex-shrink: 0; }
+  .hiw-timeline-body { padding: 1rem; }
+  .tl-week { grid-template-columns: 60px 1fr; gap: 1rem; }
+  .cta-wrap { padding: 4rem 1.5rem; }
+  .cta-inner { grid-template-columns: 1fr; gap: 3rem; }
+  .footer { padding: 2rem 1.5rem; }
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .prob-card-wide-inner { flex-direction: column; }
+}
+
+@media (max-width: 375px) {
+  .feat-tab { flex: 1 1 100% !important; }
+  .cta-wrap { padding: 3rem 1rem; }
+  .cta-actions { flex-direction: column; align-items: stretch; }
+  .btn-white, .btn-outline-white { text-align: center; }
+  .footer { padding: 1.5rem 1rem; }
+}
+
+/* ── FOCUS VISIBLE ── */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* ── BACK TO TOP ── */
+#back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(28,94,62,0.28);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s, box-shadow 0.2s;
+  pointer-events: none;
+  z-index: 90;
+  line-height: 1;
+}
+#back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#back-to-top:hover { background: var(--accent-light); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(28,94,62,0.38); }
+@media (max-width: 375px) { #back-to-top { bottom: 1rem; right: 1rem; } }
+
+/* ── Visual Polish ── */
+body { line-height: 1.75; }
+.section-eyebrow { font-size: 0.68rem; }
+.section-h2, .cta-h2 { letter-spacing: -0.5px; }
+.btn-primary { box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.btn-primary:hover { box-shadow: 0 8px 24px rgba(27,67,50,0.25); }
+.btn-ghost { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.btn-white { letter-spacing: 0.3px; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.btn-white:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.22); }
+.btn-outline-white { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.nav-cta { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+button, a { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 768px) { .btn-primary, .btn-white, .btn-ghost { min-height: 44px; } }
+</style>
+<style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(15,20,25,0.12);border-radius:2px;}</style>
+</head>
+<body id="top">
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#top" class="nav-logo">
+    <div class="nav-logo-icon">N</div>
+    <span class="nav-logo-text">نظام إدارة المحاماة</span>
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#features">المميزات</a></li>
+    <li><a href="#how">كيف يعمل</a></li>
+    <li><a href="#pilot">الأسعار</a></li>
+    <li><a href="#pilot">تواصل معنا</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <button class="nav-lang">EN</button>
+    <a href="client-login.html" style="border:1px solid var(--accent-border);color:var(--accent);background:transparent;padding:0.5rem 1.1rem;border-radius:6px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;font-family:'Cairo',sans-serif;white-space:nowrap;" onmouseover="this.style.background='rgba(28,94,62,0.06)'" onmouseout="this.style.background='transparent'">تتبع قضيتك ←</a>
+    <a href="register.html" class="nav-cta">ابدأ مجاناً</a>
+    <button class="hamburger" id="hamburger" aria-label="القائمة" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<nav class="mobile-nav" id="mobile-nav" aria-label="القائمة الجانبية">
+  <a href="#features">المميزات</a>
+  <a href="#how">كيف يعمل</a>
+  <a href="#pilot">الأسعار</a>
+  <a href="#pilot">تواصل معنا</a>
+  <div class="mobile-nav-divider"></div>
+  <a href="client-login.html" style="display:block;padding:0.8rem 1rem;font-size:0.95rem;font-weight:600;color:var(--accent);text-decoration:none;text-align:center;border-bottom:1px solid var(--border);">تتبع قضيتك — بوابة الموكل ←</a>
+  <a href="register.html" class="mobile-nav-cta">ابدأ مجاناً — مجاناً لأول 3 أشهر</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      نظام إدارة المحاماة السعودي
+    </div>
+
+    <div class="hero-sub-en">Legal Management System</div>
+
+    <h1 class="hero-h1">
+      أدِر مكتبك القانوني<br>
+      بـ<em>كفاءة لا مثيل لها</em>
+    </h1>
+
+    <p class="hero-desc">
+      منصة متكاملة مصممة خصيصاً للبيئة القانونية السعودية —
+      من إدارة الدعاوى والجلسات، إلى الفوترة الإلكترونية المتوافقة مع زاتكا،
+      وبوابة الموكل الرقمية.
+    </p>
+
+    <div class="hero-actions">
+      <a href="register.html" class="btn-primary">ابدأ النسخة التجريبية</a>
+      <a href="#how" class="btn-ghost">
+        شاهد كيف يعمل
+        <span class="btn-ghost-arrow">←</span>
+      </a>
+    </div>
+
+    <div class="hero-trust">
+      <div class="trust-item">
+        <div class="trust-num" data-count="15"><span>%</span></div>
+        <div class="trust-label">زيادة صافي الأرباح</div>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-item">
+        <div class="trust-num" data-count="0"><span>%</span></div>
+        <div class="trust-label">احتمالية تفويت موعد</div>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-item">
+        <div class="trust-num" data-count="40"><span>%</span></div>
+        <div class="trust-label">توفير في وقت المحامين</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISUAL -->
+  <div class="hero-visual">
+    <div class="card-stack">
+
+      <!-- Floating win-rate card with donut ring -->
+      <div class="mock-stat-card">
+        <div class="stat-card-top">
+          <div class="stat-card-label">نسبة الفوز</div>
+          <span style="font-size:0.52rem;color:rgba(255,255,255,0.45);font-weight:500">يناير 2025</span>
+        </div>
+        <div class="stat-card-body">
+          <!-- SVG donut ring showing 78% -->
+          <div class="stat-card-donut">
+            <svg width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="21" cy="21" r="16" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4"/>
+              <!-- 78% = 0.78 * 2π * 16 ≈ 78.4; circumference = 100.5 -->
+              <circle cx="21" cy="21" r="16" fill="none" stroke="#6EE7B7" stroke-width="4"
+                stroke-dasharray="78.4 22.1" stroke-dashoffset="25.1"
+                stroke-linecap="round" transform="rotate(-90 21 21)"/>
+            </svg>
+          </div>
+          <div class="stat-card-right">
+            <div class="stat-card-val">78%</div>
+            <div class="stat-card-trend">↑ 5% هذا الشهر</div>
+            <div class="stat-card-sub">من 142 قضية</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main dashboard card -->
+      <div class="mock-card mock-main">
+
+        <!-- Window chrome bar -->
+        <div class="mock-chrome">
+          <div class="chrome-dots">
+            <span class="chrome-dot chrome-dot-r"></span>
+            <span class="chrome-dot chrome-dot-y"></span>
+            <span class="chrome-dot chrome-dot-g"></span>
+          </div>
+          <div class="chrome-bar">
+            <span class="chrome-lock">🔒</span>
+            <span class="chrome-url">app.none.sa/dashboard</span>
+          </div>
+          <div class="chrome-actions">
+            <div class="chrome-notif">
+              🔔<span class="chrome-badge">3</span>
+            </div>
+            <div class="chrome-avatar">ع.م</div>
+          </div>
+        </div>
+
+        <!-- Body: sidebar + content -->
+        <div class="mock-body">
+
+          <!-- Icon sidebar with logo mark -->
+          <div class="mock-sidebar">
+            <div class="mock-sidebar-logo">N</div>
+            <div class="mock-nav-item active">⚖️</div>
+            <div class="mock-nav-item">🔔</div>
+            <div class="mock-nav-item">🧾</div>
+            <div class="mock-sidebar-sep"></div>
+            <div class="mock-nav-item">🗂️</div>
+            <div class="mock-nav-item">📊</div>
+          </div>
+
+          <!-- Main content area -->
+          <div class="mock-content">
+
+            <!-- Topbar with search -->
+            <div class="mock-topbar">
+              <div>
+                <div class="mock-title">لوحة التحكم</div>
+                <div class="mock-date">الأحد، 13 يناير 2025</div>
+              </div>
+              <div class="mock-topbar-right">
+                <div class="mock-search">🔍 <span>بحث...</span></div>
+              </div>
+            </div>
+
+            <!-- KPI stat cards -->
+            <div class="mock-stats">
+              <div class="mock-stat">
+                <div class="mock-stat-icon">⚖️</div>
+                <div class="mock-stat-val">142</div>
+                <div class="mock-stat-label">القضايا النشطة</div>
+                <div class="mock-stat-up">↑ 12% هذا الشهر</div>
+              </div>
+              <div class="mock-stat warn-stat">
+                <div class="mock-stat-icon">📅</div>
+                <div class="mock-stat-val">7</div>
+                <div class="mock-stat-label">جلسات اليوم</div>
+                <div class="mock-stat-up warn">⚠ 2 عاجل</div>
+              </div>
+              <div class="mock-stat gold-stat">
+                <div class="mock-stat-icon">💰</div>
+                <div class="mock-stat-val">84K</div>
+                <div class="mock-stat-label">أتعاب معلقة</div>
+                <div class="mock-stat-up gold-val">ريال سعودي</div>
+              </div>
+            </div>
+
+            <!-- Case list with section label -->
+            <div class="mock-section-label">
+              الدعاوى الأخيرة
+              <span class="mock-section-label-link">عرض الكل ←</span>
+            </div>
+
+            <!-- Row 1 — urgent -->
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <div class="mock-row-bar urgent"></div>
+                <div class="mock-row-info">
+                  <div class="mock-row-name">المالكي — نزاع تجاري</div>
+                  <div class="mock-row-meta">
+                    <span class="mock-row-court">محكمة التجارة · الرياض</span>
+                    <span class="mock-row-id">· #2025-0142</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-lawyer-badge">خ.ع</div>
+                <span class="mock-pill pill-r">عاجل</span>
+              </div>
+            </div>
+
+            <!-- Row 2 — active -->
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <div class="mock-row-bar active"></div>
+                <div class="mock-row-info">
+                  <div class="mock-row-name">شركة الخليج — عمالي</div>
+                  <div class="mock-row-meta">
+                    <span class="mock-row-court">المحكمة العمالية · جدة</span>
+                    <span class="mock-row-id">· #2025-0138</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-lawyer-badge">س.م</div>
+                <span class="mock-pill pill-g">نشطة</span>
+              </div>
+            </div>
+
+            <!-- Row 3 — pending -->
+            <div class="mock-row" style="border-bottom:none">
+              <div class="mock-row-left">
+                <div class="mock-row-bar pending"></div>
+                <div class="mock-row-info">
+                  <div class="mock-row-name">مجموعة النور — استئناف</div>
+                  <div class="mock-row-meta">
+                    <span class="mock-row-court">محكمة الاستئناف · الرياض</span>
+                    <span class="mock-row-id">· #2025-0131</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mock-row-right">
+                <div class="mock-lawyer-badge">م.ر</div>
+                <span class="mock-pill pill-y">معلقة</span>
+              </div>
+            </div>
+
+            <!-- Sparkline chart with month labels -->
+            <div class="mock-chart">
+              <div class="mock-chart-header">
+                <span>معدل النجاح · آخر 6 أشهر</span>
+                <strong>↑ 78% فوز</strong>
+              </div>
+              <svg width="100%" height="36" viewBox="0 0 220 36" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="cg" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1A5C3C;stop-opacity:0.2"/>
+                    <stop offset="100%" style="stop-color:#1A5C3C;stop-opacity:0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Horizontal grid lines -->
+                <line x1="0" y1="12" x2="220" y2="12" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>
+                <line x1="0" y1="24" x2="220" y2="24" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>
+                <!-- Sparkline -->
+                <path d="M0,28 L36,22 L73,18 L109,24 L146,10 L182,6 L220,4" fill="none" stroke="#1A5C3C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M0,28 L36,22 L73,18 L109,24 L146,10 L182,6 L220,4 L220,36 L0,36 Z" fill="url(#cg)"/>
+                <!-- Data point dots -->
+                <circle cx="0"   cy="28" r="2" fill="#1A5C3C" opacity="0.4"/>
+                <circle cx="73"  cy="18" r="2" fill="#1A5C3C" opacity="0.4"/>
+                <circle cx="146" cy="10" r="2" fill="#1A5C3C" opacity="0.4"/>
+                <circle cx="220" cy="4"  r="3" fill="#1A5C3C"/>
+              </svg>
+              <div class="mock-chart-months">
+                <span class="mock-chart-month">أغس</span>
+                <span class="mock-chart-month">سبت</span>
+                <span class="mock-chart-month">أكتو</span>
+                <span class="mock-chart-month">نوف</span>
+                <span class="mock-chart-month">ديس</span>
+                <span class="mock-chart-month">يناير</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating alert — WhatsApp Business style -->
+      <div class="mock-alert-card">
+        <div class="alert-card-header">
+          <!-- WhatsApp icon -->
+          <div class="alert-wa-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.557 4.126 1.527 5.855L.057 23.116a.75.75 0 00.927.927l5.261-1.47A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.725 9.725 0 01-4.965-1.363l-.356-.21-3.692 1.032 1.032-3.692-.21-.356A9.725 9.725 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+            </svg>
+          </div>
+          <span class="alert-app-name">نظام إدارة المحاماة · واتساب</span>
+          <span class="alert-time">الآن</span>
+        </div>
+        <div class="alert-card-title">⏰ تذكير تلقائي — قضية المالكي</div>
+        <div class="alert-card-sub">جلسة أمام محكمة التجارة غداً الساعة 9:00 ص — الرياض، دائرة 7</div>
+        <div class="alert-card-footer">
+          <span class="alert-card-badge">تم الإرسال ✓</span>
+          <span class="alert-read-check">✓✓</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- COMPLIANCE STRIP -->
+<div class="compliance-strip">
+  <div class="compliance-item"><div class="compliance-dot"></div>متوافق مع ZATCA المرحلة الثانية</div>
+  <div class="compliance-item"><div class="compliance-dot"></div>استضافة داخل المملكة · SDAIA</div>
+  <div class="compliance-item"><div class="compliance-dot"></div>تكامل مع منصة ناجز</div>
+  <div class="compliance-item"><div class="compliance-dot"></div>بيانات مشفرة بالكامل</div>
+</div>
+
+<!-- PROBLEMS SECTION -->
+<section id="problems" class="problems-wrap">
+  <div class="problems-inner">
+
+    <div class="section-eyebrow">التحديات · The Problem</div>
+    <h2 class="section-h2">أين تتسرب أرباح<br>مكتبك <em>بدون أن تعلم؟</em></h2>
+    <p class="section-p">
+      خمس مشاكل حقيقية تعاني منها مكاتب المحاماة السعودية يومياً —
+      وكل واحدة منها تقتطع من أرباحك وسمعتك بصمت.
+    </p>
+
+    <div class="problems-grid">
+
+      <!-- 1 — Featured dark card -->
+      <div class="prob-card dark">
+        <div class="prob-num">01 — الأعلى تأثيراً</div>
+        <div class="prob-icon">💸</div>
+        <div class="prob-title">تسرب الأرباح والمصاريف النثرية</div>
+        <div class="prob-body">
+          مئات الريالات تضيع يومياً في رسوم تصوير ومواصلات ورسوم حكومية
+          لا تُقيَّد فوراً. في نهاية القضية ينساها المكتب ولا يحصّلها من الموكل —
+          خسارة صامتة متكررة في كل ملف.
+        </div>
+        <div class="prob-result">↑ ارتفاع الأرباح 15% بعد الحل</div>
+      </div>
+
+      <!-- 2 -->
+      <div class="prob-card">
+        <div class="prob-num">02</div>
+        <div class="prob-icon">⚖️</div>
+        <div class="prob-title">رعب فوات المواعيد القانونية</div>
+        <div class="prob-body">
+          الاعتماد على واتساب والتقويم اليدوي لتذكير المحامين بالجلسات ومواعيد
+          الاستئناف. خطأ بشري واحد يضيع حق الموكل ويعرّض المكتب للمساءلة
+          القانونية وخسارة السمعة.
+        </div>
+        <div class="prob-result">→ تفويت المواعيد = صفر</div>
+      </div>
+
+      <!-- 3 -->
+      <div class="prob-card">
+        <div class="prob-num">03</div>
+        <div class="prob-icon">📱</div>
+        <div class="prob-title">استنزاف وقت المحامي في خدمة العملاء</div>
+        <div class="prob-body">
+          اتصالات ورسائل يومية متكررة من الموكلين: "ماذا حدث في قضيتي؟"،
+          "هل تحددت جلسة؟". المحامي يتحول لموظف خدمة عملاء بدل أن يركز
+          على التحضير القانوني الفعلي.
+        </div>
+        <div class="prob-result">↓ توفير 40% من وقت المحامين</div>
+      </div>
+
+      <!-- 4 -->
+      <div class="prob-card">
+        <div class="prob-num">04</div>
+        <div class="prob-icon">📊</div>
+        <div class="prob-title">عشوائية توزيع القضايا وضبابية الأداء</div>
+        <div class="prob-body">
+          صاحب المكتب لا يعرف حجم الضغط الفعلي على كل محامٍ. قضية معقدة
+          تُسند لمحامٍ مثقل بالمهام بينما آخر متفرغ — تأخر في الإنجاز
+          وهبوط في نسبة النجاح.
+        </div>
+        <div class="prob-result">↑ سرعة إغلاق القضايا 25%</div>
+      </div>
+
+      <!-- 5 — Full width -->
+      <div class="prob-card prob-card-wide">
+        <div class="prob-card-wide-inner">
+          <div class="prob-card-wide-main">
+            <div class="prob-num">05</div>
+            <div class="prob-icon">🗂️</div>
+            <div class="prob-title">الفوضى الأمنية وصعوبة الوصول للملفات</div>
+            <div class="prob-body" style="margin-bottom:0">
+              ملفات القضايا موزعة بين مجلدات مشتركة عشوائية وأجهزة المحامين الشخصية.
+              إذا استقال محامٍ أو تلف جهازه، تضيع أسرار المكتب.
+              البحث في آلاف الملفات يستهلك وقتاً ثميناً يومياً.
+            </div>
+          </div>
+          <div class="prob-card-wide-features">
+            <div class="prob-feature-row">
+              <div class="prob-feature-icon">🔒</div>
+              تشفير كامل لكل المستندات مع نظام صلاحيات دقيق
+            </div>
+            <div class="prob-feature-row">
+              <div class="prob-feature-icon">⚡</div>
+              الوصول لأي ملف في أقل من 5 ثوانٍ من أي مكان
+            </div>
+            <div class="prob-feature-row">
+              <div class="prob-feature-icon">🇸🇦</div>
+              استضافة آمنة داخل المملكة · SDAIA Compliant
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="problems-bottom">
+      <div class="problems-bottom-text">
+        <strong>كل هذه المشاكل تحلّها نسخة واحدة من نظام إدارة المحاماة.</strong>
+        لا تحتاج لأنظمة متعددة أو فريق تقني داخلي —
+        كل شيء مدمج في منصة واحدة مبنية للقانون السعودي.
+      </div>
+      <a href="register.html" class="btn-primary">شاهد الحل ←</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     FEATURES SECTION
+════════════════════════════════════════ -->
+
+<section id="features" class="features-wrap">
+  <div class="features-inner">
+
+    <div class="features-header">
+      <div class="features-header-right">
+        <div class="section-eyebrow">الحل · The Solution</div>
+        <h2 class="section-h2">منظومة متكاملة<br>مبنية لـ<em>القانون السعودي</em></h2>
+      </div>
+      <div class="features-header-left">
+        ست وحدات أساسية تشكّل معاً نظام إدارة شامل —
+        كل وحدة صُمِّمت لحل مشكلة حقيقية في مكتبك القانوني.
+        <br><br>
+        <strong>لا تحتاج لتدريب مطوّل.</strong>
+        الواجهة مبنية بمصطلحات قانونية سعودية صرفة، أبسط من الواتساب.
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="feat-tabs">
+      <button class="feat-tab active" onclick="switchTab(0)">⚖️ إدارة الدعاوى</button>
+      <button class="feat-tab" onclick="switchTab(1)">🔔 التنبيهات</button>
+      <button class="feat-tab" onclick="switchTab(2)">🧾 الفوترة</button>
+      <button class="feat-tab" onclick="switchTab(3)">👤 بوابة الموكل</button>
+      <button class="feat-tab" onclick="switchTab(4)">🗂️ الأرشيف</button>
+      <button class="feat-tab" onclick="switchTab(5)">📊 الأداء</button>
+    </div>
+
+    <!-- PANEL 1: Case Management -->
+    <div class="feat-panel active" id="panel-0">
+      <div class="feat-content">
+        <div class="feat-num">01 · Case Management</div>
+        <h3 class="feat-title">المحرك القانوني الشامل</h3>
+        <p class="feat-desc">
+          إدارة كاملة لكل دعاوى المكتب من مكان واحد —
+          أرقام القضايا، المحاكم، القضاة، الأطراف، والمستجدات
+          في الوقت الفعلي.
+        </p>
+        <ul class="feat-points">
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تتبع حي لحالة كل قضية ومرحلتها القانونية</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>ربط تلقائي بين القضية والموكل والمحامي المسؤول</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>سجل كامل لكل الإجراءات والمستجدات</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>مصطلحات قانونية سعودية صرفة في كل واجهة</li>
+        </ul>
+        <div class="feat-impact">↑ سرعة إغلاق القضايا بنسبة 25%</div>
+      </div>
+      <div class="feat-visual">
+        <div class="feat-visual-header">
+          <div class="feat-visual-title">الدعاوى النشطة · Active Cases</div>
+          <div class="feat-visual-badge">● مباشر</div>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">قضية تجارية – المالكي</div><div class="fv-sub">محكمة التجارة · الرياض</div></div>
+          <span class="fv-pill fvp-r">عاجل</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">نزاع عمالي – الخليج</div><div class="fv-sub">المحكمة العمالية · جدة</div></div>
+          <span class="fv-pill fvp-g">نشطة</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">استئناف – مجموعة النور</div><div class="fv-sub">محكمة الاستئناف · الرياض</div></div>
+          <span class="fv-pill fvp-y">معلقة</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">قضية إدارية – الزهراني</div><div class="fv-sub">ديوان المظالم · الرياض</div></div>
+          <span class="fv-pill fvp-b">جديدة</span>
+        </div>
+        <div class="fv-stat-row">
+          <div class="fv-stat"><div class="fv-stat-val">142</div><div class="fv-stat-lbl">نشطة</div></div>
+          <div class="fv-stat"><div class="fv-stat-val">78%</div><div class="fv-stat-lbl">نسبة الفوز</div></div>
+          <div class="fv-stat"><div class="fv-stat-val">7</div><div class="fv-stat-lbl">جلسات اليوم</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: Alerts -->
+    <div class="feat-panel" id="panel-1">
+      <div class="feat-content">
+        <div class="feat-num">02 · Smart Alerts</div>
+        <h3 class="feat-title">التنبيهات الذكية التلقائية</h3>
+        <p class="feat-desc">
+          نظام إشعارات متصاعد يُرسل تلقائياً للمحامي وصاحب المكتب
+          عبر واتساب ورسائل نصية — بدون أي جهد يدوي.
+        </p>
+        <ul class="feat-points">
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تذكير قبل الجلسة بـ 48 ساعة، 24 ساعة، وساعتين</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>إشعار فوري لصاحب المكتب عند أي موعد حرج</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تنبيه تلقائي بانتهاء مدد الاستئناف القانونية</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>إرسال عبر واتساب + SMS في آنٍ واحد</li>
+        </ul>
+        <div class="feat-impact">→ احتمالية تفويت أي موعد = 0%</div>
+      </div>
+      <div class="feat-visual">
+        <div class="feat-visual-header">
+          <div class="feat-visual-title">التنبيهات · Reminders</div>
+          <div class="feat-visual-badge">آلي</div>
+        </div>
+        <div class="fv-alert">⏰ جلسة قضية المالكي غداً 9:00 ص — تم الإرسال ✓</div>
+        <div class="fv-alert" style="margin-top:0.5rem;background:rgba(220,38,38,0.04);border-color:rgba(220,38,38,0.15);color:#DC2626;">⚠️ مدة الاستئناف تنتهي بعد 3 أيام — الزهراني</div>
+        <div class="fv-alert" style="margin-top:0.5rem;background:var(--gold-dim);border-color:rgba(184,149,42,0.2);color:var(--gold);">💸 فاتورة متأخرة 30 يوماً – شركة الخليج</div>
+        <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border);">
+          <div style="font-size:0.65rem;color:var(--ink-muted);margin-bottom:0.6rem;">قنوات الإرسال · Channels</div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <span style="font-size:0.7rem;padding:3px 10px;border-radius:2rem;background:rgba(37,211,102,0.1);color:#128C7E;border:1px solid rgba(37,211,102,0.2);font-weight:600">واتساب ✓</span>
+            <span style="font-size:0.7rem;padding:3px 10px;border-radius:2rem;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border);font-weight:600">SMS ✓</span>
+            <span style="font-size:0.7rem;padding:3px 10px;border-radius:2rem;background:var(--off-white);color:var(--ink-muted);border:1px solid var(--border);font-weight:600">بريد إلكتروني</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: Billing -->
+    <div class="feat-panel" id="panel-2">
+      <div class="feat-content">
+        <div class="feat-num">03 · E-Invoicing · ZATCA</div>
+        <h3 class="feat-title">الفوترة الإلكترونية المتوافقة</h3>
+        <p class="feat-desc">
+          نظام مالي متكامل متوافق مع متطلبات هيئة الزكاة والضريبة
+          والجمارك المرحلة الثانية — ضريبة القيمة المضافة أوتوماتيكياً.
+        </p>
+        <ul class="feat-points">
+          <li class="feat-point"><div class="feat-point-dot">✓</div>فواتير إلكترونية معتمدة ZATCA Phase 2</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تسجيل المصاريف النثرية فوراً من الجوال</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>ربط تلقائي بين المصروف وملف القضية</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تقارير مالية شهرية جاهزة للمحاسب</li>
+        </ul>
+        <div class="feat-impact">↑ استرداد أرباح ضائعة بنسبة 15%</div>
+      </div>
+      <div class="feat-visual">
+        <div class="feat-visual-header">
+          <div class="feat-visual-title">فاتورة إلكترونية · E-Invoice</div>
+          <div class="feat-visual-badge">ZATCA ✓</div>
+        </div>
+        <div class="fv-invoice">
+          <div class="fv-inv-row"><span>أتعاب المحاماة – قضية المالكي</span><span>12,000 ر.س</span></div>
+          <div class="fv-inv-row"><span>رسوم المحكمة</span><span>850 ر.س</span></div>
+          <div class="fv-inv-row"><span>مصاريف نثرية مسجّلة</span><span>320 ر.س</span></div>
+          <div class="fv-inv-row"><span>ضريبة القيمة المضافة 15%</span><span>1,976 ر.س</span></div>
+          <div class="fv-inv-total"><span>الإجمالي</span><span>15,146 ر.س</span></div>
+          <div class="fv-zatca">✓ فاتورة معتمدة ومرسلة لهيئة الزكاة والضريبة والجمارك</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 4: Client Portal -->
+    <div class="feat-panel" id="panel-3">
+      <div class="feat-content">
+        <div class="feat-num">04 · Client Portal</div>
+        <h3 class="feat-title">بوابة الموكل الرقمية</h3>
+        <p class="feat-desc">
+          تطبيق جوال يتيح لكل موكل متابعة قضيته ومواعيد جلساته
+          ومستنداته — دون الحاجة للاتصال بالمكتب.
+        </p>
+        <ul class="feat-points">
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تحديثات فورية عند أي مستجد في القضية</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>رفع المستندات المطلوبة مباشرة من الجوال</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>عرض الفواتير والمدفوعات بشفافية كاملة</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تواصل آمن مع المحامي داخل المنصة</li>
+        </ul>
+        <div class="feat-impact">↓ توفير 40% من وقت المحامين</div>
+      </div>
+      <div class="feat-visual">
+        <div class="feat-visual-header">
+          <div class="feat-visual-title">بوابة الموكل · Client View</div>
+          <div class="feat-visual-badge">أحمد المالكي</div>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">حالة القضية</div></div>
+          <span class="fv-pill fvp-r">جلسة غداً</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">الجلسة القادمة</div><div class="fv-sub">محكمة التجارة · الرياض</div></div>
+          <span style="font-size:0.7rem;color:var(--ink-mid);font-weight:600">14 يناير · 9 ص</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">مستند مطلوب منك</div></div>
+          <span class="fv-pill fvp-y">معلق</span>
+        </div>
+        <div class="fv-alert" style="margin-top:0.8rem">📄 يرجى رفع عقد الشراكة قبل الجلسة</div>
+      </div>
+    </div>
+
+    <!-- PANEL 5: Archive -->
+    <div class="feat-panel" id="panel-4">
+      <div class="feat-content">
+        <div class="feat-num">05 · Secure Archive</div>
+        <h3 class="feat-title">الأرشيف الرقمي المشفر</h3>
+        <p class="feat-desc">
+          حفظ مشفر لكل المستندات والمذكرات وملفات الصوت والفيديو
+          مع نظام صلاحيات يحمي أسرار كل قضية.
+        </p>
+        <ul class="feat-points">
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تشفير كامل لكل الملفات بمعايير AES-256</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>نظام صلاحيات دقيق — المحامي لا يرى قضايا زملائه</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>بحث نصي داخل محتوى المستندات مباشرة</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>استضافة آمنة داخل المملكة · SDAIA Compliant</li>
+        </ul>
+        <div class="feat-impact">⚡ الوصول لأي ملف في أقل من 5 ثوانٍ</div>
+      </div>
+      <div class="feat-visual">
+        <div class="feat-visual-header">
+          <div class="feat-visual-title">الأرشيف · Archive</div>
+          <div class="feat-visual-badge">🔒 مشفر</div>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">📄 لائحة الدعوى – المالكي</div><div class="fv-sub">PDF · 2.4 MB · 12 يناير</div></div>
+          <span class="fv-pill fvp-g">مكتمل</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">🎙️ تسجيل جلسة – الخليج</div><div class="fv-sub">MP3 · 45 دقيقة · 10 يناير</div></div>
+          <span class="fv-pill fvp-g">مكتمل</span>
+        </div>
+        <div class="fv-row">
+          <div><div class="fv-name">📋 مذكرة دفاع – النور</div><div class="fv-sub">DOCX · 890 KB · 8 يناير</div></div>
+          <span class="fv-pill fvp-y">مسودة</span>
+        </div>
+        <div class="fv-bar-wrap">
+          <div class="fv-bar-label"><span>مساحة التخزين</span><span>24 GB / 100 GB</span></div>
+          <div class="fv-bar-bg"><div class="fv-bar-fill" style="width:24%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 6: Performance -->
+    <div class="feat-panel" id="panel-5">
+      <div class="feat-content">
+        <div class="feat-num">06 · Performance Dashboard</div>
+        <h3 class="feat-title">لوحة أداء المحامين</h3>
+        <p class="feat-desc">
+          رؤية واضحة وفورية لأداء كل محامٍ في المكتب —
+          توزيع ذكي للمهام مبني على بيانات حقيقية لا تخمين.
+        </p>
+        <ul class="feat-points">
+          <li class="feat-point"><div class="feat-point-dot">✓</div>مؤشر ضغط العمل الفعلي لكل محامٍ</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>نسبة نجاح كل محامٍ في القضايا السابقة</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>اقتراح تلقائي لأنسب محامٍ لكل قضية جديدة</li>
+          <li class="feat-point"><div class="feat-point-dot">✓</div>تقارير أداء شهرية وسنوية قابلة للتصدير</li>
+        </ul>
+        <div class="feat-impact">↑ كفاءة توزيع القضايا 25%</div>
+      </div>
+      <div class="feat-visual">
+        <div class="feat-visual-header">
+          <div class="feat-visual-title">أداء الفريق · Team Performance</div>
+          <div class="feat-visual-badge">● مباشر</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;margin-top:0.3rem">
+          <div>
+            <div class="fv-bar-label"><span style="display:flex;align-items:center;gap:0.4rem"><span style="width:18px;height:18px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);font-size:0.55rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700">خ</span>خالد العتيبي</span><span style="color:#DC2626">90% · 48 قضية</span></div>
+            <div class="fv-bar-bg"><div class="fv-bar-fill" style="width:90%;background:#DC2626"></div></div>
+          </div>
+          <div>
+            <div class="fv-bar-label"><span style="display:flex;align-items:center;gap:0.4rem"><span style="width:18px;height:18px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);font-size:0.55rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700">س</span>سارة المحمد</span><span style="color:var(--gold)">65% · 34 قضية</span></div>
+            <div class="fv-bar-bg"><div class="fv-bar-fill" style="width:65%;background:var(--gold)"></div></div>
+          </div>
+          <div>
+            <div class="fv-bar-label"><span style="display:flex;align-items:center;gap:0.4rem"><span style="width:18px;height:18px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);font-size:0.55rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700">م</span>محمد الرشيد</span><span style="color:var(--gold)">52% · 28 قضية</span></div>
+            <div class="fv-bar-bg"><div class="fv-bar-fill" style="width:52%;background:var(--gold)"></div></div>
+          </div>
+          <div>
+            <div class="fv-bar-label"><span style="display:flex;align-items:center;gap:0.4rem"><span style="width:18px;height:18px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);font-size:0.55rem;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700">ن</span>نورة الأحمد</span><span style="color:var(--accent)">35% · 18 قضية</span></div>
+            <div class="fv-bar-bg"><div class="fv-bar-fill" style="width:35%"></div></div>
+          </div>
+        </div>
+        <div class="fv-alert" style="margin-top:1rem">💡 نورة الأحمد مقترحة للقضايا الجديدة</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.feat-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.feat-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+// Hamburger menu
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobile-nav');
+
+function closeMobileNav() {
+  hamburger.classList.remove('open');
+  mobileNav.classList.remove('open');
+  document.body.style.overflow = '';
+  hamburger.setAttribute('aria-expanded', 'false');
+}
+
+hamburger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = hamburger.classList.toggle('open');
+  mobileNav.classList.toggle('open');
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+  hamburger.setAttribute('aria-expanded', String(isOpen));
+});
+
+// Close on link click
+mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileNav));
+
+// Close on outside click
+document.addEventListener('click', (e) => {
+  if (!hamburger.contains(e.target) && !mobileNav.contains(e.target)) closeMobileNav();
+});
+
+// Close on Escape
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileNav(); });
+
+// Nav scroll opacity + shadow
+const nav = document.getElementById('main-nav');
+const btt = document.getElementById('back-to-top');
+
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  nav.classList.toggle('scrolled', y > 10);
+  btt.classList.toggle('visible', y > 400);
+}, { passive: true });
+
+// Back to top
+btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// Count-up animation (IntersectionObserver)
+const countEls = document.querySelectorAll('[data-count]');
+if (countEls.length) {
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = +el.dataset.count;
+      const prefix = el.dataset.prefix || '';
+      const duration = target <= 1 ? 600 : 1500;
+      const startTime = performance.now();
+      let textNode = Array.from(el.childNodes).find(n => n.nodeType === 3);
+      if (!textNode) { textNode = document.createTextNode(''); el.prepend(textNode); }
+      textNode.textContent = prefix + '0';
+      function tick(now) {
+        const t = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        textNode.textContent = prefix + Math.round(eased * target);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      countObserver.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  countEls.forEach(el => countObserver.observe(el));
+}
+</script>
+
+<!-- ══════════════════════════════════════
+     HOW IT WORKS
+════════════════════════════════════════ -->
+
+<section id="how" class="hiw-wrap">
+  <div class="hiw-inner">
+
+    <div class="hiw-top">
+      <div class="section-eyebrow">كيف يعمل · How It Works</div>
+      <h2 class="section-h2">من التسجيل إلى<br><em>الإطلاق في 9 أسابيع</em></h2>
+      <p class="section-p">
+        لا تحتاج لفريق تقني، لا هجرة بيانات معقدة، لا توقف عن العمل —
+        ثلاث مراحل واضحة ونظامك جاهز.
+      </p>
+    </div>
+
+    <!-- 3 STEPS -->
+    <div class="hiw-steps">
+
+      <div class="hiw-step">
+        <div class="hiw-step-num">١</div>
+        <div class="hiw-step-icon">🔍</div>
+        <div class="hiw-step-title">تحليل وتخصيص<br>Gap Analysis</div>
+        <div class="hiw-step-desc">
+          نجلس مع فريق مكتبك ونفهم طريقة عملكم الحالية —
+          نخصص سير العمل داخل النظام ليناسب مكتبك تماماً.
+          <br><br>
+          <strong style="color:var(--ink);font-size:0.78rem">الأسبوع 1–2</strong>
+        </div>
+      </div>
+
+      <div class="hiw-arrow">←</div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num">٢</div>
+        <div class="hiw-step-icon">🚀</div>
+        <div class="hiw-step-title">إطلاق تجريبي<br>Pilot Launch</div>
+        <div class="hiw-step-desc">
+          نطلق النسخة التجريبية وننقل بياناتك الأساسية،
+          ثم ندرّب كامل الفريق القانوني والإداري على النظام.
+          <br><br>
+          <strong style="color:var(--ink);font-size:0.78rem">الأسبوع 3–8</strong>
+        </div>
+      </div>
+
+      <div class="hiw-arrow">←</div>
+
+      <div class="hiw-step">
+        <div class="hiw-step-num">٣</div>
+        <div class="hiw-step-icon">✅</div>
+        <div class="hiw-step-title">إطلاق فعلي<br>Go Live</div>
+        <div class="hiw-step-desc">
+          الإطلاق الكامل مع دعم فني مباشر لضمان الانتقال السلس —
+          ونجمع ملاحظاتكم لتطوير النظام معاً.
+          <br><br>
+          <strong style="color:var(--ink);font-size:0.78rem">الأسبوع 9</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TIMELINE VISUAL -->
+    <div class="hiw-timeline">
+      <div class="hiw-timeline-header">
+        <div>
+          <div class="hiw-tl-title">خطة التنفيذ · Implementation Roadmap</div>
+          <div class="hiw-tl-sub">مكتب نموذجي — يناير 2026</div>
+        </div>
+        <span style="font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:2rem;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-border)">جارٍ التنفيذ</span>
+      </div>
+      <div class="hiw-timeline-body">
+
+        <div class="tl-week">
+          <div class="tl-week-label">أسبوع 1–2<span>Gap Analysis</span></div>
+          <div class="tl-tasks">
+            <div class="tl-task tl-task-done"><div class="tl-dot tl-dot-done"></div>تحليل سير العمل الحالي في المكتب<span class="tl-badge tl-badge-done">مكتمل ✓</span></div>
+            <div class="tl-task tl-task-done"><div class="tl-dot tl-dot-done"></div>تخصيص قوالب الدعاوى والمحاكم السعودية<span class="tl-badge tl-badge-done">مكتمل ✓</span></div>
+            <div class="tl-task tl-task-done"><div class="tl-dot tl-dot-done"></div>إعداد نظام الصلاحيات والمستخدمين<span class="tl-badge tl-badge-done">مكتمل ✓</span></div>
+          </div>
+        </div>
+
+        <div class="tl-week">
+          <div class="tl-week-label">أسبوع 3–6<span>Pilot Version</span></div>
+          <div class="tl-tasks">
+            <div class="tl-task tl-task-prog"><div class="tl-dot tl-dot-prog"></div>نقل بيانات القضايا الحالية للنظام<span class="tl-badge tl-badge-prog">جارٍ ●</span></div>
+            <div class="tl-task tl-task-prog"><div class="tl-dot tl-dot-prog"></div>ربط بوابة الواتساب للتنبيهات التلقائية<span class="tl-badge tl-badge-prog">جارٍ ●</span></div>
+            <div class="tl-task tl-task-todo"><div class="tl-dot tl-dot-todo"></div>تفعيل الفوترة الإلكترونية ZATCA</div>
+          </div>
+        </div>
+
+        <div class="tl-week">
+          <div class="tl-week-label">أسبوع 7–8<span>Training</span></div>
+          <div class="tl-tasks">
+            <div class="tl-task tl-task-todo"><div class="tl-dot tl-dot-todo"></div>تدريب المحامين والكادر الإداري</div>
+            <div class="tl-task tl-task-todo"><div class="tl-dot tl-dot-todo"></div>تدريب الموكلين على بوابة التتبع</div>
+          </div>
+        </div>
+
+        <div class="tl-week">
+          <div class="tl-week-label">أسبوع 9<span>Go Live 🚀</span></div>
+          <div class="tl-tasks">
+            <div class="tl-task tl-task-todo"><div class="tl-dot tl-dot-todo"></div>الإطلاق الفعلي الكامل</div>
+            <div class="tl-task tl-task-todo"><div class="tl-dot tl-dot-todo"></div>جمع التغذية الراجعة والتطوير المستمر</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PILOT / CTA + FOOTER
+════════════════════════════════════════ -->
+
+
+<section id="pilot" class="cta-wrap">
+  <div class="cta-grid-lines"></div>
+  <div class="cta-inner">
+
+    <!-- COPY -->
+    <div class="cta-copy">
+      <div class="cta-eyebrow">Founder's Edition · برنامج الشراكة</div>
+      <h2 class="cta-h2">كن من أوائل المكاتب<br>في <em>التحول الرقمي</em></h2>
+      <p class="cta-desc">
+        عرض حصري لعدد محدود من مكاتب المحاماة الرائدة في المملكة —
+        احصل على النظام الكامل مجاناً مقابل شراكتك في تطويره.
+      </p>
+
+      <ul class="cta-features">
+        <li class="cta-feature"><div class="cta-check">✓</div>التطوير البرمجي مجاني بالكامل</li>
+        <li class="cta-feature"><div class="cta-check">✓</div>تتحمل فقط تكاليف الخوادم والخدمات الخارجية</li>
+        <li class="cta-feature"><div class="cta-check">✓</div>ميزات حصرية "Founder's Edition" إلى الأبد</li>
+        <li class="cta-feature"><div class="cta-check">✓</div>دور مباشر في تشكيل مستقبل المنتج</li>
+      </ul>
+
+      <div class="cta-actions">
+        <a href="register.html" class="btn-white">احجز مقعدك الآن</a>
+        <a href="#how" class="btn-outline-white">اعرف أكثر ←</a>
+      </div>
+    </div>
+
+    <!-- PILOT CARD -->
+    <div class="pilot-card">
+      <div class="pilot-badge">عروض محدودة · Limited Spots</div>
+
+      <div class="pilot-price-wrap">
+        <div class="pilot-price">مجاناً</div>
+        <div class="pilot-price-sub">
+          للتطوير البرمجي الكامل<br>
+          Free development · Pay only for infrastructure
+        </div>
+      </div>
+
+      <ul class="pilot-items">
+        <li class="pilot-item"><span class="pilot-item-check">✓</span>جميع الميزات بدون قيود — Full access</li>
+        <li class="pilot-item"><span class="pilot-item-check">✓</span>استضافة آمنة داخل المملكة · SDAIA</li>
+        <li class="pilot-item"><span class="pilot-item-check">✓</span>فوترة ZATCA المرحلة الثانية</li>
+        <li class="pilot-item"><span class="pilot-item-check">✓</span>تدريب الفريق القانوني والإداري</li>
+        <li class="pilot-item"><span class="pilot-item-check">✓</span>نقل البيانات من الأنظمة القديمة</li>
+        <li class="pilot-item"><span class="pilot-item-check">✓</span>دعم فني مباشر طوال أيام الأسبوع</li>
+      </ul>
+
+      <a href="register.html" class="btn-white" style="display:block;text-align:center;width:100%;padding:1rem">
+        ابدأ الآن — Start Now
+      </a>
+
+      <div class="pilot-note">
+        * يلتزم المكتب بتوفير ساعتين أسبوعياً لتقديم الملاحظات —
+        هذا هو الثمن الحقيقي للشراكة.
+        <br>The real price is your feedback, not money.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<!-- ══════════════════════════════════════
+     TRUST / CREDIBILITY SECTION
+════════════════════════════════════════ -->
+<style>
+.trust-section {
+  background: var(--off-white);
+  border-top: 1px solid var(--border);
+  padding: 7rem 4rem;
+}
+
+.trust-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.trust-top {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.trust-top .section-eyebrow { justify-content: center; }
+.trust-top .section-eyebrow::before { display: none; }
+.trust-top .section-h2 { margin: 0 auto 1rem; }
+.trust-top .section-p { margin: 0 auto; text-align: center; }
+
+/* ── STATS ROW ── */
+.trust-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 4rem;
+}
+
+.trust-stat-card {
+  background: white;
+  padding: 2rem 1.8rem;
+  text-align: center;
+  transition: background 0.22s ease, transform 0.25s ease;
+  will-change: transform;
+}
+
+.trust-stat-card:hover { background: var(--cream); transform: translateY(-2px); }
+
+.trust-stat-val {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 0.4rem;
+  letter-spacing: -1px;
+}
+
+.trust-stat-val span { color: var(--accent); font-size: 1.8rem; }
+
+.trust-stat-label {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.trust-stat-label strong {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  font-weight: 500;
+  margin-top: 0.2rem;
+  letter-spacing: 0.5px;
+}
+
+/* ── TESTIMONIALS ── */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 4rem;
+}
+
+.testi-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  will-change: transform;
+}
+
+.testi-card:hover {
+  box-shadow: 0 12px 40px rgba(13,17,23,0.09);
+  transform: translateY(-4px);
+  border-color: var(--border-mid);
+}
+
+.testi-stars {
+  display: flex;
+  gap: 3px;
+  color: var(--gold);
+  font-size: 0.85rem;
+}
+
+.testi-quote {
+  font-size: 0.88rem;
+  color: var(--ink-mid);
+  line-height: 1.85;
+  font-weight: 400;
+  flex: 1;
+}
+
+.testi-quote::before {
+  content: '"';
+  font-size: 1.8rem;
+  color: var(--accent);
+  opacity: 0.3;
+  font-family: 'Playfair Display', serif;
+  line-height: 0;
+  vertical-align: -0.4rem;
+  margin-left: 0.3rem;
+}
+
+.testi-author {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.testi-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.testi-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.testi-role {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  margin-top: 1px;
+}
+
+.testi-location {
+  margin-right: auto;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 2rem;
+}
+
+/* ── COMPLIANCE BADGES ── */
+.compliance-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.compliance-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: border-color 0.2s;
+}
+
+.compliance-card:hover { border-color: var(--accent-border); }
+
+.compliance-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.compliance-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.compliance-desc {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+.compliance-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 0.4rem;
+}
+
+.compliance-verified::before {
+  content: '✓';
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+}
+
+@media (max-width: 1024px) {
+  .trust-section { padding: 5rem 2rem; }
+  .trust-stats { gap: 1px; }
+}
+
+@media (max-width: 768px) {
+  .trust-section { padding: 4rem 1.5rem; }
+  .trust-stats { grid-template-columns: 1fr 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .compliance-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .compliance-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 375px) {
+  .trust-section { padding: 3rem 1rem; }
+  .trust-stats { grid-template-columns: 1fr; }
+  .trust-stat-card { padding: 1.5rem 1rem; }
+  .trust-top { margin-bottom: 3rem; }
+  .compliance-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<section class="trust-section">
+  <div class="trust-inner">
+
+    <div class="trust-top">
+      <div class="section-eyebrow">القيمة المقدّمة · Value Delivered</div>
+      <h2 class="section-h2">مصممة لمشاكل<br>مكاتب <em>المحاماة السعودية</em></h2>
+      <p class="section-p">
+        نظام إدارة المحاماة مبني خصيصاً للبيئة القانونية السعودية —
+        من متطلبات ZATCA إلى التكامل مع الجهات القضائية.
+      </p>
+    </div>
+
+    <!-- STATS -->
+    <div class="trust-stats">
+      <div class="trust-stat-card">
+        <div class="trust-stat-val" style="font-size:1.5rem;letter-spacing:-0.5px;">آلاف<span></span></div>
+        <div class="trust-stat-label">
+          مصممة لإدارة آلاف القضايا
+          <strong>Built for Scale</strong>
+        </div>
+      </div>
+      <div class="trust-stat-card">
+        <div class="trust-stat-val" data-count="3"><span> مراحل</span></div>
+        <div class="trust-stat-label">
+          تذكير تلقائي لكل موعد قانوني
+          <strong>Multi-Stage Reminders</strong>
+        </div>
+      </div>
+      <div class="trust-stat-card">
+        <div class="trust-stat-val" style="font-size:1.5rem;letter-spacing:-0.5px;">أتمتة<span></span></div>
+        <div class="trust-stat-label">
+          للمهام الإدارية المتكررة
+          <strong>Admin Automation</strong>
+        </div>
+      </div>
+      <div class="trust-stat-card">
+        <div class="trust-stat-val" data-count="9"><span></span></div>
+        <div class="trust-stat-label">
+          أسابيع للإطلاق الكامل
+          <strong>Weeks to Full Launch</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS -->
+    <div class="testimonials-grid">
+
+      <div class="testi-card">
+        <div class="testi-stars">⚖️ تحدي شائع</div>
+        <div class="testi-quote">
+          "كنا نعتمد على مجموعات الواتساب لتذكير المحامين بالجلسات.
+          النظام المتكامل يلغي هذه الحاجة بتذكيرات أوتوماتيكية متعددة المراحل."
+        </div>
+        <div class="testi-author">
+          <div class="testi-avatar">⚖️</div>
+          <div>
+            <div class="testi-name">شريك مؤسس</div>
+            <div class="testi-role">مكتب محاماة · الرياض</div>
+          </div>
+          <div class="testi-location">مشكلة يومية</div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">💰 تحدي شائع</div>
+        <div class="testi-quote">
+          "التوافق مع ZATCA كان مصدر قلق حقيقي.
+          الفوترة المدمجة والمتوافقة مع المرحلة الثانية توفّر ساعات أسبوعياً في المتابعة اليدوية."
+        </div>
+        <div class="testi-author">
+          <div class="testi-avatar">💼</div>
+          <div>
+            <div class="testi-name">مدير مالي</div>
+            <div class="testi-role">مكتب قانوني · جدة</div>
+          </div>
+          <div class="testi-location">مشكلة يومية</div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">📞 تحدي شائع</div>
+        <div class="testi-quote">
+          "الاستفسارات الهاتفية من الموكلين تستنزف ساعتين يومياً.
+          بوابة الموكل الذاتية تتيح للموكل متابعة قضيته بنفسه دون الحاجة للاتصال."
+        </div>
+        <div class="testi-author">
+          <div class="testi-avatar">📋</div>
+          <div>
+            <div class="testi-name">محامية أولى</div>
+            <div class="testi-role">مكتب استشارات · الدمام</div>
+          </div>
+          <div class="testi-location">مشكلة يومية</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COMPLIANCE BADGES -->
+    <div class="compliance-grid">
+
+      <div class="compliance-card">
+        <div class="compliance-icon">🏛️</div>
+        <div>
+          <div class="compliance-title">ZATCA Phase 2</div>
+          <div class="compliance-desc">فوترة إلكترونية متوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك المرحلة الثانية</div>
+          <div class="compliance-verified">متوافق مع المعايير</div>
+        </div>
+      </div>
+
+      <div class="compliance-card">
+        <div class="compliance-icon">🔐</div>
+        <div>
+          <div class="compliance-title">PDPL Ready</div>
+          <div class="compliance-desc">تصميم متوافق مع متطلبات نظام حماية البيانات الشخصية السعودي</div>
+          <div class="compliance-verified">متوافق مع PDPL</div>
+        </div>
+      </div>
+
+      <div class="compliance-card">
+        <div class="compliance-icon">⚖️</div>
+        <div>
+          <div class="compliance-title">ناجز · Najiz</div>
+          <div class="compliance-desc">مصمم للتكامل مع منصة ناجز للخدمات القضائية الإلكترونية</div>
+          <div class="compliance-verified">جاهز للتكامل</div>
+        </div>
+      </div>
+
+      <div class="compliance-card">
+        <div class="compliance-icon">🛡️</div>
+        <div>
+          <div class="compliance-title">AES-256 Encryption</div>
+          <div class="compliance-desc">تشفير AES-256 لكل الملفات والبيانات في النسخة الإنتاجية</div>
+          <div class="compliance-verified">في النسخة الإنتاجية</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo-text">نظام إدارة المحاماة</div>
+    <div class="footer-compliance">
+      <div class="footer-badge">ZATCA Phase 2</div>
+      <div class="footer-badge">SDAIA Compliant</div>
+      <div class="footer-badge">ناجز Integration</div>
+      <div class="footer-badge">AES-256 Encrypted</div>
+    </div>
+    <div class="footer-copy">© 2026 نظام إدارة المحاماة · مبني في المملكة العربية السعودية</div>
+  </div>
+</footer>
+
+
+<button id="back-to-top" aria-label="العودة إلى الأعلى">↑</button>
+
+  <script src="sidebar-badges.js"></script>
+</body>
+</html>

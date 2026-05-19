@@ -1,0 +1,670 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الأتعاب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Main/Topbar */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--border); }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
+    .topbar-search:hover { border-color: var(--border-mid); }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+
+    /* Content */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+
+    /* Page header */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+
+    /* KPI cards */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .kpi-card { border-radius: 14px; padding: 1.1rem 1.3rem; box-shadow: 0 1px 3px rgba(15,20,25,0.05); border: 1px solid var(--border); background: var(--white); transition: box-shadow 0.2s ease; isolation: isolate; }
+    .kpi-card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1); }
+    .kpi-card.kpi-green { background: var(--green-dim); border-color: rgba(22,163,74,0.18); }
+    .kpi-card.kpi-gold  { background: rgba(184,149,42,0.07); border-color: rgba(184,149,42,0.2); }
+    .kpi-card.kpi-red   { background: var(--red-dim); border-color: rgba(220,38,38,0.18); }
+    .kpi-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--ink-muted); }
+    .kpi-card.kpi-green .kpi-label { color: var(--green); }
+    .kpi-card.kpi-gold  .kpi-label { color: var(--gold); }
+    .kpi-card.kpi-red   .kpi-label { color: var(--red); }
+    .kpi-val { font-size: 1.55rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; line-height: 1; }
+    .kpi-card.kpi-green .kpi-val { color: var(--accent); }
+    .kpi-card.kpi-gold  .kpi-val { color: var(--gold); }
+    .kpi-card.kpi-red   .kpi-val { color: var(--red); }
+    .kpi-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 0.4rem; }
+    .kpi-up { color: var(--green); font-weight: 600; }
+
+    /* Filters */
+    .filters-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.2rem; flex-wrap: wrap; }
+    .filter-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; flex: 1; min-width: 220px; max-width: 320px; transition: border-color 0.15s; }
+    .filter-search:focus-within { border-color: var(--accent-border); }
+    .filter-search input { border: none; background: transparent; outline: none; font-family: 'Cairo', sans-serif; font-size: 0.78rem; color: var(--ink); width: 100%; }
+    .filter-search input::placeholder { color: var(--ink-muted); }
+    .filter-select { background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem 0.42rem 1.8rem; font-size: 0.78rem; color: var(--ink-light); font-family: 'Cairo', sans-serif; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.6rem center; transition: border-color 0.15s; }
+    .filter-select:hover, .filter-select:focus { border-color: var(--border-mid); color: var(--ink); }
+    .btn-reset { background: none; border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.75rem; font-size: 0.72rem; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; white-space: nowrap; }
+    .btn-reset:hover { border-color: rgba(220,38,38,0.35); color: var(--red); }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .data-table td { padding: 0.75rem 1.2rem; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background 0.1s ease; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .fee-name { font-weight: 700; color: var(--ink); font-size: 0.82rem; }
+    .fee-id { font-size: 0.6rem; color: var(--ink-muted); font-family: monospace; margin-top: 2px; }
+    .amount-cell { font-weight: 700; font-size: 0.82rem; font-variant-numeric: tabular-nums; direction: ltr; text-align: right; }
+    .amount-green { color: var(--accent); }
+    .amount-gold  { color: var(--gold); }
+    .amount-red   { color: var(--red); }
+    .lawyer-chip { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--ink-light); }
+    .av-xs { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; white-space: nowrap; }
+    .pill::before { content: ''; width: 4px; height: 4px; border-radius: 50%; }
+    .pill-collected { background: rgba(22,163,74,0.08); color: var(--green); border: 1px solid rgba(22,163,74,0.18); } .pill-collected::before { background: var(--green); }
+    .pill-pending   { background: rgba(184,149,42,0.09); color: var(--gold);  border: 1px solid rgba(184,149,42,0.2);  } .pill-pending::before   { background: var(--gold); }
+    .pill-late      { background: rgba(220,38,38,0.08);  color: var(--red);   border: 1px solid rgba(220,38,38,0.18); } .pill-late::before      { background: var(--red); }
+    .type-tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; }
+    .type-fee  { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .type-exp  { background: var(--gold-dim);   color: var(--gold);   border: 1px solid rgba(184,149,42,0.2); }
+    .type-gov  { background: rgba(37,99,235,0.07); color: #2563EB; border: 1px solid rgba(37,99,235,0.15); }
+    .type-consult { background: rgba(139,92,246,0.07); color: #7c3aed; border: 1px solid rgba(139,92,246,0.15); }
+    .row-btn { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 3px 10px; border-radius: 5px; font-size: 0.63rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .no-results { text-align: center; padding: 3rem 1.5rem; color: var(--ink-muted); font-size: 0.82rem; }
+    .no-results-icon { font-size: 2rem; margin-bottom: 0.6rem; line-height: 1; }
+    .no-results-title { font-size: 0.88rem; font-weight: 700; color: var(--ink-mid); margin-bottom: 0.3rem; }
+    .no-results-sub { font-size: 0.74rem; color: var(--ink-muted); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--white); border-radius: 14px; width: 100%; max-width: 540px; box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); transform: translateY(18px); transition: transform 0.2s ease; max-height: 92vh; overflow-y: auto; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { background: linear-gradient(to bottom, var(--off-white), var(--white)); padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1; flex-shrink: 0; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .form-input, .form-select, .form-textarea { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .form-textarea { resize: vertical; min-height: 68px; }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+
+    /* Date chips */
+    .date-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .date-chip { background: none; border: 1px solid var(--border-mid); border-radius: 5px; padding: 3px 10px; font-size: 0.68rem; color: var(--ink-light); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .date-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* VAT preview */
+    .vat-preview { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .vat-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; }
+    .vat-row .label { color: var(--ink-light); }
+    .vat-row .val { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .vat-row.total-row { border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.1rem; }
+    .vat-row.total-row .label { color: var(--ink-mid); font-weight: 700; font-size: 0.82rem; }
+    .vat-row.total-row .val { color: var(--accent); font-size: 0.95rem; }
+    .vat-hidden { display: none; }
+
+    /* Bottom bar */
+    .bottom-bar { background: linear-gradient(135deg, rgba(28,94,62,0.06) 0%, rgba(28,94,62,0.03) 100%); border: 1px solid var(--accent-border); border-radius: 10px; padding: 0.85rem 1.4rem; display: flex; align-items: center; gap: 0.7rem; font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+    .bottom-bar-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* Toast */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Loading + highlight */
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    .loading-dots { animation: dotsFade 1s ease infinite; }
+    @keyframes highlightRow { 0% { background: rgba(28,94,62,0.08); } 100% { background: transparent; } }
+    .new-row td { animation: highlightRow 2s ease forwards; }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } .kpi-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 768px) { .btn-new, .row-btn { min-height: 44px; } }
+    @media (max-width: 600px) { .kpi-row { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .kpi-row { grid-template-columns: 1fr; } .modal-overlay { align-items: flex-end; } .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; } }
+
+    /* ── z-index stacking fix ── */
+    .modal-overlay {
+      position: fixed !important;
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      z-index: 9999 !important;
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 2rem 1rem !important;
+    }
+    .modal-overlay.open { display: flex !important; }
+    .modal-card {
+      position: relative !important;
+      z-index: 10000 !important;
+      margin: auto !important;
+      flex-shrink: 0 !important;
+    }
+    .kpi-card, .card { isolation: isolate; }
+    .kpi-card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+    .card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+  </style>
+  <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item active" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">الأتعاب</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في الأتعاب...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+        <button class="btn-new" id="btnNewFeeTop">+ تسجيل أتعاب</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">الأتعاب</div>
+          <div class="ph-sub">إجمالي أتعاب المكتب هذا الشهر</div>
+        </div>
+        <button class="btn-new" id="btnNewFee">+ تسجيل أتعاب</button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">إجمالي الأتعاب</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">محصّلة</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+        </div>
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-label">معلقة التحصيل</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">مصاريف نثرية</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+        </div>
+      </div>
+
+      <!-- Table card -->
+      <div class="card">
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="filter-search">
+            <span>🔍</span>
+            <input type="text" id="fSearch" placeholder="ابحث باسم الموكل أو القضية...">
+          </div>
+          <select class="filter-select" id="fType">
+            <option value="">نوع الأتعاب: الكل</option>
+            <option value="fee">أتعاب محاماة</option>
+            <option value="exp">مصاريف نثرية</option>
+            <option value="gov">رسوم حكومية</option>
+            <option value="consult">استشارة</option>
+          </select>
+          <select class="filter-select" id="fStatus">
+            <option value="">الحالة: الكل</option>
+            <option value="collected">محصّلة</option>
+            <option value="pending">معلقة</option>
+            <option value="late">متأخرة</option>
+          </select>
+          <select class="filter-select" id="fLawyer">
+            <option value="">المحامي: الكل</option>
+            <option value="خالد العتيبي">خالد العتيبي</option>
+            <option value="سارة المحمد">سارة المحمد</option>
+            <option value="محمد الرشيد">محمد الرشيد</option>
+            <option value="نورة الأحمد">نورة الأحمد</option>
+          </select>
+          <button class="btn-reset" id="fReset">↺ إعادة تعيين</button>
+        </div>
+
+        <!-- Table -->
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>البند</th>
+              <th>الموكل</th>
+              <th>القضية</th>
+              <th>المحامي</th>
+              <th>المبلغ (ر.س)</th>
+              <th>النوع</th>
+              <th>تاريخ التسجيل</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="feesBody">
+            <tr id="fNoResults">
+              <td colspan="9" class="no-results"><div class="no-results-icon">💰</div><div class="no-results-title">لا توجد أتعاب بعد</div><div class="no-results-sub">ابدأ بإضافة بند أتعاب جديد من زر «+ إضافة أتعاب»</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom summary bar -->
+      <div class="bottom-bar">
+        <span class="bottom-bar-icon">💡</span>
+        <span>تسجيل المصاريف النثرية فوراً يرفع صافي أرباح المكتب — لا تترك مصروفاً بدون تقييد</span>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="feeModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-title">+ تسجيل أتعاب</span>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fType2">نوع البند</label>
+            <select class="form-select" id="fType2">
+              <option value="fee">أتعاب محاماة</option>
+              <option value="exp">مصاريف نثرية</option>
+              <option value="gov">رسوم حكومية</option>
+              <option value="consult">استشارة</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fLawyer2">المحامي المسؤول</label>
+            <select class="form-select" id="fLawyer2">
+              <option value="خالد العتيبي">خالد العتيبي</option>
+              <option value="سارة المحمد">سارة المحمد</option>
+              <option value="محمد الرشيد">محمد الرشيد</option>
+              <option value="نورة الأحمد">نورة الأحمد</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fClient">الموكل</label>
+            <select class="form-select" id="fClient">
+              <option value="عبدالرحمن المالكي">عبدالرحمن المالكي</option>
+              <option value="سلطان العامدي">سلطان العامدي</option>
+              <option value="فيصل الشهري">فيصل الشهري</option>
+              <option value="ناصر العمري">ناصر العمري</option>
+              <option value="سعد السيساعي">سعد السيساعي</option>
+              <option value="شركة الفارس للاستثمار">شركة الفارس للاستثمار</option>
+              <option value="مجموعة النور التجارية">مجموعة النور التجارية</option>
+              <option value="شركة الخليج العقارية">شركة الخليج العقارية</option>
+              <option value="منال الزهراني">منال الزهراني</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fCase">القضية</label>
+            <select class="form-select" id="fCase">
+              <option value="#2025-0142">#2025-0142 — المالكي</option>
+              <option value="#2025-0138">#2025-0138 — العامدي</option>
+              <option value="#2025-0135">#2025-0135 — الشهري</option>
+              <option value="#2025-0130">#2025-0130 — العمري</option>
+              <option value="#2025-0128">#2025-0128 — السيساعي</option>
+              <option value="#2025-0131">#2025-0131 — الغامدي</option>
+              <option value="#2025-0133">#2025-0133 — الخليج العقارية</option>
+              <option value="#2025-0136">#2025-0136 — الزهراني</option>
+              <option value="استشارة">استشارة</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fAmount">المبلغ (ر.س) *</label>
+            <input class="form-input" id="fAmount" type="number" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fDue">تاريخ الاستحقاق</label>
+            <input class="form-input" id="fDue" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">اختيار سريع للتاريخ</label>
+          <div class="date-chips">
+            <button type="button" class="date-chip" id="chipToday">اليوم</button>
+            <button type="button" class="date-chip" id="chipWeek">بعد أسبوع</button>
+            <button type="button" class="date-chip" id="chipMonth">بعد شهر</button>
+          </div>
+        </div>
+
+        <!-- VAT Live Preview -->
+        <div class="vat-preview" id="vatPreview">
+          <div class="vat-row">
+            <span class="label">المبلغ الأصلي</span>
+            <span class="val" id="vatBase">0.00 ر.س</span>
+          </div>
+          <div class="vat-row">
+            <span class="label">ضريبة القيمة المضافة (15%)</span>
+            <span class="val" id="vatAmt">0.00 ر.س</span>
+          </div>
+          <div class="vat-row total-row">
+            <span class="label">الإجمالي شامل الضريبة</span>
+            <span class="val" id="vatTotal">0.00 ر.س</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="fNotes">ملاحظات</label>
+          <textarea class="form-textarea" id="fNotes" placeholder="تفاصيل إضافية (اختياري)..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="modalCancel">إلغاء</button>
+        <button class="btn-new" id="fSubmit">تسجيل الأتعاب</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function() {
+
+    /* ── Filters ── */
+    var fSearch  = document.getElementById('fSearch');
+    var fType    = document.getElementById('fType');
+    var fStatus  = document.getElementById('fStatus');
+    var fLawyer  = document.getElementById('fLawyer');
+    var noRes    = document.getElementById('fNoResults');
+
+    function runFilter() {
+      var q   = fSearch.value.trim().toLowerCase();
+      var typ = fType.value;
+      var sts = fStatus.value;
+      var law = fLawyer.value;
+      var rows = document.querySelectorAll('#feesBody tr[data-search]');
+      var vis = 0;
+      rows.forEach(function(tr) {
+        var ok = (!q   || tr.dataset.search.toLowerCase().indexOf(q) > -1)
+              && (!typ || tr.dataset.type   === typ)
+              && (!sts || tr.dataset.status === sts)
+              && (!law || tr.dataset.lawyer === law);
+        tr.style.display = ok ? '' : 'none';
+        if (ok) vis++;
+      });
+      noRes.style.display = vis === 0 ? '' : 'none';
+    }
+
+    fSearch.addEventListener('input', runFilter);
+    fType.addEventListener('change', runFilter);
+    fStatus.addEventListener('change', runFilter);
+    fLawyer.addEventListener('change', runFilter);
+    document.getElementById('fReset').addEventListener('click', function() {
+      fSearch.value = ''; fType.value = ''; fStatus.value = ''; fLawyer.value = '';
+      runFilter();
+    });
+
+    /* ── Modal ── */
+    var modal     = document.getElementById('feeModal');
+    var toastTimer;
+
+    function openModal() {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function() { document.getElementById('fAmount').focus(); }, 60);
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('fAmount').value = '';
+      document.getElementById('fAmount').style.borderColor = '';
+      document.getElementById('fDue').value = '';
+      document.getElementById('fNotes').value = '';
+      document.getElementById('fType2').selectedIndex = 0;
+      document.getElementById('fLawyer2').selectedIndex = 0;
+      document.getElementById('fClient').selectedIndex = 0;
+      document.getElementById('fCase').selectedIndex = 0;
+      updateVAT();
+    }
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg;
+      clearTimeout(toastTimer);
+      t.classList.add('show');
+      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+
+    document.getElementById('btnNewFee').addEventListener('click', openModal);
+    document.getElementById('btnNewFeeTop').addEventListener('click', openModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+    /* ── Date chips ── */
+    function setDate(offsetDays) {
+      var d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      document.getElementById('fDue').value = y + '-' + m + '-' + day;
+    }
+    document.getElementById('chipToday').addEventListener('click', function() { setDate(0); });
+    document.getElementById('chipWeek').addEventListener('click',  function() { setDate(7); });
+    document.getElementById('chipMonth').addEventListener('click', function() { setDate(30); });
+
+    /* ── VAT Live Preview ── */
+    function fmt(n) {
+      return n.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+    }
+    function updateVAT() {
+      var raw = parseFloat(document.getElementById('fAmount').value) || 0;
+      var vat = Math.round(raw * 15) / 100;
+      var total = raw + vat;
+      document.getElementById('vatBase').textContent  = fmt(raw);
+      document.getElementById('vatAmt').textContent   = fmt(vat);
+      document.getElementById('vatTotal').textContent = fmt(total);
+    }
+    document.getElementById('fAmount').addEventListener('input', updateVAT);
+    updateVAT();
+
+    /* ── Submit ── */
+    var submitBtn = document.getElementById('fSubmit');
+    submitBtn.addEventListener('click', function() {
+      var amountEl = document.getElementById('fAmount');
+      var raw = parseFloat(amountEl.value);
+      if (!raw || raw <= 0) {
+        amountEl.style.borderColor = 'var(--red)';
+        amountEl.focus();
+        return;
+      }
+      amountEl.style.borderColor = '';
+
+      var typeVal   = document.getElementById('fType2').value;
+      var lawyer    = document.getElementById('fLawyer2').value;
+      var client    = document.getElementById('fClient').value;
+      var caseVal   = document.getElementById('fCase').value;
+      var months    = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      var today     = new Date();
+      var dateStr   = today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
+
+      var typeLabels = { fee: 'أتعاب محاماة', exp: 'مصاريف نثرية', gov: 'رسوم حكومية', consult: 'استشارة' };
+      var typeCls    = { fee: 'type-fee', exp: 'type-exp', gov: 'type-gov', consult: 'type-consult' };
+      var avMap      = { 'خالد العتيبي': 'خع', 'سارة المحمد': 'سم', 'محمد الرشيد': 'مر', 'نورة الأحمد': 'نا' };
+      var feeId      = '#FEE-' + String(Math.floor(Math.random() * 9000) + 1000);
+      var amtFmt     = raw.toLocaleString('ar-SA');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
+      submitBtn.classList.add('btn-loading');
+
+      setTimeout(function() {
+        var tbody  = document.getElementById('feesBody');
+        var noRow  = document.getElementById('fNoResults');
+        var tr     = document.createElement('tr');
+        tr.setAttribute('data-search', typeLabels[typeVal] + ' ' + client);
+        tr.setAttribute('data-type',   typeVal);
+        tr.setAttribute('data-status', 'pending');
+        tr.setAttribute('data-lawyer', lawyer);
+        tr.innerHTML =
+          '<td><div class="fee-name">' + typeLabels[typeVal] + ' — ' + client + '</div><div class="fee-id">' + feeId + '</div></td>' +
+          '<td style="font-size:0.78rem">' + client + '</td>' +
+          '<td style="font-size:0.75rem;color:var(--ink-light)">' + caseVal + '</td>' +
+          '<td><div class="lawyer-chip"><div class="av-xs">' + (avMap[lawyer] || '—') + '</div> ' + lawyer + '</div></td>' +
+          '<td><div class="amount-cell amount-gold">' + amtFmt + '</div></td>' +
+          '<td><span class="type-tag ' + typeCls[typeVal] + '">' + typeLabels[typeVal] + '</span></td>' +
+          '<td style="font-size:0.73rem;color:var(--ink-light)">' + dateStr + '</td>' +
+          '<td><span class="pill pill-pending">معلقة</span></td>' +
+          '<td><button class="row-btn">عرض</button></td>';
+        tbody.insertBefore(tr, tbody.firstChild);
+        tr.classList.add('new-row');
+        saveFees();
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'تسجيل الأتعاب';
+        submitBtn.classList.remove('btn-loading');
+        closeModal();
+        showToast('تم تسجيل الأتعاب بنجاح');
+      }, 900);
+    });
+
+  })();
+
+  function saveFees() {
+    var rows = [];
+    document.querySelectorAll('#feesBody tr').forEach(function(tr) {
+      if (!tr.classList.contains('no-results') && !tr.querySelector('.empty-state') && tr.id !== 'fNoResults') {
+        rows.push(tr.innerHTML);
+      }
+    });
+    localStorage.setItem('fees_data', JSON.stringify(rows));
+  }
+
+  function loadFees() {
+    var saved = localStorage.getItem('fees_data');
+    if (saved) {
+      try {
+        var rows = JSON.parse(saved);
+        if (rows.length > 0) {
+          var tbody = document.getElementById('feesBody');
+          rows.forEach(function(html) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+          });
+          var nr = document.getElementById('fNoResults');
+          if (nr) nr.style.display = 'none';
+        }
+      } catch(e) {}
+    }
+  }
+
+  window.addEventListener('load', loadFees);
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>

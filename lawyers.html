@@ -1,0 +1,846 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — المحامون</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* ── Main / Topbar ── */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--border); }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); min-width: 190px; }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+
+    /* ── Content ── */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .card-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, var(--off-white), var(--white)); }
+    .card-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* ── Page header ── */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+
+    /* ── KPI ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+    .kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.3rem; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); transition: box-shadow 0.2s; isolation: isolate; }
+    .kpi-card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); }
+    .kpi-card::before { content:''; position:absolute; top:0; right:0; left:0; height:3px; }
+    .kpi-card.kc-green::before { background: var(--green); }
+    .kpi-card.kc-gold::before  { background: var(--gold); }
+    .kpi-card.kc-accent::before{ background: var(--accent); }
+    .kpi-card.kc-blue::before  { background: #2563EB; }
+    .kpi-label { font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.45rem; }
+    .kpi-val { font-size: 1.75rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; line-height: 1; margin-bottom: 0.3rem; }
+    .kpi-sub { font-size: 0.66rem; color: var(--ink-muted); }
+    .kpi-sub.green { color: var(--green); font-weight: 600; }
+
+    /* ── Lawyer cards grid ── */
+    .lawyers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .lawyer-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s; isolation: isolate; position: relative; }
+    .lawyer-card:hover { box-shadow: 0 8px 28px rgba(15,20,25,0.12); }
+    .delete-lawyer-btn { position: absolute; top: 0.8rem; left: 0.8rem; width: 28px; height: 28px; border-radius: 50%; background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.2); color: #DC2626; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Cairo', sans-serif; opacity: 0; transition: opacity 0.15s, background 0.15s; }
+    .lawyer-card:hover .delete-lawyer-btn { opacity: 1; }
+    .delete-lawyer-btn:hover { background: #DC2626; color: white; }
+
+    /* Card top row */
+    .lc-top { display: flex; align-items: flex-start; gap: 1rem; }
+    .lc-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-dim); border: 2px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 900; color: var(--accent); flex-shrink: 0; font-family: 'Playfair Display', serif; }
+    .lc-info { flex: 1; }
+    .lc-name { font-size: 0.95rem; font-weight: 900; color: var(--ink); letter-spacing: -0.3px; }
+    .lc-title { font-size: 0.72rem; color: var(--ink-light); margin-top: 1px; }
+    .lc-spec { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 4px; font-size: 0.62rem; font-weight: 700; padding: 2px 8px; margin-top: 0.4rem; }
+    .lc-status { margin-right: auto; }
+    .pill-active { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; background: rgba(22,163,74,0.08); color: var(--green); border: 1px solid rgba(22,163,74,0.18); }
+    .pill-active::before { content:''; width:4px; height:4px; border-radius:50%; background: var(--green); }
+
+    /* Stats row */
+    .lc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; }
+    .lc-stat { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 0.7rem; text-align: center; }
+    .lc-stat-val { font-size: 1rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; line-height: 1; }
+    .lc-stat-val.green { color: var(--accent); }
+    .lc-stat-val.gold  { color: var(--gold); }
+    .lc-stat-lbl { font-size: 0.58rem; color: var(--ink-muted); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+
+    /* Workload bar */
+    .lc-workload { }
+    .lc-wl-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .lc-wl-label { font-size: 0.62rem; color: var(--ink-muted); font-weight: 600; }
+    .lc-wl-pct { font-size: 0.62rem; font-weight: 700; color: var(--ink-light); }
+    .lc-wl-track { height: 6px; background: var(--off-white); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+    .lc-wl-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .wl-high { background: var(--accent); }
+    .wl-mid  { background: var(--gold); }
+    .wl-low  { background: #94A3B8; }
+
+    /* Contact */
+    .lc-contact { display: flex; flex-direction: column; gap: 3px; }
+    .lc-contact-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--ink-light); }
+    .lc-contact-icon { font-size: 0.75rem; width: 16px; text-align: center; flex-shrink: 0; }
+
+    /* Card buttons */
+    .lc-actions { display: flex; gap: 0.5rem; }
+    .btn-view { flex: 1; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); border-radius: 7px; padding: 0.45rem 0.8rem; font-size: 0.73rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-view:hover { background: var(--accent); color: white; }
+    .btn-assign { flex: 1; background: none; border: 1px solid var(--border-mid); color: var(--ink-light); border-radius: 7px; padding: 0.45rem 0.8rem; font-size: 0.73rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-assign:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Performance comparison ── */
+    .perf-table { width: 100%; border-collapse: collapse; }
+    .perf-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .perf-table td { padding: 0.85rem 1.2rem; font-size: 0.78rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .perf-table tr:last-child td { border-bottom: none; }
+    .perf-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .perf-lawyer { display: flex; align-items: center; gap: 0.6rem; }
+    .av-sm { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.58rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .perf-bars { display: flex; align-items: flex-end; gap: 3px; height: 36px; }
+    .perf-bar { width: 22px; border-radius: 3px 3px 0 0; transition: height 0.4s ease; cursor: default; position: relative; }
+    .perf-bar:hover::after { content: attr(data-val); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 0.5rem; background: var(--ink); color: white; padding: 1px 4px; border-radius: 3px; white-space: nowrap; margin-bottom: 3px; font-family: 'Cairo', sans-serif; }
+    .pb-nov { background: var(--gold-dim); border: 1px solid rgba(184,149,42,0.25); }
+    .pb-dec { background: var(--accent-dim); border: 1px solid var(--accent-border); }
+    .pb-jan { background: var(--accent); border: 1px solid var(--accent); opacity: 0.9; }
+    .win-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 700; }
+    .win-green { color: var(--green); }
+    .win-gold  { color: var(--gold); }
+
+    /* ── Section label ── */
+    .section-label { font-size: 0.72rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+
+    /* ── Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.55); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
+    .modal-overlay.open { display: flex; }
+    .modal-card { background: var(--white); border-radius: 14px; width: 560px; max-width: 95vw; box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); position: relative; margin: auto; flex-shrink: 0; }
+    .modal-card::-webkit-scrollbar { width: 4px; }
+    .modal-card::-webkit-scrollbar-thumb { background: rgba(15,20,25,0.15); border-radius: 2px; }
+    .modal-head { background: linear-gradient(to bottom, var(--off-white), var(--white)); padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .form-input, .form-select { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+
+    /* ── Side panel ── */
+    .side-panel { position: fixed; top: 0; right: 0; left: auto; width: 380px; max-width: 95vw; height: 100vh; overflow-y: auto; z-index: 500; background: var(--white); box-shadow: -4px 0 24px rgba(15,20,25,0.12); transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; }
+    .side-panel.open { transform: translateX(0); }
+    .panel-head { padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, var(--off-white), var(--white)); flex-shrink: 0; }
+    .panel-title { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+    .panel-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; }
+    .panel-close:hover { border-color: var(--red); color: var(--red); }
+    .panel-body { padding: 1.4rem; flex: 1; display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* Panel hero */
+    .panel-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; padding: 1.2rem; background: var(--off-white); border-radius: 12px; border: 1px solid var(--border); }
+    .panel-av { width: 72px; height: 72px; border-radius: 50%; background: var(--accent-dim); border: 2px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 900; color: var(--accent); font-family: 'Playfair Display', serif; }
+    .panel-name { font-size: 1rem; font-weight: 900; color: var(--ink); }
+    .panel-role { font-size: 0.72rem; color: var(--ink-light); }
+    .panel-spec-tag { display: inline-flex; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 4px; font-size: 0.65rem; font-weight: 700; padding: 2px 10px; }
+
+    /* Panel stats */
+    .panel-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; }
+    .ps-item { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem; text-align: center; }
+    .ps-val { font-size: 1rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ps-lbl { font-size: 0.58rem; color: var(--ink-muted); font-weight: 600; text-transform: uppercase; margin-top: 1px; }
+
+    /* Panel section */
+    .panel-section-lbl { font-size: 0.6rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.5rem; }
+    .panel-case-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.85rem; background: var(--off-white); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 0.4rem; }
+    .panel-case-name { font-size: 0.75rem; font-weight: 600; color: var(--ink); }
+    .panel-case-id { font-size: 0.6rem; color: var(--ink-muted); font-family: monospace; margin-top: 1px; }
+    .pill-sm { display: inline-flex; align-items: center; font-size: 0.6rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+    .ps-green { background: rgba(22,163,74,0.08); color: var(--green); border: 1px solid rgba(22,163,74,0.18); }
+    .ps-gold  { background: rgba(184,149,42,0.09); color: var(--gold);  border: 1px solid rgba(184,149,42,0.2); }
+    .ps-red   { background: rgba(220,38,38,0.08); color: var(--red);   border: 1px solid rgba(220,38,38,0.15); }
+
+    /* Panel mini chart */
+    .panel-chart { display: flex; align-items: flex-end; gap: 5px; height: 60px; padding: 0 0.2rem; }
+    .pc-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .pc-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--accent-dim); border: 1px solid var(--accent-border); min-height: 3px; }
+    .pc-bar.pc-hi { background: var(--accent); border-color: var(--accent); opacity: 0.9; }
+    .pc-lbl { font-size: 0.52rem; color: var(--ink-muted); }
+
+    /* Panel actions */
+    .panel-footer { padding: 1rem 1.4rem; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .btn-close-panel { width: 100%; border: 1px solid var(--border-mid); color: var(--ink-light); background: none; border-radius: 7px; padding: 0.55rem; font-size: 0.78rem; font-weight: 600; font-family: 'Cairo', sans-serif; cursor: pointer; transition: all 0.15s; }
+    .btn-close-panel:hover { border-color: var(--ink-mid); color: var(--ink); }
+
+    /* ── Toast ── */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Loading ── */
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    .loading-dots { animation: dotsFade 1s ease infinite; }
+    @keyframes highlightCard { 0%{box-shadow:0 0 0 3px rgba(28,94,62,0.25),0 6px 24px rgba(15,20,25,0.1);} 100%{box-shadow:0 1px 3px rgba(15,20,25,0.06),0 4px 12px rgba(15,20,25,0.04);} }
+    .new-card { animation: highlightCard 2s ease forwards; }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } .kpi-row { grid-template-columns: 1fr 1fr; } .lawyers-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .btn-new, .row-btn { min-height: 44px; } }
+    @media (max-width: 600px) { .kpi-row { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } .side-panel { width: 100%; } }
+    @media (max-width: 480px) { .kpi-row { grid-template-columns: 1fr; } .modal-overlay { align-items: flex-end; } .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; } }
+
+    /* ── Definitive overlay / panel z-index overrides ── */
+    #lawyerModal { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15,20,25,0.55) !important; backdrop-filter: blur(4px) !important; z-index: 9999 !important; align-items: flex-start !important; justify-content: center !important; padding: 2rem 1rem !important; overflow-y: auto !important; }
+    #lawyerModal.open { display: flex !important; }
+    #lawyerModalCard { position: relative !important; z-index: 10000 !important; margin: auto !important; width: 560px !important; max-width: 95vw !important; background: white !important; border-radius: 14px !important; flex-shrink: 0 !important; }
+    .side-panel { position: fixed !important; top: 0 !important; right: 0 !important; left: auto !important; width: 380px !important; max-width: 95vw !important; height: 100vh !important; overflow-y: auto !important; background: white !important; box-shadow: -8px 0 32px rgba(15,20,25,0.15) !important; z-index: 9999 !important; transform: translateX(100%) !important; transition: transform 0.3s ease !important; }
+    .side-panel.open { transform: translateX(0) !important; }
+    .lawyer-card { z-index: 1 !important; }
+    .kpi-card { z-index: 1 !important; }
+  </style>
+  <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item active" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">المحامون</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في المحامين...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+        <button class="btn-new" id="btnNewLawyerTop">+ إضافة محامي</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">المحامون</div>
+          <div class="ph-sub">فريق <span class="firm-name-target">نظام إدارة المحاماة</span> القانوني</div>
+        </div>
+        <button class="btn-new" id="btnNewLawyer">+ إضافة محامي</button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card kc-accent">
+          <div class="kpi-label">إجمالي المحامين</div>
+          <div class="kpi-val" id="kpiCount">0</div>
+          <div class="kpi-sub">لا يوجد محامون بعد</div>
+        </div>
+        <div class="kpi-card kc-gold">
+          <div class="kpi-label">متوسط القضايا</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-sub">لا توجد بيانات بعد</div>
+        </div>
+        <div class="kpi-card kc-green">
+          <div class="kpi-label">أعلى نسبة فوز</div>
+          <div class="kpi-val">—</div>
+          <div class="kpi-sub">لا توجد بيانات بعد</div>
+        </div>
+        <div class="kpi-card kc-blue">
+          <div class="kpi-label">إجمالي الأتعاب</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-sub">ر.س · هذا العام</div>
+        </div>
+      </div>
+
+      <!-- Lawyers Grid -->
+      <div class="lawyers-grid" id="lawyersGrid">
+        <div id="emptyState" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--ink-muted)">
+          <div style="font-size:2rem;margin-bottom:0.5rem">⚖️</div>
+          <div style="font-weight:600;margin-bottom:0.25rem">لا يوجد محامون بعد</div>
+          <div style="font-size:0.8rem">ابدأ بإضافة محامٍ جديد من زر «+ إضافة محامي»</div>
+        </div>
+      </div><!-- /lawyers-grid -->
+
+      <!-- Performance Comparison -->
+      <div class="section-label">📊 مقارنة الأداء الشهري</div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">أداء المحامين — آخر 3 أشهر</div>
+            <div class="card-sub">نوفمبر · ديسمبر · يناير 2025</div>
+          </div>
+          <div style="display:flex;gap:0.8rem;align-items:center;font-size:0.62rem;color:var(--ink-muted)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--gold-dim);border:1px solid rgba(184,149,42,0.25);display:inline-block"></span>نوفمبر</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--accent-dim);border:1px solid var(--accent-border);display:inline-block"></span>ديسمبر</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--accent);display:inline-block"></span>يناير</span>
+          </div>
+        </div>
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>المحامي</th>
+              <th>أداء آخر 3 أشهر</th>
+              <th>نوفمبر</th>
+              <th>ديسمبر</th>
+              <th>يناير</th>
+              <th>نسبة الفوز</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6" style="text-align:center;padding:2rem;color:var(--ink-muted)">لا توجد بيانات أداء بعد</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- Add Lawyer Modal -->
+  <div class="modal-overlay" id="lawyerModal">
+    <div class="modal-card" id="lawyerModalCard">
+      <div class="modal-head">
+        <span class="modal-title">+ إضافة محامي جديد</span>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="lName">الاسم الكامل *</label>
+          <input class="form-input" id="lName" type="text" placeholder="اسم المحامي ثلاثياً">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="lTitle">اللقب الوظيفي</label>
+            <select class="form-select" id="lTitle">
+              <option value="شريك">شريك</option>
+              <option value="محامي أول">محامي أول</option>
+              <option value="محامية أولى">محامية أولى</option>
+              <option value="محامي" selected>محامي</option>
+              <option value="محامية">محامية</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lSpec">التخصص</label>
+            <select class="form-select" id="lSpec">
+              <option value="قانون تجاري">قانون تجاري</option>
+              <option value="قانون عمالي">قانون عمالي</option>
+              <option value="قانون عقاري">قانون عقاري</option>
+              <option value="قانون إداري">قانون إداري</option>
+              <option value="قانون جزائي">قانون جزائي</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="lPhone">رقم الهاتف *</label>
+            <input class="form-input" id="lPhone" type="tel" placeholder="05XXXXXXXX" dir="ltr" style="text-align:right">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lEmail">البريد الإلكتروني *</label>
+            <input class="form-input" id="lEmail" type="email" placeholder="name@none.sa" dir="ltr" style="text-align:right">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="lLicense">رقم الترخيص</label>
+            <input class="form-input" id="lLicense" type="text" placeholder="رقم ترخيص هيئة المحامين السعوديين">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lJoin">تاريخ الانضمام</label>
+            <input class="form-input" id="lJoin" type="date">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="modalCancel">إلغاء</button>
+        <button class="btn-new" id="lSubmit">إضافة المحامي</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side Panel -->
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-head">
+      <span class="panel-title" id="panelTitle">ملف المحامي</span>
+      <button class="panel-close" id="panelClose">✕</button>
+    </div>
+    <div class="panel-body">
+      <!-- Hero -->
+      <div class="panel-hero">
+        <div class="panel-av" id="panelAv">خع</div>
+        <div class="panel-name" id="panelName">خالد العتيبي</div>
+        <div class="panel-role" id="panelRole">شريك · مؤسس مشارك</div>
+        <span class="panel-spec-tag" id="panelSpec">قانون تجاري</span>
+      </div>
+      <!-- Stats -->
+      <div class="panel-stats">
+        <div class="ps-item"><div class="ps-val" id="panelCases">48</div><div class="ps-lbl">قضية نشطة</div></div>
+        <div class="ps-item"><div class="ps-val" id="panelWin">85%</div><div class="ps-lbl">نسبة الفوز</div></div>
+        <div class="ps-item"><div class="ps-val" id="panelFee">98K</div><div class="ps-lbl">أتعاب ر.س</div></div>
+      </div>
+      <!-- Monthly chart -->
+      <div>
+        <div class="panel-section-lbl">الأداء الشهري</div>
+        <div class="panel-chart" id="panelChart"></div>
+      </div>
+      <!-- Last 5 cases -->
+      <div>
+        <div class="panel-section-lbl">آخر 5 قضايا</div>
+        <div id="panelCasesList"></div>
+      </div>
+      <!-- Contact -->
+      <div>
+        <div class="panel-section-lbl">بيانات التواصل</div>
+        <div class="lc-contact">
+          <div class="lc-contact-row"><span class="lc-contact-icon">📞</span><span id="panelPhone">0501234567</span></div>
+          <div class="lc-contact-row"><span class="lc-contact-icon">✉️</span><span id="panelEmail">k.alotaibi@none.sa</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn-close-panel" id="panelCloseBtn">إغلاق الملف</button>
+      <button onclick="deleteLawyerFromPanel()" style="width:100%;padding:0.7rem;background:rgba(220,38,38,0.08);color:#DC2626;border:1px solid rgba(220,38,38,0.2);border-radius:8px;font-size:0.82rem;font-weight:600;font-family:'Cairo',sans-serif;cursor:pointer;margin-top:0.5rem;transition:background 0.15s">🗑 حذف المحامي</button>
+    </div>
+  </div>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function() {
+
+    /* ── Lawyer data ── */
+    var LAWYERS = [
+      {
+        name: 'خالد العتيبي', initials: 'خع', title: 'شريك · مؤسس مشارك', spec: 'قانون تجاري',
+        cases: 48, win: '85%', fee: '98K', phone: '0501234567', email: 'k.alotaibi@none.sa',
+        chartBars: [62, 70, 80, 75, 90, 95],
+        casesList: [
+          { name: 'قضية المالكي التجارية', id: '#2025-0142', status: 'نشطة', cls: 'ps-green' },
+          { name: 'قضية السيساعي الجزائية', id: '#2025-0128', status: 'نشطة', cls: 'ps-green' },
+          { name: 'مراجعة عقد شركة الفارس', id: '#2025-0141', status: 'معلقة', cls: 'ps-gold' },
+          { name: 'قضية العمري الإدارية', id: '#2025-0139', status: 'مغلقة', cls: 'ps-red' },
+          { name: 'نزاع الشراكة التجارية', id: '#2025-0127', status: 'مغلقة', cls: 'ps-red' }
+        ]
+      },
+      {
+        name: 'سارة المحمد', initials: 'سم', title: 'محامية أولى', spec: 'قانون عمالي',
+        cases: 34, win: '79%', fee: '72.5K', phone: '0512345678', email: 's.almohammad@none.sa',
+        chartBars: [45, 50, 55, 60, 65, 72],
+        casesList: [
+          { name: 'قضية العامدي العمالية', id: '#2025-0138', status: 'نشطة', cls: 'ps-green' },
+          { name: 'تسوية نزاع عمالي — الحربي', id: '#2025-0134', status: 'نشطة', cls: 'ps-green' },
+          { name: 'قضية إنهاء خدمة الزهراني', id: '#2025-0136', status: 'معلقة', cls: 'ps-gold' },
+          { name: 'نزاع راتب — شركة النور', id: '#2025-0129', status: 'مغلقة', cls: 'ps-red' },
+          { name: 'فصل تعسفي — القحطاني', id: '#2025-0125', status: 'مغلقة', cls: 'ps-red' }
+        ]
+      },
+      {
+        name: 'محمد الرشيد', initials: 'مر', title: 'محامي · متخصص عقاري', spec: 'قانون عقاري',
+        cases: 28, win: '74%', fee: '58K', phone: '0523456789', email: 'm.alrashid@none.sa',
+        chartBars: [35, 40, 42, 45, 50, 57],
+        casesList: [
+          { name: 'قضية الشهري العقارية', id: '#2025-0135', status: 'نشطة', cls: 'ps-green' },
+          { name: 'نزاع عقار — الخليج', id: '#2025-0133', status: 'نشطة', cls: 'ps-green' },
+          { name: 'قضية تقييم عقار — الغامدي', id: '#2025-0131', status: 'معلقة', cls: 'ps-gold' },
+          { name: 'إخلاء عقار تجاري', id: '#2025-0126', status: 'مغلقة', cls: 'ps-red' },
+          { name: 'نزاع ملكية — الدوسري', id: '#2025-0122', status: 'مغلقة', cls: 'ps-red' }
+        ]
+      },
+      {
+        name: 'نورة الأحمد', initials: 'نا', title: 'محامية · قانون إداري', spec: 'قانون إداري',
+        cases: 18, win: '82%', fee: '41K', phone: '0534567890', email: 'n.alahmad@none.sa',
+        chartBars: [25, 28, 32, 35, 38, 44],
+        casesList: [
+          { name: 'قضية العمري — ديوان المظالم', id: '#2025-0130', status: 'نشطة', cls: 'ps-green' },
+          { name: 'طعن إداري — شركة مدار', id: '#2025-0132', status: 'نشطة', cls: 'ps-green' },
+          { name: 'اعتراض قرار — وزارة العمل', id: '#2025-0137', status: 'معلقة', cls: 'ps-gold' },
+          { name: 'تظلم إداري — القحطاني', id: '#2025-0124', status: 'مغلقة', cls: 'ps-red' },
+          { name: 'نزاع جمركي — مجموعة النور', id: '#2025-0120', status: 'مغلقة', cls: 'ps-red' }
+        ]
+      }
+    ];
+
+    /* ── Panel ── */
+    var panel     = document.getElementById('sidePanel');
+    var monthLabels = ['أغس','سبت','أكت','نوف','ديس','يناير'];
+
+    window.openPanel = function(idx) {
+      /* Legacy path: find card by data-idx and delegate to openLawyerPanel */
+      var card = document.querySelector('.lawyer-card[data-idx="' + idx + '"]');
+      if (card) openLawyerPanel(card);
+    };
+
+    function closePanel() {
+      panel.classList.remove('open');
+      removeOverlay();
+      document.body.style.overflow = '';
+    }
+    window.closePanel = closePanel;
+
+    document.getElementById('panelClose').addEventListener('click', closePanel);
+    document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.side-panel, .detail-panel').forEach(function(p) {
+          p.classList.remove('open');
+        });
+        removeOverlay();
+        document.body.style.overflow = '';
+      }
+    });
+
+    /* ── Modal ── */
+    var modal     = document.getElementById('lawyerModal');
+    var toastTimer;
+
+    function openModal() {
+      ['lName','lPhone','lEmail','lLicense'].forEach(function(id) {
+        var el = document.getElementById(id);
+        el.value = '';
+        el.style.borderColor = '';
+      });
+      document.getElementById('lJoin').value = '';
+      document.getElementById('lTitle').selectedIndex = 3;
+      document.getElementById('lSpec').selectedIndex = 0;
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function() { document.getElementById('lName').focus(); }, 50);
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      ['lName','lPhone','lEmail','lLicense'].forEach(function(id) {
+        var el = document.getElementById(id);
+        el.value = '';
+        el.style.borderColor = '';
+      });
+      document.getElementById('lJoin').value = '';
+      document.getElementById('lTitle').selectedIndex = 3;
+      document.getElementById('lSpec').selectedIndex = 0;
+    }
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg;
+      clearTimeout(toastTimer);
+      t.classList.add('show');
+      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+    window.showToast = showToast;
+
+    document.getElementById('btnNewLawyer').addEventListener('click', openModal);
+    document.getElementById('btnNewLawyerTop').addEventListener('click', openModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+    /* ── Submit ── */
+    var submitBtn = document.getElementById('lSubmit');
+    submitBtn.addEventListener('click', function() {
+      var nameEl  = document.getElementById('lName');
+      var phoneEl = document.getElementById('lPhone');
+      var emailEl = document.getElementById('lEmail');
+      var name    = nameEl.value.trim();
+      var phone   = phoneEl.value.trim();
+      var email   = emailEl.value.trim();
+      var valid   = true;
+
+      [{ el: nameEl, val: name }, { el: phoneEl, val: phone }, { el: emailEl, val: email }].forEach(function(f) {
+        if (!f.val) { f.el.style.borderColor = 'var(--red)'; valid = false; }
+        else          { f.el.style.borderColor = ''; }
+      });
+      if (!valid) return;
+
+      var title = document.getElementById('lTitle').value;
+      var spec  = document.getElementById('lSpec').value;
+      var initials = name.split(' ').slice(0, 2).map(function(w) { return w[0]; }).join('');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
+      submitBtn.classList.add('btn-loading');
+
+      setTimeout(function() {
+        /* Push to LAWYERS data */
+        var newIdx = LAWYERS.length;
+        LAWYERS.push({
+          name: name, initials: initials, title: title, spec: spec,
+          cases: 0, win: '—', fee: '—', phone: phone, email: email,
+          chartBars: [10, 10, 10, 10, 10, 10],
+          casesList: []
+        });
+
+        /* Update KPI */
+        document.getElementById('kpiCount').textContent = LAWYERS.length;
+
+        /* Build new card */
+        var grid = document.getElementById('lawyersGrid');
+        var card = document.createElement('div');
+        card.className = 'lawyer-card new-card';
+        card.setAttribute('data-idx', newIdx);
+        card.innerHTML =
+          '<button class="delete-lawyer-btn" onclick="deleteLawyer(this)" title="حذف المحامي">✕</button>' +
+          '<div class="lc-top">' +
+            '<div class="lc-avatar">' + initials + '</div>' +
+            '<div class="lc-info">' +
+              '<div class="lc-name">' + name + '</div>' +
+              '<div class="lc-title">' + title + '</div>' +
+              '<div class="lc-spec">⚖️ ' + spec + '</div>' +
+            '</div>' +
+            '<div class="lc-status"><span class="pill-active">نشط</span></div>' +
+          '</div>' +
+          '<div class="lc-stats">' +
+            '<div class="lc-stat"><div class="lc-stat-val green">0</div><div class="lc-stat-lbl">قضية نشطة</div></div>' +
+            '<div class="lc-stat"><div class="lc-stat-val">—</div><div class="lc-stat-lbl">نسبة الفوز</div></div>' +
+            '<div class="lc-stat"><div class="lc-stat-val gold">—</div><div class="lc-stat-lbl">أتعاب ر.س</div></div>' +
+          '</div>' +
+          '<div class="lc-workload">' +
+            '<div class="lc-wl-top"><span class="lc-wl-label">عبء العمل</span><span class="lc-wl-pct">0%</span></div>' +
+            '<div class="lc-wl-track"><div class="lc-wl-fill wl-low" style="width:0%"></div></div>' +
+          '</div>' +
+          '<div class="lc-contact">' +
+            '<div class="lc-contact-row"><span class="lc-contact-icon">📞</span>' + phone + '</div>' +
+            '<div class="lc-contact-row"><span class="lc-contact-icon">✉️</span>' + email + '</div>' +
+          '</div>' +
+          '<div class="lc-actions">' +
+            '<button class="btn-view">عرض الملف</button>' +
+            '<button class="btn-assign">تعيين قضية</button>' +
+          '</div>';
+        grid.appendChild(card);
+        var es = document.getElementById('emptyState');
+        if (es) es.style.display = 'none';
+        saveLawyers();
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'إضافة المحامي';
+        submitBtn.classList.remove('btn-loading');
+        closeModal();
+        showToast('تمت إضافة المحامي بنجاح');
+      }, 900);
+    });
+
+  })();
+
+  function showOverlay(closeCallback) {
+    var existing = document.getElementById('panelOverlay');
+    if (existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'panelOverlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,20,25,0.4);z-index:9998;cursor:pointer;';
+    ov.addEventListener('click', closeCallback);
+    document.body.appendChild(ov);
+  }
+  function removeOverlay() {
+    var ov = document.getElementById('panelOverlay');
+    if (ov) ov.remove();
+  }
+
+  function saveLawyers() {
+    var cards = [];
+    document.querySelectorAll('#lawyersGrid .lawyer-card').forEach(function(card) {
+      cards.push(card.outerHTML);
+    });
+    localStorage.setItem('lawyers_data', JSON.stringify(cards));
+  }
+
+  function loadLawyers() {
+    var saved = localStorage.getItem('lawyers_data');
+    var emptyState = document.getElementById('emptyState');
+    if (saved) {
+      try {
+        var cards = JSON.parse(saved);
+        if (cards.length > 0) {
+          var grid = document.getElementById('lawyersGrid');
+          if (emptyState) emptyState.style.display = 'none';
+          cards.forEach(function(html) {
+            var div = document.createElement('div');
+            div.innerHTML = html;
+            var card = div.firstElementChild;
+            if (card) grid.appendChild(card);
+          });
+          updateLawyerCount();
+        }
+      } catch(e) {}
+    }
+  }
+
+  /* ── Open panel by reading card DOM (works for static + localStorage cards) ── */
+  function openLawyerPanel(card) {
+    function txt(sel) {
+      var el = card.querySelector(sel);
+      return el ? el.textContent.trim() : '—';
+    }
+    function contactTxt(row) {
+      if (!row) return '—';
+      var icon = row.querySelector('.lc-contact-icon');
+      return row.textContent.replace(icon ? icon.textContent : '', '').trim() || '—';
+    }
+    var contactRows = card.querySelectorAll('.lc-contact-row');
+    var specRaw = txt('.lc-spec').replace('⚖️', '').trim();
+
+    document.getElementById('panelAv').textContent    = txt('.lc-avatar');
+    document.getElementById('panelName').textContent  = txt('.lc-name');
+    document.getElementById('panelTitle').textContent = txt('.lc-name');
+    document.getElementById('panelRole').textContent  = txt('.lc-title');
+    document.getElementById('panelSpec').textContent  = specRaw;
+    document.getElementById('panelPhone').textContent = contactTxt(contactRows[0]);
+    document.getElementById('panelEmail').textContent = contactTxt(contactRows[1]);
+    document.getElementById('panelCases').textContent = txt('.lc-stat-val.green') || '—';
+    document.getElementById('panelWin').textContent   = '—';
+    document.getElementById('panelFee').textContent   = '—';
+    document.getElementById('panelChart').innerHTML   = '';
+    document.getElementById('panelCasesList').innerHTML =
+      '<div style="font-size:0.75rem;color:var(--ink-muted);text-align:center;padding:0.5rem">لا توجد قضايا مرتبطة بعد</div>';
+
+    var p = document.getElementById('sidePanel');
+    p.scrollTop = 0;
+    window.scrollTo(0, 0);
+    p.classList.add('open');
+    showOverlay(function() { window.closePanel(); });
+    document.body.style.overflow = 'hidden';
+  }
+
+  /* ── Event delegation for btn-view (handles both new & localStorage cards) ── */
+  document.addEventListener('click', function(e) {
+    var viewBtn = e.target.closest('.btn-view');
+    if (viewBtn) {
+      var card = viewBtn.closest('.lawyer-card');
+      if (card) openLawyerPanel(card);
+    }
+  });
+
+  window.addEventListener('load', loadLawyers);
+
+  function updateLawyerCount() {
+    document.getElementById('kpiCount').textContent =
+      document.querySelectorAll('#lawyersGrid .lawyer-card').length;
+  }
+
+  function syncEmptyState() {
+    var grid = document.getElementById('lawyersGrid');
+    var es = document.getElementById('emptyState');
+    if (!grid || !es) return;
+    es.style.display = grid.querySelectorAll('.lawyer-card').length === 0 ? 'block' : 'none';
+  }
+
+  function deleteLawyer(btn) {
+    var card = btn.closest('.lawyer-card');
+    if (!card) return;
+    var nameEl = card.querySelector('.lc-name');
+    var name = nameEl ? nameEl.textContent.trim() : 'هذا المحامي';
+    if (!confirm('هل أنت متأكد من حذف "' + name + '"؟\nسيتم حذف جميع بياناته نهائياً.')) return;
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(function() {
+      card.remove();
+      saveLawyers();
+      updateLawyerCount();
+      syncEmptyState();
+      window.showToast('تم حذف المحامي بنجاح');
+    }, 300);
+  }
+
+  function deleteLawyerFromPanel() {
+    var name = (document.getElementById('panelName') || {}).textContent || 'هذا المحامي';
+    name = name.trim();
+    if (!confirm('هل أنت متأكد من حذف "' + name + '"؟')) return;
+    document.querySelectorAll('#lawyersGrid .lawyer-card').forEach(function(card) {
+      var el = card.querySelector('.lc-name');
+      if (el && el.textContent.trim() === name) card.remove();
+    });
+    window.closePanel();
+    saveLawyers();
+    updateLawyerCount();
+    syncEmptyState();
+    window.showToast('تم حذف المحامي بنجاح');
+  }
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>

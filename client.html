@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — بوابة الموكل</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-logo { display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .nav-logo-text { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--ink); }
+    .nav-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; flex-shrink: 0; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-client { display: flex; align-items: center; gap: 0.6rem; }
+    .nav-av { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-dim); border: 1.5px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .nav-client-name { font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+    .nav-client-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+    .nav-logout { font-size: 0.73rem; color: var(--ink-muted); text-decoration: none; padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
+    .nav-logout:hover { border-color: var(--red); color: var(--red); }
+    .nav-divider { width: 1px; height: 24px; background: var(--border); }
+
+    /* ── Page wrap ── */
+    .page { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    /* ── Hero ── */
+    .hero {
+      background: var(--accent);
+      padding: 2rem;
+      margin-bottom: 0;
+    }
+    .hero-inner { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+    .hero-greeting { font-size: 1.15rem; font-weight: 700; color: white; margin-bottom: 0.3rem; letter-spacing: -0.3px; }
+    .hero-sub { font-size: 0.78rem; color: rgba(255,255,255,0.72); }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 2rem; padding: 2px 10px; font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.9); margin-top: 0.75rem; }
+    .hero-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: heroPulse 1.4s infinite; }
+    @keyframes heroPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── Cards ── */
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .card-head { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .card-sub { font-size: 0.63rem; color: var(--ink-muted); margin-top: 1px; }
+    .card-body { padding: 1.4rem; }
+
+    /* ── Pills ── */
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; white-space: nowrap; }
+    .pill::before { content: ''; width: 4px; height: 4px; border-radius: 50%; }
+    .pill-active { background: rgba(22,163,74,0.08); color: var(--green); border: 1px solid rgba(22,163,74,0.18); } .pill-active::before { background: var(--green); }
+    .pill-done  { background: rgba(100,116,139,0.09); color: var(--ink-muted); border: 1px solid rgba(100,116,139,0.12); } .pill-done::before { background: var(--ink-muted); }
+    .pill-warn  { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.15); } .pill-warn::before { background: var(--red); }
+    .pill-next  { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); } .pill-next::before { background: var(--accent); animation: heroPulse 1.2s infinite; }
+
+    /* ── Case status card ── */
+    .case-meta-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .case-num { font-size: 0.65rem; color: var(--ink-muted); font-family: monospace; margin-bottom: 0.25rem; }
+    .case-title-main { font-size: 1rem; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .case-court { font-size: 0.75rem; color: var(--ink-light); margin-top: 0.25rem; }
+    .next-session-box { background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 10px; padding: 0.8rem 1.1rem; font-size: 0.75rem; color: var(--ink-mid); line-height: 1.6; min-width: 220px; }
+    .next-session-label { font-size: 0.6rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem; }
+    .next-session-date { font-weight: 700; color: var(--accent); }
+    .lawyer-row { display: flex; align-items: center; gap: 0.55rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .lawyer-label { font-size: 0.65rem; color: var(--ink-muted); }
+    .lawyer-av { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .lawyer-name { font-size: 0.78rem; font-weight: 600; color: var(--ink); }
+
+    /* ── Progress bar ── */
+    .progress-section { margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid var(--border); }
+    .progress-label { font-size: 0.65rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.9rem; }
+    .progress-track { display: flex; align-items: center; gap: 0; overflow-x: auto; padding-bottom: 0.2rem; }
+    .progress-step { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 80px; position: relative; }
+    .progress-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 11px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--border-mid);
+      z-index: 0;
+    }
+    .progress-step.done:not(:last-child)::after { background: var(--accent); }
+    .progress-step.current:not(:last-child)::after { background: linear-gradient(to left, var(--border-mid), var(--accent)); }
+    .step-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; position: relative; z-index: 1; flex-shrink: 0; }
+    .progress-step.done .step-dot { background: var(--accent); color: white; }
+    .progress-step.current .step-dot { background: var(--white); border: 2.5px solid var(--accent); color: var(--accent); box-shadow: 0 0 0 4px var(--accent-dim); }
+    .progress-step.future .step-dot { background: var(--off-white); border: 2px solid var(--border-mid); color: var(--ink-muted); }
+    .step-label { font-size: 0.6rem; color: var(--ink-muted); text-align: center; line-height: 1.3; max-width: 72px; }
+    .progress-step.done .step-label { color: var(--accent); font-weight: 600; }
+    .progress-step.current .step-label { color: var(--accent); font-weight: 700; }
+    .here-arrow { font-size: 0.55rem; color: var(--accent); font-weight: 700; }
+
+    /* ── Info cards row ── */
+    .info-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .info-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; box-shadow: 0 1px 3px rgba(15,20,25,0.05); }
+    .info-card-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .info-card-label { font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.3rem; }
+    .info-card-val { font-size: 0.9rem; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; line-height: 1.3; }
+    .info-card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 0.25rem; }
+    .info-card-sub.warn { color: var(--red); font-weight: 600; }
+    .info-card-sub.ok { color: var(--green); font-weight: 600; }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; padding: 0.2rem 0; }
+    .tl-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.9rem 0; position: relative; }
+    .tl-item:not(:last-child) { border-bottom: 1px dashed var(--border); }
+    .tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 32px; }
+    .tl-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+    .tl-icon.done  { background: rgba(22,163,74,0.1); border: 1.5px solid rgba(22,163,74,0.2); color: var(--green); }
+    .tl-icon.next  { background: var(--accent-dim); border: 2px solid var(--accent-border); color: var(--accent); box-shadow: 0 0 0 4px rgba(28,94,62,0.06); }
+    .tl-icon.future { background: var(--off-white); border: 2px dashed var(--border-mid); color: var(--ink-muted); }
+    .tl-content { flex: 1; }
+    .tl-title { font-size: 0.83rem; font-weight: 700; color: var(--ink); margin-bottom: 0.2rem; }
+    .tl-title.muted { color: var(--ink-light); font-weight: 600; }
+    .tl-date { font-size: 0.7rem; color: var(--ink-muted); }
+    .tl-date.green { color: var(--accent); font-weight: 600; }
+    .tl-note { font-size: 0.67rem; color: var(--ink-muted); margin-top: 0.2rem; }
+    .tl-pill-wrap { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; }
+    .tl-item.highlighted { background: rgba(28,94,62,0.03); border-radius: 10px; margin: 0 -0.8rem; padding: 0.9rem 0.8rem; border-bottom: none !important; }
+    .tl-item.highlighted + .tl-item { border-top: 1px dashed var(--border); }
+
+    /* ── Documents table ── */
+    .doc-table { width: 100%; border-collapse: collapse; }
+    .doc-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.6rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); }
+    .doc-table td { padding: 0.85rem 1.2rem; font-size: 0.78rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .doc-table tr:last-child td { border-bottom: none; }
+    .doc-table tbody tr:hover td { background: rgba(247,246,243,0.6); }
+    .doc-name { font-weight: 600; color: var(--ink); font-size: 0.8rem; }
+    .doc-status-warn { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; color: var(--red); font-weight: 600; }
+    .doc-status-ok  { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; color: var(--green); font-weight: 600; }
+    .btn-upload { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 4px 14px; font-size: 0.72rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; }
+    .btn-upload:hover { background: var(--accent-light); transform: translateY(-1px); }
+    .btn-view { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); border-radius: 6px; padding: 4px 12px; font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-view:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Footer ── */
+    .client-footer { margin-top: 2rem; padding: 1.2rem 1.4rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .footer-contact { font-size: 0.75rem; color: var(--ink-mid); line-height: 1.7; }
+    .footer-contact strong { color: var(--ink); }
+    .footer-disc { font-size: 0.62rem; color: var(--ink-muted); max-width: 360px; line-height: 1.6; }
+
+    /* ── Upload Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--white); border-radius: 14px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); transform: translateY(18px); transition: transform 0.2s ease; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { background: linear-gradient(to bottom, var(--off-white), var(--white)); padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; border-radius: 14px 14px 0 0; }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.5rem; }
+    .drop-zone { border: 2px dashed var(--border-mid); border-radius: 10px; padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--off-white); }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent-border); background: var(--accent-dim); }
+    .drop-icon { font-size: 2rem; margin-bottom: 0.7rem; }
+    .drop-text { font-size: 0.82rem; font-weight: 600; color: var(--ink-mid); margin-bottom: 0.3rem; }
+    .drop-sub { font-size: 0.68rem; color: var(--ink-muted); }
+    .drop-hint { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+    .drop-file-input { display: none; }
+    .selected-file { display: none; align-items: center; gap: 0.5rem; margin-top: 0.8rem; padding: 0.6rem 0.85rem; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 7px; font-size: 0.75rem; color: var(--accent); font-weight: 600; }
+    .selected-file.show { display: flex; }
+    .modal-note { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; color: var(--accent); padding: 0.65rem 1.5rem; background: rgba(28,94,62,0.05); border-top: 1px solid var(--accent-border); }
+    .modal-foot { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.6rem; justify-content: flex-end; }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .btn-submit-full { width: 100%; padding: 0.9rem; font-size: 0.9rem; background: var(--accent); color: white; border: none; border-radius: 7px; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-submit-full:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    .loading-dots { animation: dotsFade 1s ease infinite; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Section spacer ── */
+    .section { margin-top: 1.5rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .navbar { padding: 0 1rem; }
+      .hero-inner, .page { padding-right: 1rem; padding-left: 1rem; }
+      .info-cards { grid-template-columns: 1fr; }
+      .case-meta-row { flex-direction: column; }
+      .next-session-box { min-width: unset; width: 100%; }
+      .progress-track { gap: 0; }
+      .step-label { font-size: 0.52rem; }
+    }
+    @media (max-width: 480px) {
+      .modal-overlay { align-items: flex-end; }
+      .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; }
+      .client-footer { flex-direction: column; }
+    }
+  </style>
+  <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+</head>
+<body>
+
+  <!-- Portal banner -->
+  <div style="background:var(--accent-dim);border-bottom:1px solid var(--accent-border);padding:0.4rem 2rem;font-size:0.72rem;color:var(--accent);text-align:center;font-weight:600;letter-spacing:0.2px;">
+    أنت في بوابة الموكل — هذه الصفحة مخصصة لك فقط · Client Portal
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="client-login.html" class="nav-logo">
+      <span class="nav-logo-text">نظام إدارة المحاماة</span>
+      <div class="nav-logo-dot"></div>
+      <div style="display:flex;flex-direction:column;margin-right:0.5rem;justify-content:center;">
+        <span style="font-size:0.58rem;font-weight:700;color:var(--accent);letter-spacing:0.8px;line-height:1;margin-top:2px;">بوابة الموكل</span>
+      </div>
+    </a>
+    <div class="nav-right">
+      <div class="nav-client">
+        <div>
+          <div class="nav-client-name client-name">أحمد المالكي</div>
+          <div class="nav-client-role">موكل — متابعة قضية</div>
+        </div>
+        <div class="nav-av">أم</div>
+      </div>
+      <div class="nav-divider"></div>
+      <a href="client-login.html" class="nav-logout">تسجيل الخروج</a>
+    </div>
+  </nav>
+
+  <!-- Hero greeting -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-greeting">مرحباً أحمد، قضيتك التجارية أمام محكمة التجارة بالرياض</div>
+      <div class="hero-sub">آخر تحديث: اليوم 9:00 ص — جميع المعلومات محدّثة</div>
+      <div class="hero-badge">الجلسة القادمة غداً</div>
+    </div>
+  </div>
+
+  <!-- Page content -->
+  <div class="page" style="margin-top:1.5rem">
+
+    <!-- Case status card -->
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">تفاصيل القضية</div>
+          <div class="card-sub">آخر تحديث اليوم 9:00 ص</div>
+        </div>
+        <span class="pill pill-active">نشطة</span>
+      </div>
+      <div class="card-body">
+        <div class="case-meta-row">
+          <div>
+            <div class="case-num case-number">#2025-0142</div>
+            <div class="case-title-main case-type">قضية تجارية</div>
+            <div class="case-court court-name">محكمة التجارة بالرياض</div>
+          </div>
+          <div class="next-session-box">
+            <div class="next-session-label">الجلسة القادمة</div>
+            <div class="next-session-date next-session">غداً الأربعاء 14 يناير</div>
+            <div style="margin-top:0.25rem;font-size:0.72rem;color:var(--ink-mid)">9:00 ص — محكمة التجارة</div>
+            <div style="font-size:0.68rem;color:var(--ink-muted);margin-top:0.15rem">قاعة 3أ</div>
+          </div>
+        </div>
+
+        <div class="lawyer-row">
+          <div class="lawyer-label">المحامي المسؤول:</div>
+          <div class="lawyer-av">خع</div>
+          <div class="lawyer-name">خالد العتيبي</div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-section">
+          <div class="progress-label">مراحل القضية</div>
+          <div class="progress-track">
+            <div class="progress-step done">
+              <div class="step-dot">✓</div>
+              <div class="step-label">تقديم الدعوى</div>
+            </div>
+            <div class="progress-step done">
+              <div class="step-dot">✓</div>
+              <div class="step-label">جلسة أولى</div>
+            </div>
+            <div class="progress-step current">
+              <div class="step-dot">◉</div>
+              <div class="step-label">نحن هنا ←</div>
+            </div>
+            <div class="progress-step future">
+              <div class="step-dot"></div>
+              <div class="step-label">حكم ابتدائي</div>
+            </div>
+            <div class="progress-step future">
+              <div class="step-dot"></div>
+              <div class="step-label">استئناف</div>
+            </div>
+            <div class="progress-step future">
+              <div class="step-dot"></div>
+              <div class="step-label">حكم نهائي</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 info cards -->
+    <div class="info-cards section">
+      <div class="info-card">
+        <div class="info-card-icon">📎</div>
+        <div class="info-card-label">المستندات</div>
+        <div class="info-card-val">1 مستند معلق</div>
+        <div class="info-card-sub warn">⚠ عقد الشراكة مطلوب منك</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">📅</div>
+        <div class="info-card-label">الجلسات القادمة</div>
+        <div class="info-card-val">1 جلسة</div>
+        <div class="info-card-sub">هذا الأسبوع — الأربعاء 9:00 ص</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-icon">🧾</div>
+        <div class="info-card-label">الفواتير</div>
+        <div class="info-card-val">13,800 ر.س</div>
+        <div class="info-card-sub ok">✓ مدفوعة بالكامل</div>
+      </div>
+    </div>
+
+    <!-- Sessions timeline -->
+    <div class="card section">
+      <div class="card-head">
+        <div>
+          <div class="card-title">مسار الجلسات</div>
+          <div class="card-sub">3 جلسات — 1 قادمة</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:0.4rem;padding-bottom:0.4rem">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-left">
+              <div class="tl-icon done">✓</div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title">جلسة أولى</div>
+              <div class="tl-date">5 يناير 2025 — 10:00 ص</div>
+              <div class="tl-note">محكمة التجارة بالرياض · قاعة 2ب</div>
+              <div class="tl-pill-wrap"><span class="pill pill-done">منتهية</span></div>
+            </div>
+          </div>
+
+          <div class="tl-item highlighted">
+            <div class="tl-left">
+              <div class="tl-icon next">→</div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title">جلسة ثانية</div>
+              <div class="tl-date green">غداً 14 يناير 2025 — 9:00 ص</div>
+              <div class="tl-note">محكمة التجارة بالرياض · قاعة 3أ</div>
+              <div class="tl-pill-wrap"><span class="pill pill-next">الجلسة القادمة</span></div>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left">
+              <div class="tl-icon future">○</div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title muted">جلسة ثالثة</div>
+              <div class="tl-date">متوقعة فبراير 2025</div>
+              <div class="tl-note">سيتم تحديد الموعد بعد الجلسة القادمة</div>
+              <div class="tl-pill-wrap"><span class="pill pill-done">قادمة</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents section -->
+    <div class="card section">
+      <div class="card-head">
+        <div>
+          <div class="card-title">المستندات</div>
+          <div class="card-sub">3 مستندات — 1 مطلوب منك</div>
+        </div>
+        <span class="pill pill-warn">⚠ إجراء مطلوب</span>
+      </div>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>اسم المستند</th>
+            <th>الحالة</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="doc-name">عقد الشراكة الأصلي</div></td>
+            <td><span class="doc-status-warn">⚠️ مطلوب منك</span></td>
+            <td><button class="btn-upload" id="openUpload">رفع المستند</button></td>
+          </tr>
+          <tr>
+            <td><div class="doc-name">صورة الهوية الوطنية</div></td>
+            <td><span class="doc-status-ok">✓ مُسلَّم</span></td>
+            <td><button class="btn-view">عرض</button></td>
+          </tr>
+          <tr>
+            <td><div class="doc-name">وكالة شرعية</div></td>
+            <td><span class="doc-status-ok">✓ مُسلَّم</span></td>
+            <td><button class="btn-view">عرض</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer note -->
+    <div class="client-footer">
+      <div class="footer-contact">
+        <div>للتواصل مع محاميك: <strong class="lawyer-name">خالد العتيبي</strong></div>
+        <div style="margin-top:0.2rem;color:var(--ink-light)">📞 05XXXXXXXX &nbsp;·&nbsp; 📧 khalid@none.sa</div>
+      </div>
+      <div class="footer-disc">
+        جميع المعلومات والمستندات المعروضة في هذه الصفحة سرية وخاصة بك. لا يحق لأي طرف ثالث الاطلاع عليها. في حال اكتشاف أي خطأ تواصل مع المكتب مباشرة.
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-title">📎 رفع عقد الشراكة الأصلي</div>
+        <button class="modal-close" id="closeUpload">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="drop-zone" id="dropZone">
+          <input type="file" class="drop-file-input" id="fileInput" accept=".pdf,.jpg,.jpeg,.png">
+          <div class="drop-icon">⬆️</div>
+          <div class="drop-text">اسحب الملف هنا أو انقر للاختيار</div>
+          <div class="drop-sub">انقر لفتح نافذة اختيار الملف</div>
+          <div class="drop-hint">PDF, JPG, PNG — حجم أقصى 10MB</div>
+        </div>
+        <div class="selected-file" id="selectedFile">
+          <span>📄</span>
+          <span id="selectedFileName"></span>
+        </div>
+      </div>
+      <div class="modal-note">✓ سيتم مراجعة المستند من قِبل المحامي المسؤول خلال 24 ساعة</div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="cancelUpload">إلغاء</button>
+        <button class="btn-submit-full" id="submitUpload" style="flex:1">رفع المستند</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function() {
+    'use strict';
+
+    /* ── Data sources ── */
+    var caseNum    = sessionStorage.getItem('caseNum') || '';
+    var caseDataSS = {};
+    try { caseDataSS = JSON.parse(sessionStorage.getItem('caseData') || '{}'); } catch(e) {}
+    var firmData = null;
+    try { firmData = JSON.parse(localStorage.getItem('firm_data') || 'null'); } catch(e) {}
+
+    function parseRows(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; } }
+    function parseTr(html) {
+      var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+      return doc.querySelectorAll('tr > td');
+    }
+    function todayStart() { var d = new Date(); d.setHours(0,0,0,0); return d; }
+    function arabicNow() {
+      var d = new Date();
+      var days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      var mons = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      return days[d.getDay()] + '، ' + d.getDate() + ' ' + mons[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    function parseArabicDate(text) {
+      var mons = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
+      var s = text.replace(/^[^،]+،\s*/, '').trim().split(/\s+/);
+      var day = parseInt(s[0], 10), mon = mons[s[1]], yr = s[2] ? parseInt(s[2], 10) : new Date().getFullYear();
+      if (isNaN(day) || mon === undefined) return null;
+      var d = new Date(yr, mon, day); d.setHours(0,0,0,0); return d;
+    }
+    function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function fmtNum(n) { return Number((+n).toFixed(2)).toLocaleString('en-US'); }
+
+    /* ── Find case in cases_data ── */
+    var caseInfo = null;
+    if (caseNum) {
+      parseRows('cases_data').some(function(html) {
+        var cells = parseTr(html);
+        if (cells.length < 2) return false;
+        var idEl = cells[0].querySelector('.case-id');
+        var num  = idEl ? idEl.textContent.trim() : cells[0].textContent.trim();
+        if (num.indexOf(caseNum) === -1 && html.indexOf(caseNum) === -1) return false;
+        var lawyerEl = cells[4] ? (cells[4].querySelector('.lawyer-chip') || cells[4]) : null;
+        var statusEl = cells[6] ? cells[6].querySelector('.pill') : null;
+        caseInfo = {
+          client: cells[1] ? cells[1].textContent.replace(/\s+/g,' ').trim() : '',
+          type:   cells[2] ? cells[2].textContent.replace(/\s+/g,' ').trim() : '',
+          court:  cells[3] ? cells[3].textContent.replace(/\s+/g,' ').trim() : '',
+          lawyer: lawyerEl ? lawyerEl.textContent.replace(/\s+/g,' ').trim() : '',
+          status: statusEl ? statusEl.textContent.trim() : ''
+        };
+        return true;
+      });
+    }
+
+    var clientName = (caseInfo && caseInfo.client) ? caseInfo.client : (caseDataSS.client || '');
+    var caseType   = (caseInfo && caseInfo.type)   ? caseInfo.type   : (caseDataSS.type   || '');
+    var courtName  = (caseInfo && caseInfo.court)  ? caseInfo.court  : (caseDataSS.court  || '');
+    var lawyerName = (caseInfo && caseInfo.lawyer) ? caseInfo.lawyer : (caseDataSS.lawyer || '');
+    var firmEmail  = (firmData && firmData.email)  ? firmData.email  : 'contact@firm.sa';
+    var firmPhone  = (firmData && firmData.phone)  ? firmData.phone  : '920XXXXX';
+    var hasData    = !!(caseNum && (clientName || caseInfo || caseDataSS.client));
+
+    /* ── Sessions for this case ── */
+    var todayD = todayStart();
+    var allSessions = [], pastSess = [], futureSess = [];
+    if (caseNum) {
+      parseRows('sessions_data').forEach(function(html) {
+        if (html.indexOf(caseNum) === -1) return;
+        var cells = parseTr(html);
+        var dateEl = null;
+        for (var j = 0; j < cells.length; j++) {
+          var dc = cells[j].querySelector('.date-cell');
+          if (dc && !dateEl) { dateEl = dc; break; }
+        }
+        var dateText = dateEl ? dateEl.textContent.trim() : '';
+        var detail = '';
+        for (var j = 0; j < cells.length; j++) {
+          var t = cells[j].textContent.replace(/\s+/g,' ').trim();
+          if (t && t !== dateText && t.length > 3 && !/^\d+$/.test(t)) { detail = t; break; }
+        }
+        allSessions.push({ dateText: dateText, detail: detail });
+      });
+    }
+    allSessions.sort(function(a, b) {
+      var da = parseArabicDate(a.dateText), db = parseArabicDate(b.dateText);
+      if (!da) return 1; if (!db) return -1; return da - db;
+    });
+    allSessions.forEach(function(s) {
+      var d = parseArabicDate(s.dateText);
+      if (d && d < todayD) pastSess.push(s); else futureSess.push(s);
+    });
+    var nextSess     = futureSess.length > 0 ? futureSess[0] : null;
+    var nextSessText = nextSess ? nextSess.dateText : (caseDataSS.next || null);
+
+    /* ── Invoices for this client ── */
+    var totalInvoiced = 0, totalPending = 0, invCount = 0;
+    if (clientName) {
+      var firstName = clientName.split(' ')[0];
+      parseRows('invoices_data').forEach(function(html) {
+        var cells = parseTr(html);
+        if (cells.length < 6) return;
+        var invClient = cells[1] ? cells[1].textContent.trim() : '';
+        if (!invClient || (invClient !== clientName && invClient.indexOf(firstName) === -1)) return;
+        var totEl  = cells[5] ? cells[5].querySelector('.amount-total') : null;
+        var amount = totEl ? parseFloat(totEl.getAttribute('data-amount') || '0') : 0;
+        var pill   = cells[8] ? cells[8].querySelector('.pill') : null;
+        totalInvoiced += amount;
+        if (!pill || !pill.classList.contains('pill-paid')) totalPending += amount;
+        invCount++;
+      });
+    }
+
+    /* ── Progress steps ── */
+    function buildProgressSteps() {
+      var done = pastSess.length;
+      var steps = [
+        { label: 'تقديم الدعوى', state: 'done' },
+        { label: 'جلسة أولى',   state: done >= 1 ? 'done' : (futureSess.length > 0 ? 'current' : 'future') },
+        { label: 'المرافعات',   state: done >= 2 ? 'done' : (done === 1 ? 'current' : 'future') },
+        { label: 'حكم ابتدائي', state: done >= 3 ? 'done' : (done === 2 ? 'current' : 'future') },
+        { label: 'استئناف',     state: 'future' },
+        { label: 'حكم نهائي',  state: 'future' }
+      ];
+      if (!steps.some(function(s) { return s.state === 'current'; })) {
+        for (var i = 0; i < steps.length; i++) { if (steps[i].state !== 'done') { steps[i].state = 'current'; break; } }
+      }
+      return steps;
+    }
+
+    /* ── DOM Updates ── */
+    document.addEventListener('DOMContentLoaded', function() {
+
+      /* Error state */
+      if (!hasData) {
+        var hero = document.querySelector('.hero'); if (hero) hero.style.display = 'none';
+        var page = document.querySelector('.page');
+        if (page) page.innerHTML = [
+          '<div style="text-align:center;padding:4rem 2rem;color:var(--ink-muted)">',
+          '<div style="font-size:2rem;margin-bottom:1rem">⚠️</div>',
+          '<div style="font-size:1rem;font-weight:700;color:var(--ink-mid);margin-bottom:0.5rem">القضية غير متاحة حالياً</div>',
+          '<div style="font-size:0.82rem;margin-bottom:1.5rem">يرجى التواصل مع المكتب للتحقق من بياناتك</div>',
+          '<a href="client-login.html" style="background:var(--accent);color:white;padding:0.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.85rem">العودة لتسجيل الدخول</a>',
+          '</div>'
+        ].join('');
+        return;
+      }
+
+      /* Navbar */
+      document.querySelectorAll('.client-name').forEach(function(el) { el.textContent = clientName; });
+      var av = document.querySelector('.nav-av');
+      if (av && clientName) {
+        var p = clientName.trim().split(' ');
+        av.textContent = p.length >= 2 ? p[0][0] + p[1][0] : p[0].substring(0,2);
+      }
+
+      /* Hero */
+      var heroGreet = document.querySelector('.hero-greeting');
+      if (heroGreet) {
+        var fn = clientName.split(' ')[0];
+        heroGreet.textContent = 'مرحباً ' + fn + '، ' + (caseType ? 'قضية ' + caseType : 'القضية') + (courtName ? ' أمام ' + courtName : '');
+      }
+      var heroSub = document.querySelector('.hero-sub');
+      if (heroSub) heroSub.textContent = 'آخر تحديث: ' + arabicNow();
+      var heroBadge = document.querySelector('.hero-badge');
+      if (heroBadge) {
+        if (nextSessText) { heroBadge.textContent = 'الجلسة القادمة: ' + nextSessText; }
+        else { heroBadge.textContent = 'لا توجد جلسات قادمة'; heroBadge.style.background = 'rgba(255,255,255,0.08)'; }
+      }
+
+      /* Case card details */
+      document.querySelectorAll('.case-number').forEach(function(el) { el.textContent = caseNum; });
+      document.querySelectorAll('.case-type').forEach(function(el) { el.textContent = caseType ? 'قضية ' + caseType : '—'; });
+      document.querySelectorAll('.court-name').forEach(function(el) { el.textContent = courtName || '—'; });
+      var caseCardSub = document.querySelector('.card-head .card-sub');
+      if (caseCardSub) caseCardSub.textContent = 'آخر تحديث: ' + arabicNow();
+
+      /* Next session box */
+      var nxBox = document.querySelector('.next-session-box');
+      if (nxBox) {
+        if (nextSessText) {
+          nxBox.innerHTML = '<div class="next-session-label">الجلسة القادمة</div>' +
+            '<div class="next-session-date">' + esc(nextSessText) + '</div>' +
+            (nextSess && nextSess.detail ? '<div style="margin-top:0.25rem;font-size:0.72rem;color:var(--ink-mid)">' + esc(nextSess.detail) + '</div>' : '');
+        } else {
+          nxBox.innerHTML = '<div class="next-session-label">الجلسة القادمة</div>' +
+            '<div class="next-session-date" style="color:var(--ink-muted);font-weight:400">لا توجد جلسة قادمة</div>' +
+            '<div style="margin-top:0.25rem;font-size:0.68rem;color:var(--ink-muted)">سيتم تحديد الموعد لاحقاً</div>';
+          nxBox.style.background = 'rgba(100,116,139,0.05)';
+          nxBox.style.borderColor = 'var(--border)';
+        }
+      }
+
+      /* Lawyer */
+      document.querySelectorAll('.lawyer-name').forEach(function(el) { el.textContent = lawyerName || 'المحامي المسؤول'; });
+      var lawyerAv = document.querySelector('.lawyer-av');
+      if (lawyerAv && lawyerName) {
+        var lp = lawyerName.trim().split(' ');
+        lawyerAv.textContent = lp.length >= 2 ? lp[0][0] + lp[1][0] : lp[0].substring(0,2);
+      }
+
+      /* Progress bar */
+      var track = document.querySelector('.progress-track');
+      if (track) {
+        track.innerHTML = buildProgressSteps().map(function(s, i) {
+          var dot = s.state === 'done' ? '✓' : s.state === 'current' ? '◉' : '';
+          var lbl = s.state === 'current' ? s.label + ' ←' : s.label;
+          return '<div class="progress-step ' + s.state + '"><div class="step-dot">' + dot + '</div><div class="step-label">' + esc(lbl) + '</div></div>';
+        }).join('');
+        track.querySelectorAll('.progress-step').forEach(function(step, i) {
+          step.style.opacity = '0'; step.style.transform = 'translateY(8px)';
+          step.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          setTimeout(function() { step.style.opacity = '1'; step.style.transform = 'translateY(0)'; }, 100 + i * 70);
+        });
+      }
+
+      /* Info cards */
+      var infoCards = document.querySelectorAll('.info-card');
+      if (infoCards.length >= 3) {
+        // Documents
+        infoCards[0].querySelector('.info-card-val').textContent = 'لا توجد مستندات';
+        var ds = infoCards[0].querySelector('.info-card-sub');
+        ds.textContent = 'لم يطلب منك المحامي أي مستندات'; ds.className = 'info-card-sub';
+        // Sessions
+        infoCards[1].querySelector('.info-card-val').textContent = futureSess.length > 0 ? futureSess.length + ' جلسة' : '—';
+        var ss = infoCards[1].querySelector('.info-card-sub');
+        ss.textContent = nextSessText || 'لا توجد جلسات قادمة'; ss.className = 'info-card-sub';
+        // Invoices
+        var iv = infoCards[2];
+        if (invCount === 0) {
+          iv.querySelector('.info-card-val').textContent = 'لا توجد فواتير';
+          var is = iv.querySelector('.info-card-sub'); is.textContent = 'لا توجد فواتير مسجّلة'; is.className = 'info-card-sub';
+        } else if (totalPending > 0) {
+          iv.querySelector('.info-card-val').textContent = fmtNum(totalPending) + ' ر.س';
+          var iw = iv.querySelector('.info-card-sub'); iw.textContent = '⚠ معلق — يحتاج سداد'; iw.className = 'info-card-sub warn';
+        } else {
+          iv.querySelector('.info-card-val').textContent = fmtNum(totalInvoiced) + ' ر.س';
+          var io = iv.querySelector('.info-card-sub'); io.textContent = '✓ مدفوعة بالكامل'; io.className = 'info-card-sub ok';
+        }
+      }
+
+      /* Sessions timeline */
+      var tlEl = document.querySelector('.timeline');
+      if (tlEl) {
+        var tlCard = tlEl.closest('.card');
+        if (allSessions.length === 0) {
+          tlEl.innerHTML = '<div style="text-align:center;padding:2.5rem 1rem;color:var(--ink-muted)">' +
+            '<div style="font-size:1.5rem;margin-bottom:0.5rem">📅</div>' +
+            '<div style="font-size:0.82rem;font-weight:600;color:var(--ink-mid);margin-bottom:0.2rem">لا توجد جلسات مسجّلة</div>' +
+            '<div style="font-size:0.7rem">سيتم تحديث مسار الجلسات عند إضافة جلسات للقضية</div></div>';
+          if (tlCard) { var tls = tlCard.querySelector('.card-sub'); if (tls) tls.textContent = 'لا توجد جلسات لهذه القضية'; }
+        } else {
+          var tlHtml = '';
+          var futCount = 0;
+          allSessions.forEach(function(s) {
+            var d = parseArabicDate(s.dateText);
+            var isPast = d && d < todayD;
+            var isNext = nextSess && s === nextSess;
+            if (!isPast) futCount++;
+            var iconCls   = isPast ? 'done' : isNext ? 'next' : 'future';
+            var iconInner = isPast ? '✓' : isNext ? '→' : '○';
+            tlHtml += '<div class="tl-item ' + (isNext ? 'highlighted' : '') + '">' +
+              '<div class="tl-left"><div class="tl-icon ' + iconCls + '">' + iconInner + '</div></div>' +
+              '<div class="tl-content">' +
+              '<div class="tl-title' + ((!isPast && !isNext) ? ' muted' : '') + '">' + esc(s.dateText || 'موعد غير محدد') + '</div>' +
+              (s.detail ? '<div class="tl-date ' + (isNext ? 'green' : '') + '">' + esc(s.detail) + '</div>' : '') +
+              '<div class="tl-pill-wrap">' +
+              (isNext ? '<span class="pill pill-next">الجلسة القادمة</span>' : isPast ? '<span class="pill pill-done">منتهية</span>' : '<span class="pill pill-done" style="color:var(--ink-muted)">قادمة</span>') +
+              '</div></div></div>';
+          });
+          tlEl.innerHTML = tlHtml;
+          if (tlCard) { var tls2 = tlCard.querySelector('.card-sub'); if (tls2) tls2.textContent = allSessions.length + ' جلسة — ' + futCount + ' قادمة'; }
+        }
+      }
+
+      /* Documents: empty state */
+      document.querySelectorAll('.card').forEach(function(card) {
+        var title = card.querySelector('.card-title');
+        if (!title || title.textContent.trim() !== 'المستندات') return;
+        var tbody = card.querySelector('tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2.5rem 1rem;color:var(--ink-muted)">' +
+          '<div style="font-size:1.5rem;margin-bottom:0.4rem">📎</div>' +
+          '<div style="font-size:0.82rem;font-weight:600;color:var(--ink-mid);margin-bottom:0.2rem">لم يطلب منك المحامي أي مستندات حالياً</div>' +
+          '<div style="font-size:0.7rem;margin-bottom:0.8rem">يمكنك رفع مستند طوعياً إذا رأيت ضرورة لذلك</div>' +
+          '<button class="btn-upload" id="openUpload">⬆ رفع مستند طوعي</button>' +
+          '</td></tr>';
+        var cardHead = card.querySelector('.card-head');
+        if (cardHead) {
+          var cSub = cardHead.querySelector('.card-sub'); if (cSub) cSub.textContent = 'لا توجد مستندات مطلوبة';
+          var cPill = cardHead.querySelector('.pill'); if (cPill) cPill.style.display = 'none';
+        }
+      });
+
+      /* Footer contact */
+      var footerContact = document.querySelector('.footer-contact');
+      if (footerContact) {
+        footerContact.innerHTML =
+          '<div>للتواصل مع محاميك: <strong>' + esc(lawyerName || 'المحامي المسؤول') + '</strong></div>' +
+          '<div style="margin-top:0.2rem;color:var(--ink-light)">📞 ' + esc(firmPhone) + ' &nbsp;·&nbsp; 📧 ' + esc(firmEmail) + '</div>';
+      }
+
+    }); /* end DOMContentLoaded */
+
+    /* ── Upload modal ── */
+    (function() {
+      var modal     = document.getElementById('uploadModal');
+      var dropEl    = document.getElementById('dropZone');
+      var fileIn    = document.getElementById('fileInput');
+      var selBox    = document.getElementById('selectedFile');
+      var selName   = document.getElementById('selectedFileName');
+      var submitBtn = document.getElementById('submitUpload');
+
+      function openModal()  { modal.classList.add('open'); }
+      function closeModal() {
+        modal.classList.remove('open');
+        fileIn.value = ''; selBox.classList.remove('show'); selName.textContent = '';
+        submitBtn.disabled = false; submitBtn.innerHTML = 'رفع المستند'; submitBtn.classList.remove('btn-loading');
+      }
+
+      /* Use event delegation for #openUpload (button may be created dynamically) */
+      document.addEventListener('click', function(e) { if (e.target && e.target.id === 'openUpload') openModal(); });
+      document.getElementById('closeUpload').addEventListener('click', closeModal);
+      document.getElementById('cancelUpload').addEventListener('click', closeModal);
+      modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+      dropEl.addEventListener('click', function() { fileIn.click(); });
+      dropEl.addEventListener('dragover',  function(e) { e.preventDefault(); dropEl.classList.add('drag-over'); });
+      dropEl.addEventListener('dragleave', function()  { dropEl.classList.remove('drag-over'); });
+      dropEl.addEventListener('drop', function(e) {
+        e.preventDefault(); dropEl.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+      });
+      fileIn.addEventListener('change', function() { if (this.files.length) handleFile(this.files[0]); });
+
+      function handleFile(file) {
+        selName.textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+        selBox.classList.add('show');
+      }
+
+      submitBtn.addEventListener('click', function() {
+        if (!fileIn.files.length && !selName.textContent) {
+          dropEl.style.borderColor = 'var(--red)';
+          setTimeout(function() { dropEl.style.borderColor = ''; }, 1500);
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'جاري الرفع <span class="loading-dots">...</span>';
+        submitBtn.classList.add('btn-loading');
+        setTimeout(function() { closeModal(); showToast('تم رفع المستند بنجاح'); }, 1200);
+      });
+    })();
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg; t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+
+  })(); /* end main IIFE */
+  </script>
+
+  <script src="sidebar-badges.js"></script>
+</body>
+</html>

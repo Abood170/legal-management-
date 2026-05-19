@@ -1,0 +1,934 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الجلسات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.58rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s; border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: var(--off-white); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Main/Topbar */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
+    .topbar-search:hover { border-color: var(--border-mid); }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); transform: translateY(-1px); }
+
+    /* Content/Table */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .card-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 0.83rem; font-weight: 700; color: var(--ink); }
+    .card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1.4rem; text-align: right; font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .data-table td { padding: 0.75rem 1.4rem; font-size: 0.78rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: rgba(247,246,243,0.7); }
+    .case-name { font-weight: 600; color: var(--ink); font-size: 0.8rem; }
+    .case-id { font-size: 0.6rem; color: var(--ink-muted); margin-top: 2px; font-family: monospace; }
+    .lawyer-chip { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--ink-light); }
+    .lawyer-av { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.52rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 2rem; font-size: 0.62rem; font-weight: 700; white-space: nowrap; }
+    .pill::before { content: ''; width: 4px; height: 4px; border-radius: 50%; }
+    .pill-urgent { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.15); } .pill-urgent::before { background: var(--red); }
+    .pill-active { background: var(--green-dim); color: var(--green); border: 1px solid rgba(22,163,74,0.15); } .pill-active::before { background: var(--green); }
+    .pill-pending { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.15); } .pill-pending::before { background: var(--gold); }
+    .pill-closed { background: rgba(100,116,139,0.09); color: var(--ink-muted); border: 1px solid rgba(100,116,139,0.12); } .pill-closed::before { background: var(--ink-muted); }
+    .pill-today { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.2); } .pill-today::before { background: var(--red); animation: blink 1.2s infinite; }
+    .pill-upcoming { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); } .pill-upcoming::before { background: var(--gold); }
+    .pill-done { background: rgba(100,116,139,0.09); color: var(--ink-muted); border: 1px solid rgba(100,116,139,0.12); } .pill-done::before { background: var(--ink-muted); }
+    @keyframes blink { 50%{opacity:0.25} }
+    .date-cell { font-size: 0.73rem; color: var(--ink-light); }
+    .date-today { color: var(--red); font-weight: 600; }
+    .time-cell { font-size: 0.78rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .row-btn { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 2px 9px; border-radius: 5px; font-size: 0.63rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+    /* Page header + Filters */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.3px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+    .filters-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.2rem; flex-wrap: wrap; }
+    .filter-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; flex: 1; min-width: 200px; max-width: 300px; transition: border-color 0.15s; }
+    .filter-search:focus-within { border-color: var(--accent-border); }
+    .filter-search input { border: none; background: transparent; outline: none; font-family: 'Cairo', sans-serif; font-size: 0.78rem; color: var(--ink); width: 100%; }
+    .filter-search input::placeholder { color: var(--ink-muted); }
+    .filter-select { background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem 0.42rem 1.8rem; font-size: 0.78rem; color: var(--ink-light); font-family: 'Cairo', sans-serif; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.6rem center; transition: border-color 0.15s; }
+    .filter-select:hover, .filter-select:focus { border-color: var(--border-mid); color: var(--ink); }
+    .btn-reset { background: none; border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.75rem; font-size: 0.72rem; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; white-space: nowrap; }
+    .btn-reset:hover { border-color: rgba(220,38,38,0.35); color: var(--red); }
+    .no-results { text-align: center; padding: 2.5rem; color: var(--ink-muted); font-size: 0.82rem; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } }
+
+    /* Modal + Toast */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--white); border-radius: 12px; width: 100%; max-width: 560px; box-shadow: 0 24px 64px rgba(15,20,25,0.2); transform: translateY(18px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1; flex-shrink: 0; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .form-input, .form-select, .form-textarea { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .form-textarea { resize: vertical; }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 600px) { .modal-card { max-width: 95vw; } .form-row { grid-template-columns: 1fr; } }
+
+    /* ── Visual Polish ── */
+    body { line-height: 1.75; }
+    .nav-section { font-size: 0.68rem; }
+    .card-title, .topbar-title, .ph-title { letter-spacing: -0.5px; }
+    .data-table td { font-size: 0.83rem; }
+    .card { border-radius: 14px; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .modal-card { box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); border-radius: 14px; }
+    .btn-new { letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-new:hover { box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+    .row-btn, .btn-cancel { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .data-table th { border-bottom-width: 2px; }
+    .data-table tbody tr { transition: background 0.1s ease; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .nav-item { transition: all 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .nav-item:hover { background: rgba(28,94,62,0.04); }
+    .nav-item.active { border-radius: 0 8px 8px 0; }
+    .pill { padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; }
+    .pill-urgent { background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.18); }
+    .pill-active { background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.18); }
+    .pill-pending { background: rgba(184,149,42,0.09); border: 1px solid rgba(184,149,42,0.2); }
+    .topbar { box-shadow: 0 1px 0 var(--border); }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 768px) { .btn-new, .row-btn { min-height: 44px; } }
+    @media (max-width: 480px) { .modal-overlay { align-items: flex-end; } .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; } }
+
+    /* ── z-index stacking fix ── */
+    .modal-overlay {
+      position: fixed !important;
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      z-index: 9999 !important;
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 2rem 1rem !important;
+    }
+    .modal-overlay.open { display: flex !important; }
+    .modal-card {
+      position: relative !important;
+      z-index: 10000 !important;
+      margin: auto !important;
+      flex-shrink: 0 !important;
+    }
+    .card { isolation: isolate; }
+    .card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+    #sessionPanel { position:fixed !important; top:0 !important; right:0 !important; left:auto !important; width:400px; max-width:95vw; height:100vh !important; z-index:9999 !important; overflow-y:auto !important; background:white; box-shadow:-8px 0 32px rgba(15,20,25,0.15); transform:translateX(100%); transition:transform 0.3s ease; display:flex; flex-direction:column; }
+    #sessionPanel.open { transform:translateX(0) !important; }
+    #panelOverlay { position:fixed; inset:0; z-index:9998; background:rgba(15,20,25,0.35); }
+
+    /* ── Table Visual Upgrade ── */
+
+    /* Date+Time stacked cells */
+    .date-cell { font-weight: 600; color: var(--ink); font-size: 0.8rem; line-height: 1.35; }
+    .date-today { color: var(--red); font-weight: 600; }
+    .time-cell { font-size: 0.72rem; color: var(--ink-muted); font-weight: 400; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+    /* Row status border (RTL: border-right = visual leading edge) */
+    tr[data-status="today"] > td:first-child  { border-right: 3px solid var(--red); }
+    tr[data-status="upcoming"] > td:first-child { border-right: 3px solid var(--gold); }
+    tr[data-status="done"] > td:first-child   { border-right: 3px solid var(--border-mid); }
+
+    /* Row padding + alternating background */
+    .data-table td { padding: 0.9rem 1.2rem; vertical-align: middle; }
+    .data-table tbody tr:nth-child(even) > td { background: rgba(247,246,243,0.5); }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.035) !important; }
+
+    /* Action buttons */
+    .row-btn { border: 1px solid var(--accent-border); color: var(--accent); background: var(--accent-dim); border-radius: 6px; padding: 4px 12px; font-size: 0.72rem; font-weight: 600; }
+    .row-btn:hover { border-color: var(--accent); background: rgba(28,94,62,0.13); color: var(--accent); transform: none; }
+    tr[data-status="done"] .row-btn { border: 1px solid var(--border-mid); color: var(--ink-muted); background: transparent; }
+    tr[data-status="done"] .row-btn:hover { border-color: var(--ink-light); color: var(--ink); }
+
+    /* Summary stats bar */
+    .session-stats-bar { display: flex; align-items: center; gap: 1.2rem; padding: 0.6rem 1.4rem; border-bottom: 1px solid var(--border); background: var(--off-white); flex-wrap: wrap; }
+    .stat-pill { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.75rem; color: var(--ink-light); }
+    .stat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .stat-today  .stat-dot { background: var(--red); }
+    .stat-upcoming .stat-dot { background: var(--gold); }
+    .stat-done   .stat-dot { background: var(--border-mid); }
+    .stat-today  strong { color: var(--red); font-weight: 700; }
+    .stat-upcoming strong { color: var(--gold); font-weight: 700; }
+    .stat-done   strong { color: var(--ink-muted); font-weight: 700; }
+
+    /* Empty state */
+    .empty-state { padding: 3rem 1.5rem; text-align: center; }
+    .empty-icon { font-size: 2.2rem; margin-bottom: 0.8rem; line-height: 1; }
+    .empty-title { font-size: 0.9rem; font-weight: 700; color: var(--ink); margin-bottom: 0.4rem; }
+    .empty-sub { font-size: 0.75rem; color: var(--ink-muted); line-height: 1.6; }
+
+    /* ── Modal Enhancement ── */
+    .modal-head { background: linear-gradient(to bottom, var(--off-white), var(--white)); padding: 1.2rem 1.5rem; }
+    input[type="date"], input[type="time"] { appearance: none; -webkit-appearance: none; background: var(--off-white); border: 1px solid var(--border-mid); border-radius: 8px; padding: 0.75rem 1rem; font-family: 'Cairo', sans-serif; font-size: 0.85rem; color: var(--ink); width: 100%; cursor: pointer; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    input[type="date"]:focus, input[type="time"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); outline: none; }
+    .field-icon-label { display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); margin-bottom: 0; }
+    .field-hint { font-size: 0.68rem; color: var(--ink-muted); margin-top: 0.3rem; }
+    .quick-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .chip { font-size: 0.7rem; padding: 3px 10px; border-radius: 2rem; border: 1px solid var(--border-mid); background: var(--white); cursor: pointer; color: var(--ink-light); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1.7; }
+    .chip:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+    .chip.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); font-weight: 600; }
+    .modal-note { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; color: var(--accent); padding: 0.65rem 1.4rem; background: rgba(28,94,62,0.05); border-top: 1px solid var(--accent-border); }
+    .btn-submit-full { width: 100%; padding: 0.9rem; font-size: 0.9rem; }
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    .loading-dots { animation: dotsFade 1s ease infinite; }
+  </style>
+<style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item active" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">الجلسات</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في الجلسات...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+        <button class="btn-new js-new-session">+ جلسة جديدة</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">الجلسات</div>
+          <div class="ph-sub" id="phSub">— جلسات هذا الأسبوع</div>
+        </div>
+        <button class="btn-new js-new-session">+ جلسة جديدة</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="card">
+        <div class="filters-bar">
+          <div class="filter-search">
+            <span>🔍</span>
+            <input type="text" id="sSearch" placeholder="ابحث بالقضية أو المحكمة...">
+          </div>
+          <select class="filter-select" id="sStatus">
+            <option value="">الحالة — الكل</option>
+            <option value="today">اليوم</option>
+            <option value="upcoming">قادمة</option>
+            <option value="done">منتهية</option>
+          </select>
+          <select class="filter-select" id="sLawyer">
+            <option value="">المحامي — الكل</option>
+            <option value="khalid">خالد العتيبي</option>
+            <option value="sarah">سارة المحمد</option>
+            <option value="mohammed">محمد الرشيد</option>
+            <option value="noura">نورة الأحمد</option>
+          </select>
+          <button class="btn-reset" id="sReset">إعادة ضبط</button>
+          <span id="sCount" style="font-size:0.7rem;color:var(--ink-muted);margin-right:auto;"></span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">قائمة الجلسات</div>
+            <div class="card-sub">جميع الجلسات المسجلة في النظام</div>
+          </div>
+        </div>
+        <div class="session-stats-bar">
+          <span class="stat-pill stat-today"><span class="stat-dot"></span>اليوم: <strong id="statToday">0</strong> جلسة</span>
+          <span class="stat-pill stat-upcoming"><span class="stat-dot"></span>قادمة: <strong id="statUpcoming">0</strong> جلسات</span>
+          <span class="stat-pill stat-done"><span class="stat-dot"></span>منتهية: <strong id="statDone">0</strong> جلسات</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th colspan="2">التاريخ والوقت</th>
+              <th>القضية</th>
+              <th>المحكمة</th>
+              <th>القاعة</th>
+              <th>المحامي</th>
+              <th>الحالة</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="sessionsBody">
+            <tr id="sNoResults">
+              <td colspan="8">
+                <div class="empty-state">
+                  <div class="empty-icon">📅</div>
+                  <div class="empty-title">لا توجد جلسات بعد</div>
+                  <div class="empty-sub">ابدأ بإضافة جلسة جديدة من زر «+ جلسة جديدة»</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <script>
+  (function() {
+    var rows = document.querySelectorAll('#sessionsBody tr[data-search]');
+    var noRes = document.getElementById('sNoResults');
+    var countEl = document.getElementById('sCount');
+    var search = document.getElementById('sSearch');
+    var status = document.getElementById('sStatus');
+    var lawyer = document.getElementById('sLawyer');
+    var reset = document.getElementById('sReset');
+
+    function filter() {
+      var q = search.value.trim().toLowerCase();
+      var st = status.value;
+      var lw = lawyer.value;
+      var visible = 0;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var matchQ = !q || r.getAttribute('data-search').toLowerCase().indexOf(q) !== -1;
+        var matchSt = !st || r.getAttribute('data-status') === st;
+        var matchLw = !lw || r.getAttribute('data-lawyer') === lw;
+        var show = matchQ && matchSt && matchLw;
+        r.style.display = show ? '' : 'none';
+        if (show) visible++;
+      }
+      noRes.style.display = visible === 0 ? '' : 'none';
+      countEl.textContent = visible + ' جلسة';
+    }
+
+    search.addEventListener('input', filter);
+    status.addEventListener('change', filter);
+    lawyer.addEventListener('change', filter);
+    reset.addEventListener('click', function() {
+      search.value = '';
+      status.value = '';
+      lawyer.value = '';
+      filter();
+    });
+
+    filter();
+  })();
+  </script>
+
+  <!-- New Session Modal -->
+  <div class="modal-overlay" id="sModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-title">جلسة جديدة</span>
+        <button class="modal-close" id="sModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="sfCase">القضية *</label>
+          <select class="form-select" id="sfCase">
+            <option value="" disabled selected>— اختر القضية —</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-icon-label" for="sfDate">📅 تاريخ الجلسة *</label>
+            <input class="form-input" id="sfDate" type="date">
+            <div class="field-hint">مثال: 15 يناير 2025</div>
+            <div class="quick-chips">
+              <button type="button" class="chip js-date-chip" data-offset="0">اليوم</button>
+              <button type="button" class="chip js-date-chip" data-offset="1">غداً</button>
+              <button type="button" class="chip js-date-chip" data-offset="7">بعد أسبوع</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-icon-label" for="sfTime">🕐 وقت الجلسة *</label>
+            <input class="form-input" id="sfTime" type="time">
+            <div class="quick-chips">
+              <button type="button" class="chip js-time-chip" data-time="09:00">9:00 ص</button>
+              <button type="button" class="chip js-time-chip" data-time="11:00">11:00 ص</button>
+              <button type="button" class="chip js-time-chip" data-time="13:00">1:00 م</button>
+              <button type="button" class="chip js-time-chip" data-time="15:00">3:00 م</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="sfCourt">المحكمة</label>
+            <select class="form-select" id="sfCourt">
+              <option>محكمة التجارة بالرياض</option>
+              <option>المحكمة العمالية بالرياض</option>
+              <option>محكمة الاستئناف بالرياض</option>
+              <option>ديوان المظالم بالرياض</option>
+              <option>محكمة التجارة بجدة</option>
+              <option>المحكمة العمالية بجدة</option>
+              <option>محكمة الاستئناف بجدة</option>
+              <option>ديوان المظالم بجدة</option>
+              <option>المحكمة العمالية بالدمام</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sfHall">رقم القاعة</label>
+            <input class="form-input" id="sfHall" type="text" placeholder="قاعة 3أ">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="sfLawyer">المحامي</label>
+          <select class="form-select" id="sfLawyer">
+            <option value="" disabled selected>اختر المحامي...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="sfNotes">ملاحظات <span style="color:var(--ink-muted);font-weight:400">(اختياري)</span></label>
+          <textarea class="form-textarea" id="sfNotes" rows="3" placeholder="أي ملاحظات إضافية..."></textarea>
+        </div>
+      </div>
+      <div class="modal-note">✓ سيتم إرسال تذكير تلقائي للمحامي المسؤول قبل الجلسة بـ 24 ساعة</div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="sModalCancel">إلغاء</button>
+        <button class="btn-new btn-submit-full" id="sFormSubmit">إضافة الجلسة</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+  /* ── chip + loading-state enhancement (replaces submit listener via clone) ── */
+  (function() {
+    /* Date chips */
+    document.querySelectorAll('.js-date-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var d = new Date();
+        d.setDate(d.getDate() + parseInt(this.getAttribute('data-offset'), 10));
+        var yyyy = d.getFullYear(), mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+        document.getElementById('sfDate').value = yyyy+'-'+mm+'-'+dd;
+        document.getElementById('sfDate').style.borderColor = '';
+        document.querySelectorAll('.js-date-chip').forEach(function(c){c.classList.remove('active');});
+        this.classList.add('active');
+      });
+    });
+
+    /* Time chips */
+    document.querySelectorAll('.js-time-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        document.getElementById('sfTime').value = this.getAttribute('data-time');
+        document.getElementById('sfTime').style.borderColor = '';
+        document.querySelectorAll('.js-time-chip').forEach(function(c){c.classList.remove('active');});
+        this.classList.add('active');
+      });
+    });
+
+    /* Submit: clone button to detach old listener, add loading state */
+    var origBtn = document.getElementById('sFormSubmit');
+    var btn = origBtn.cloneNode(true);
+    origBtn.parentNode.replaceChild(btn, origBtn);
+
+    btn.addEventListener('click', function() {
+      var caseSel   = document.getElementById('sfCase');
+      var dateIn    = document.getElementById('sfDate');
+      var timeIn    = document.getElementById('sfTime');
+      var valid = true;
+      if (!caseSel.value) { caseSel.style.borderColor = 'var(--red)'; valid = false; } else { caseSel.style.borderColor = ''; }
+      if (!dateIn.value)  { dateIn.style.borderColor  = 'var(--red)'; valid = false; } else { dateIn.style.borderColor  = ''; }
+      if (!timeIn.value)  { timeIn.style.borderColor  = 'var(--red)'; valid = false; } else { timeIn.style.borderColor  = ''; }
+      if (!valid) return;
+
+      var caseName   = caseSel.value;
+      var caseId     = caseSel.options[caseSel.selectedIndex].getAttribute('data-id') || '';
+      var date       = dateIn.value;
+      var time       = timeIn.value;
+      var court      = document.getElementById('sfCourt').value;
+      var hall       = document.getElementById('sfHall').value.trim() || '—';
+      var lawyerSel  = document.getElementById('sfLawyer');
+      var lawyerVal  = lawyerSel.value;
+      var lawyerName = lawyerSel.options[lawyerSel.selectedIndex].text;
+      var lawyerAv   = lawyerSel.options[lawyerSel.selectedIndex].getAttribute('data-av') ||
+                       lawyerName.split(' ').slice(0,2).map(function(w){return w[0];}).join('');
+
+      btn.disabled = true;
+      btn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
+      btn.classList.add('btn-loading');
+
+      setTimeout(function() {
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-search', caseName + ' ' + court);
+        tr.setAttribute('data-status', 'upcoming');
+        tr.setAttribute('data-lawyer', lawyerVal);
+        tr.innerHTML =
+          '<td><div class="date-cell">' + arabicDate(date) + '</div></td>' +
+          '<td><div class="time-cell">' + arabicTime(time) + '</div></td>' +
+          '<td><div class="case-name">' + caseName + '</div>' + (caseId ? '<div class="case-id">' + caseId + '</div>' : '') + '</td>' +
+          '<td>' + court + '</td>' +
+          '<td>' + hall + '</td>' +
+          '<td><div class="lawyer-chip"><div class="lawyer-av">' + lawyerAv + '</div>' + lawyerName + '</div></td>' +
+          '<td><span class="pill pill-upcoming">قادمة</span></td>' +
+          '<td><div class="row-actions" style="display:flex;gap:0.4rem;flex-wrap:wrap;"><button class="row-btn view-session-btn">تفاصيل</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteSession(this)">حذف</button></div></td>';
+        document.getElementById('sessionsBody').insertBefore(tr, document.getElementById('sessionsBody').firstChild);
+        saveSessions();
+        updateSessionStats();
+
+        btn.disabled = false;
+        btn.innerHTML = 'إضافة الجلسة';
+        btn.classList.remove('btn-loading');
+
+        var overlay = document.getElementById('sModal');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        caseSel.value = ''; caseSel.style.borderColor = '';
+        dateIn.value  = ''; dateIn.style.borderColor  = '';
+        timeIn.value  = ''; timeIn.style.borderColor  = '';
+        document.getElementById('sfHall').value  = '';
+        document.getElementById('sfNotes').value = '';
+        document.getElementById('sfCourt').selectedIndex  = 0;
+        lawyerSel.selectedIndex = 0;
+        document.querySelectorAll('.js-date-chip,.js-time-chip').forEach(function(c){c.classList.remove('active');});
+
+        showToast('تمت إضافة الجلسة بنجاح');
+      }, 1200);
+    });
+
+    function arabicDate(val) {
+      var d = new Date(val+'T00:00:00');
+      var days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      var mon  = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      return days[d.getDay()] + '، ' + d.getDate() + ' ' + mon[d.getMonth()];
+    }
+    function arabicTime(val) {
+      var p = val.split(':'), h = parseInt(p[0],10), m = p[1];
+      var s = h < 12 ? 'ص' : 'م';
+      if (h > 12) h -= 12; if (h === 0) h = 12;
+      return h + ':' + m + ' ' + s;
+    }
+  })();
+  </script>
+
+  <script>
+  (function() {
+    var overlay    = document.getElementById('sModal');
+    var tbody      = document.getElementById('sessionsBody');
+    var toastTimer;
+
+    function populateCasesDropdown() {
+      var select = document.getElementById('sfCase');
+      if (!select) return;
+      select.innerHTML = '<option value="" disabled selected>— اختر القضية —</option>';
+      var saved = localStorage.getItem('cases_data');
+      if (!saved) return;
+      var cases;
+      try { cases = JSON.parse(saved); } catch(e) { return; }
+      console.log('[cases dropdown] عدد القضايا في cases_data:', cases.length);
+      cases.forEach(function(html) {
+        var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+        var cells = doc.querySelectorAll('tr > td');
+        if (cells.length < 2) return;
+        // cells[0] → case name + id,  cells[1] → client (plain text)
+        var idEl   = cells[0].querySelector('.case-id');
+        var caseId = idEl ? idEl.textContent.trim() : '';
+        var client = cells[1].textContent.trim();
+        console.log('[cases dropdown] أول صف:', caseId, '|', client);
+        if (!caseId && !client) return;
+        var opt = document.createElement('option');
+        opt.value = caseId;
+        opt.textContent = caseId && client ? caseId + ' — ' + client : caseId || client;
+        if (caseId) opt.setAttribute('data-id', caseId);
+        select.appendChild(opt);
+      });
+    }
+
+    function populateLawyersDropdown() {
+      var select = document.getElementById('sfLawyer');
+      if (!select) return;
+      select.innerHTML = '<option value="" disabled selected>اختر المحامي...</option>';
+      var saved = localStorage.getItem('lawyers_data');
+      if (saved) {
+        try {
+          var lawyers = JSON.parse(saved);
+          lawyers.forEach(function(html) {
+            var div = document.createElement('div');
+            div.innerHTML = html;
+            var nameEl = div.querySelector('.lc-name');
+            var name = nameEl ? nameEl.textContent.trim() : null;
+            if (name) {
+              var opt = document.createElement('option');
+              opt.value = name;
+              opt.textContent = name;
+              select.appendChild(opt);
+            }
+          });
+        } catch(e) {}
+      }
+      if (select.options.length <= 1) {
+        ['خالد بن عبدالعزيز العتيبي','سارة بنت محمد القحطاني','محمد بن سالم الزهراني','نورة بنت أحمد الشمري'].forEach(function(name) {
+          var opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    function openModal() {
+      populateCasesDropdown();
+      populateLawyersDropdown();
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('sfCase').value  = '';
+      document.getElementById('sfCase').style.borderColor  = '';
+      document.getElementById('sfDate').value  = '';
+      document.getElementById('sfDate').style.borderColor  = '';
+      document.getElementById('sfTime').value  = '';
+      document.getElementById('sfTime').style.borderColor  = '';
+      document.getElementById('sfHall').value  = '';
+      document.getElementById('sfNotes').value = '';
+      document.getElementById('sfCourt').selectedIndex  = 0;
+      document.getElementById('sfLawyer').selectedIndex = 0;
+    }
+
+    var triggers = document.querySelectorAll('.js-new-session');
+    for (var i = 0; i < triggers.length; i++) {
+      triggers[i].addEventListener('click', openModal);
+    }
+    document.getElementById('sModalClose').addEventListener('click', closeModal);
+    document.getElementById('sModalCancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+  })();
+
+  function updateSessionStats() {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Saudi week: Saturday–Friday
+    var dow = today.getDay(); // 0=Sun … 6=Sat
+    var daysFromSat = (dow - 6 + 7) % 7;
+    var weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - daysFromSat);
+    var weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    var months = {
+      'يناير':0,'فبراير':1,'مارس':2,'أبريل':3,'مايو':4,'يونيو':5,
+      'يوليو':6,'أغسطس':7,'سبتمبر':8,'أكتوبر':9,'نوفمبر':10,'ديسمبر':11
+    };
+
+    function parseDateCell(text) {
+      // "الأحد، 15 يناير" or "الأحد، 15 يناير 2025"
+      var s = text.replace(/^[^،]+،\s*/, '').trim().split(/\s+/);
+      var day = parseInt(s[0], 10);
+      var mon = months[s[1]];
+      var yr  = s[2] ? parseInt(s[2], 10) : today.getFullYear();
+      if (isNaN(day) || mon === undefined) return null;
+      var d = new Date(yr, mon, day);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    var countToday = 0, countUpcoming = 0, countDone = 0, countWeek = 0, countTotal = 0;
+
+    document.querySelectorAll('#sessionsBody tr').forEach(function(tr) {
+      if (tr.id === 'sNoResults') return;
+      var dateEl = tr.querySelector('.date-cell');
+      if (!dateEl) return;
+      var d = parseDateCell(dateEl.textContent.trim());
+      if (!d) return;
+      countTotal++;
+      if (d >= weekStart && d <= weekEnd) countWeek++;
+      if (d.getTime() === today.getTime())  countToday++;
+      else if (d > today)                   countUpcoming++;
+      else                                  countDone++;
+    });
+
+    // ph-sub
+    var phSub = document.getElementById('phSub');
+    if (phSub) phSub.textContent = countWeek + ' جلسة هذا الأسبوع';
+
+    // stat pills
+    var elToday    = document.getElementById('statToday');
+    var elUpcoming = document.getElementById('statUpcoming');
+    var elDone     = document.getElementById('statDone');
+    if (elToday)    elToday.textContent    = countToday;
+    if (elUpcoming) elUpcoming.textContent = countUpcoming;
+    if (elDone)     elDone.textContent     = countDone;
+
+    // sidebar badge
+    var badge = document.getElementById('sessionsBadge');
+    if (badge) {
+      if (countTotal > 0) { badge.textContent = countTotal; badge.style.display = ''; }
+      else badge.style.display = 'none';
+    }
+
+    // empty state
+    var noRes = document.getElementById('sNoResults');
+    if (noRes) noRes.style.display = countTotal === 0 ? '' : 'none';
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = '✓ ' + msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3000);
+  }
+
+  function saveSessions() {
+    var rows = [];
+    document.querySelectorAll('#sessionsBody tr').forEach(function(tr) {
+      if (!tr.classList.contains('no-results') && !tr.querySelector('.empty-state') && tr.id !== 'sNoResults') {
+        rows.push(tr.innerHTML);
+      }
+    });
+    localStorage.setItem('sessions_data', JSON.stringify(rows));
+  }
+
+  function loadSessions() {
+    var saved = localStorage.getItem('sessions_data');
+    if (saved) {
+      try {
+        var rows = JSON.parse(saved);
+        if (rows.length > 0) {
+          var tbody = document.getElementById('sessionsBody');
+          rows.forEach(function(html) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = html;
+            tr.querySelectorAll('.row-btn').forEach(function(btn) {
+              if (btn.textContent.trim() === 'تفاصيل') btn.classList.add('view-session-btn');
+            });
+            tbody.appendChild(tr);
+          });
+          var nr = document.getElementById('sNoResults');
+          if (nr) nr.style.display = 'none';
+        }
+      } catch(e) {}
+    }
+    updateSessionStats();
+  }
+
+  window.addEventListener('load', loadSessions);
+  </script>
+
+  <!-- Session Side Panel -->
+  <div id="sessionPanel">
+    <div style="background:linear-gradient(135deg,#1C5E3E,#24764E);padding:1.5rem;color:white;flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <h3 style="margin:0;font-size:1rem;font-weight:700;">تفاصيل الجلسة</h3>
+        <button onclick="closeSessionPanel()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+      <div style="font-size:0.78rem;opacity:0.85;" id="spStatus"></div>
+    </div>
+    <div style="padding:1.25rem;flex:1;display:flex;flex-direction:column;gap:1rem;">
+      <div style="background:#f8faf9;border-radius:10px;padding:1rem;">
+        <div style="font-size:0.7rem;font-weight:700;color:#1C5E3E;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">معلومات الجلسة</div>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;"><span style="color:#6B7280;">القضية</span><span style="font-weight:600;color:#111;text-align:left;max-width:55%;" id="spCase"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;"><span style="color:#6B7280;">التاريخ</span><span style="font-weight:600;color:#111;" id="spDate"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;"><span style="color:#6B7280;">الوقت</span><span style="font-weight:600;color:#111;" id="spTime"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;"><span style="color:#6B7280;">المحكمة</span><span style="font-weight:600;color:#111;" id="spCourt"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;"><span style="color:#6B7280;">القاعة</span><span style="font-weight:600;color:#111;" id="spHall"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem;"><span style="color:#6B7280;">المحامي</span><span style="font-weight:600;color:#111;" id="spLawyer"></span></div>
+        </div>
+      </div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.5rem;">
+        <button onclick="closeSessionPanel()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#374151;font-family:'Cairo',sans-serif;font-size:0.85rem;cursor:pointer;">إغلاق</button>
+        <button onclick="deleteSessionFromPanel()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid rgba(220,38,38,0.3);background:rgba(220,38,38,0.05);color:#DC2626;font-family:'Cairo',sans-serif;font-size:0.85rem;cursor:pointer;">حذف الجلسة</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var panel = document.getElementById('sessionPanel');
+    var activePanelRow = null;
+
+    function showOverlay(cb) {
+      removeOverlay();
+      var ov = document.createElement('div');
+      ov.id = 'panelOverlay';
+      ov.onclick = cb || closeSessionPanel;
+      document.body.appendChild(ov);
+    }
+    function removeOverlay() {
+      var ov = document.getElementById('panelOverlay');
+      if (ov) ov.remove();
+    }
+
+    window.openSessionPanel = function(row) {
+      activePanelRow = row;
+      var cells = row.querySelectorAll('td');
+      var caseNameEl = cells[2] ? cells[2].querySelector('.case-name') : null;
+      var caseIdEl   = cells[2] ? cells[2].querySelector('.case-id')   : null;
+      var pillEl     = cells[6] ? cells[6].querySelector('.pill')      : null;
+      var lawyerEl   = cells[5] ? cells[5].querySelector('.lawyer-chip') : null;
+
+      document.getElementById('spDate').textContent   = cells[0] ? cells[0].querySelector('.date-cell') ? cells[0].querySelector('.date-cell').textContent.trim() : cells[0].textContent.trim() : '';
+      document.getElementById('spTime').textContent   = cells[1] ? cells[1].querySelector('.time-cell') ? cells[1].querySelector('.time-cell').textContent.trim() : cells[1].textContent.trim() : '';
+      document.getElementById('spCase').textContent   = caseNameEl ? caseNameEl.textContent.trim() : (cells[2] ? cells[2].textContent.trim() : '');
+      document.getElementById('spCourt').textContent  = cells[3] ? cells[3].textContent.trim() : '';
+      document.getElementById('spHall').textContent   = cells[4] ? cells[4].textContent.trim() : '';
+
+      var lawyerName = '';
+      if (lawyerEl) {
+        var clone = lawyerEl.cloneNode(true);
+        var av = clone.querySelector('.lawyer-av');
+        if (av) av.remove();
+        lawyerName = clone.textContent.trim();
+      }
+      document.getElementById('spLawyer').textContent = lawyerName;
+
+      var statusEl = document.getElementById('spStatus');
+      if (pillEl) {
+        statusEl.innerHTML = pillEl.outerHTML;
+      } else {
+        statusEl.textContent = caseIdEl ? caseIdEl.textContent.trim() : '';
+      }
+
+      window.scrollTo(0, 0);
+      panel.scrollTop = 0;
+      showOverlay(closeSessionPanel);
+      panel.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeSessionPanel = function() {
+      panel.classList.remove('open');
+      removeOverlay();
+      document.body.style.overflow = '';
+      activePanelRow = null;
+    };
+
+    window.deleteSessionFromPanel = function() {
+      if (!activePanelRow) return;
+      activePanelRow.style.transition = 'opacity 0.25s';
+      activePanelRow.style.opacity = '0';
+      setTimeout(function() {
+        activePanelRow.remove();
+        saveSessions();
+        updateSessionStats();
+        window.closeSessionPanel();
+        showToast('تم حذف الجلسة');
+      }, 260);
+    };
+
+    window.deleteSession = function(btn) {
+      var row = btn.closest('tr');
+      if (!row) return;
+      row.style.transition = 'opacity 0.25s';
+      row.style.opacity = '0';
+      setTimeout(function() {
+        row.remove();
+        saveSessions();
+        updateSessionStats();
+        showToast('تم حذف الجلسة');
+      }, 260);
+    };
+
+    document.getElementById('sessionsBody').addEventListener('click', function(e) {
+      var btn = e.target.closest('.view-session-btn');
+      if (!btn) return;
+      var row = btn.closest('tr');
+      if (row) window.openSessionPanel(row);
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && panel.classList.contains('open')) window.closeSessionPanel();
+    });
+  })();
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>

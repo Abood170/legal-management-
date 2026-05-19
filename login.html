@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة المحاماة — تسجيل الدخول</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #ffffff;
+  --off-white: #F7F6F3;
+  --ink: #0F1419;
+  --ink-mid: #2D3748;
+  --ink-light: #64748B;
+  --ink-muted: #94A3B8;
+  --accent: #1C5E3E;
+  --accent-light: #24764E;
+  --accent-dim: rgba(28,94,62,0.08);
+  --accent-border: rgba(28,94,62,0.15);
+  --gold: #B8952A;
+  --border: rgba(15,20,25,0.08);
+  --border-mid: rgba(15,20,25,0.12);
+  --error: #DC2626;
+  --error-dim: rgba(220,38,38,0.07);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--off-white);
+  color: var(--ink);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── BRAND PANEL ── */
+.brand-panel {
+  background: var(--ink);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  bottom: -100px; right: -100px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28,94,62,0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.brand-top { position: relative; z-index: 1; }
+
+.brand-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  text-decoration: none;
+  margin-bottom: 3rem;
+}
+
+.brand-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+}
+
+.brand-logo-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  margin-bottom: 3px;
+}
+
+.brand-headline {
+  font-size: 2rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  margin-bottom: 1rem;
+}
+
+.brand-headline em { font-style: normal; color: #6EE7B7; }
+
+.brand-desc {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+
+/* Mini dashboard preview */
+.brand-preview {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-top: 1rem;
+}
+
+.preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.preview-title { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.7); }
+.preview-dot { width: 6px; height: 6px; border-radius: 50%; background: #6EE7B7; animation: pulse 2s infinite; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.preview-stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 6px;
+  margin-bottom: 0.8rem;
+}
+
+.preview-stat {
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.preview-stat-val { font-size: 1rem; font-weight: 900; color: white; line-height: 1; }
+.preview-stat-lbl { font-size: 0.55rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+.preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.65rem;
+}
+
+.preview-row:last-child { border-bottom: none; }
+.preview-row-name { color: rgba(255,255,255,0.6); }
+
+.preview-pill {
+  padding: 1px 7px;
+  border-radius: 2rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.pp-g { background: rgba(110,231,183,0.12); color: #6EE7B7; }
+.pp-r { background: rgba(220,38,38,0.12); color: #F87171; }
+.pp-y { background: rgba(184,149,42,0.15); color: #D4A843; }
+
+/* Brand bottom */
+.brand-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.brand-compliance {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.brand-compliance::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(110,231,183,0.4);
+}
+
+/* ── FORM PANEL ── */
+.form-panel {
+  background: var(--white);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.form-inner {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.form-header { margin-bottom: 2.5rem; }
+
+.form-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.form-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.form-subtitle {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.6;
+}
+
+.form-subtitle a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-subtitle a:hover { text-decoration: underline; }
+
+/* Field */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field-label a {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.field-label a:hover { text-decoration: underline; }
+
+.field-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: 'Cairo', sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  transition: all 0.15s;
+  outline: none;
+}
+
+.field-input::placeholder { color: var(--ink-muted); }
+
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* Password */
+.password-wrap { position: relative; }
+
+.password-toggle {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  padding: 0;
+  font-family: 'Cairo', sans-serif;
+  transition: color 0.15s;
+}
+
+.password-toggle:hover { color: var(--accent); }
+
+/* Remember me */
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.remember-check {
+  width: 17px; height: 17px;
+  border: 1.5px solid var(--border-mid);
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  appearance: none;
+  background: white;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.remember-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.remember-check:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 900;
+}
+
+.remember-label {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  cursor: pointer;
+}
+
+/* Submit */
+.btn-submit {
+  width: 100%;
+  padding: 0.95rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-submit:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(28,94,62,0.2);
+}
+
+/* Error state */
+.error-msg {
+  display: none;
+  background: var(--error-dim);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  color: var(--error);
+  margin-bottom: 1.2rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Register link */
+.register-box {
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  text-align: center;
+}
+
+.register-box-text {
+  font-size: 0.84rem;
+  color: var(--ink-light);
+  margin-bottom: 0.8rem;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  color: var(--ink-mid);
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Loading spinner */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 900px) {
+  body { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+  .form-panel { padding: 2rem 1.5rem; }
+}
+
+/* ── Visual Polish ── */
+body { line-height: 1.75; }
+.form-eyebrow { font-size: 0.68rem; }
+.field-input { padding: 0.78rem 1rem; border-radius: 8px; }
+.field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(28,94,62,0.08); }
+.btn-submit { letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.btn-submit:hover { box-shadow: 0 8px 24px rgba(28,94,62,0.22); transform: translateY(-1px); }
+.btn-outline { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.register-box { border-radius: 12px; }
+button, a { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 768px) { .btn-submit, .btn-outline { min-height: 44px; } }
+</style>
+<style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}</style>
+</head>
+<body>
+
+<!-- BRAND PANEL -->
+<div class="brand-panel">
+  <div class="brand-grid"></div>
+
+  <div class="brand-top">
+    <a href="index.html" class="brand-logo">
+      <span class="brand-logo-text">نظام إدارة المحاماة</span>
+      <div class="brand-logo-dot"></div>
+    </a>
+
+    <h2 class="brand-headline">
+      مرحباً بعودتك<br>
+      إلى <em>مكتبك الرقمي</em>
+    </h2>
+
+    <p class="brand-desc">
+      نظامك ينتظرك — قضاياك، جلساتك، وتنبيهاتك
+      كلها في مكان واحد.
+    </p>
+
+    <!-- Mini preview -->
+    <div class="brand-preview">
+      <div class="preview-bar">
+        <div class="preview-title">لوحة التحكم · Dashboard</div>
+        <div class="preview-dot"></div>
+      </div>
+      <div class="preview-stats">
+        <div class="preview-stat">
+          <div class="preview-stat-val">142</div>
+          <div class="preview-stat-lbl">قضية نشطة</div>
+        </div>
+        <div class="preview-stat">
+          <div class="preview-stat-val">7</div>
+          <div class="preview-stat-lbl">جلسات اليوم</div>
+        </div>
+        <div class="preview-stat">
+          <div class="preview-stat-val">78%</div>
+          <div class="preview-stat-lbl">نسبة الفوز</div>
+        </div>
+      </div>
+      <div class="preview-row">
+        <span class="preview-row-name">قضية تجارية – المالكي</span>
+        <span class="preview-pill pp-r">عاجل</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-row-name">نزاع عمالي – الخليج</span>
+        <span class="preview-pill pp-g">نشطة</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-row-name">استئناف – مجموعة النور</span>
+        <span class="preview-pill pp-y">معلقة</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-bottom">
+    <div class="brand-compliance">ZATCA Phase 2</div>
+    <div class="brand-compliance">SDAIA Compliant</div>
+    <div class="brand-compliance">AES-256 Encrypted</div>
+  </div>
+</div>
+
+<!-- FORM PANEL -->
+<div class="form-panel">
+  <div class="form-inner">
+
+    <div class="form-header">
+      <div class="form-eyebrow">تسجيل الدخول · Sign In</div>
+      <h1 class="form-title">مرحباً بعودتك</h1>
+      <p class="form-subtitle">
+        ما عندك حساب بعد؟
+        <a href="register.html">سجّل مكتبك مجاناً</a>
+      </p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-msg" id="errorMsg">
+      ⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="email">البريد الإلكتروني</label>
+      <input type="email" class="field-input" id="email"
+        placeholder="name@firm.com.sa" autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="password">
+        كلمة المرور
+        <a href="#" onclick="showReset();return false">نسيت كلمة المرور؟</a>
+      </label>
+      <div class="password-wrap">
+        <input type="password" class="field-input" id="password"
+          placeholder="••••••••" style="padding-left:3.5rem" autocomplete="current-password">
+        <button type="button" class="password-toggle" onclick="togglePwd()">إظهار</button>
+      </div>
+    </div>
+
+    <div class="remember-row">
+      <input type="checkbox" class="remember-check" id="remember" checked>
+      <label for="remember" class="remember-label">تذكّرني لمدة 30 يوماً</label>
+    </div>
+
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+      <span id="btnText">تسجيل الدخول</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+    <div style="background:var(--off-white);border:1px solid var(--border);border-radius:8px;padding:0.8rem 1rem;text-align:center;margin-bottom:1rem;">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--ink-mid);margin-bottom:0.3rem;">موكل وليس محامياً؟</div>
+      <a href="client-login.html" style="font-size:0.8rem;color:var(--accent);font-weight:600;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">تابع قضيتك من بوابة الموكل ←</a>
+    </div>
+
+    <div class="divider">أو</div>
+
+    <div class="register-box">
+      <div class="register-box-text">
+        ليس لديك حساب بعد؟ انضم لبرنامج الشراكة المحدود
+      </div>
+      <a href="register.html" class="btn-outline">
+        إنشاء حساب مجاناً ←
+      </a>
+    </div>
+
+    <!-- Reset password (hidden) -->
+    <div id="resetPanel" style="display:none;margin-top:2rem;padding:1.5rem;background:var(--off-white);border:1px solid var(--border);border-radius:10px;">
+      <div style="font-size:0.82rem;font-weight:700;color:var(--ink);margin-bottom:0.8rem">استعادة كلمة المرور</div>
+      <div style="font-size:0.78rem;color:var(--ink-light);margin-bottom:1rem;line-height:1.6">
+        أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين
+      </div>
+      <div class="field" style="margin-bottom:0.8rem">
+        <input type="email" class="field-input" placeholder="name@firm.com.sa" id="resetEmail">
+      </div>
+      <button onclick="sendReset()" style="width:100%;padding:0.7rem;background:var(--accent);color:white;border:none;border-radius:6px;font-size:0.85rem;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;">
+        إرسال رابط الاستعادة
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function togglePwd() {
+  const inp = document.getElementById('password');
+  const btn = document.querySelector('.password-toggle');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'إخفاء'; }
+  else { inp.type = 'password'; btn.textContent = 'إظهار'; }
+}
+
+function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pwd = document.getElementById('password').value;
+  const btn = document.getElementById('loginBtn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btnText');
+  const error = document.getElementById('errorMsg');
+
+  if (!email || !pwd) {
+    error.style.display = 'flex';
+    error.textContent = '⚠️ يرجى إدخال البريد الإلكتروني وكلمة المرور';
+    return;
+  }
+
+  var firmData = null;
+  try { firmData = JSON.parse(localStorage.getItem('firm_data') || 'null'); } catch(e) {}
+  if (!firmData) {
+    error.style.display = 'flex';
+    error.textContent = '⚠️ لا يوجد حساب مسجّل — يرجى إنشاء حساب أولاً';
+    return;
+  }
+  if (email !== firmData.email) {
+    error.style.display = 'flex';
+    error.textContent = '⚠️ البريد الإلكتروني غير مسجّل';
+    return;
+  }
+
+  error.style.display = 'none';
+  spinner.style.display = 'block';
+  btnText.textContent = 'جاري الدخول...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    window.location.href = 'dashboard.html';
+  }, 1200);
+}
+
+function showReset() {
+  const panel = document.getElementById('resetPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function sendReset() {
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) return;
+  document.getElementById('resetPanel').innerHTML =
+    '<div style="text-align:center;padding:0.5rem 0"><div style="font-size:1.5rem;margin-bottom:0.5rem">✓</div><div style="font-size:0.85rem;font-weight:700;color:var(--accent);margin-bottom:0.3rem">تم الإرسال!</div><div style="font-size:0.78rem;color:var(--ink-light)">تحقق من بريدك الإلكتروني</div></div>';
+}
+
+// Allow Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+  <script src="sidebar-badges.js"></script>
+</body>
+</html>

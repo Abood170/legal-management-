@@ -1,0 +1,1443 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الإعدادات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; animation: pageIn 0.2s ease both; }
+    @keyframes pageIn { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+
+    /* ── App Sidebar ── */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* ── Main / Topbar ── */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; min-width: 190px; }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+
+    /* ── Content ── */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+
+    /* ── Settings layout ── */
+    .settings-layout { display: grid; grid-template-columns: 220px 1fr; gap: 1.2rem; align-items: start; }
+    .settings-menu { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); position: sticky; top: 1rem; }
+    .sm-head { padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.72rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 1.5px; text-transform: uppercase; }
+    .sm-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.2rem; font-size: 0.8rem; color: var(--ink-light); cursor: pointer; transition: all 0.15s; border-right: 2px solid transparent; user-select: none; }
+    .sm-item:hover { background: var(--off-white); color: var(--ink); }
+    .sm-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 700; }
+    .sm-icon { font-size: 0.9rem; width: 18px; text-align: center; flex-shrink: 0; }
+
+    /* ── Section panels ── */
+    .settings-panel { display: none; flex-direction: column; gap: 1.2rem; }
+    .settings-panel.active { display: flex; animation: panelFade 0.18s ease; }
+    @keyframes panelFade { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+
+    .set-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); }
+    .set-card-head { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); }
+    .set-card-title { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+    .set-card-sub { font-size: 0.66rem; color: var(--ink-muted); margin-top: 2px; }
+    .set-card-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* ── Form elements ── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.32rem; }
+    .form-label { font-size: 0.71rem; font-weight: 600; color: var(--ink-mid); display: flex; align-items: center; gap: 0.35rem; }
+    .form-input, .form-select, .form-textarea { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .verified-badge { background: rgba(22,163,74,0.1); color: var(--green); border: 1px solid rgba(22,163,74,0.2); border-radius: 2rem; font-size: 0.58rem; font-weight: 700; padding: 1px 6px; }
+    .input-suffix { position: relative; }
+    .input-suffix .form-input { padding-left: 2.5rem; }
+    .suffix-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: var(--green); pointer-events: none; }
+
+    /* Buttons */
+    .btn-save { background: var(--accent); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; width: 100%; letter-spacing: 0.3px; }
+    .btn-save:hover { background: var(--accent-light); }
+    .btn-save.saved { background: var(--green); }
+    .btn-save.saving { opacity: 0.7; cursor: not-allowed; }
+    .btn-new { background: var(--accent); color: white; padding: 0.42rem 0.9rem; border-radius: 7px; font-size: 0.75rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.2); padding: 0.5rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-danger:hover { background: var(--red); color: white; }
+    .btn-outline { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.4rem 0.85rem; border-radius: 7px; font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; white-space: nowrap; }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-disabled { opacity: 0.5; cursor: not-allowed !important; }
+
+    /* ── Avatar ── */
+    .avatar-section { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-dim); border: 3px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 900; color: var(--accent); position: relative; cursor: pointer; transition: all 0.2s; }
+    .avatar-circle:hover { border-color: var(--accent); }
+    .avatar-circle:hover .avatar-overlay { opacity: 1; }
+    .avatar-overlay { position: absolute; inset: 0; border-radius: 50%; background: rgba(28,94,62,0.6); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0; transition: opacity 0.2s; }
+    .avatar-name { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
+    .avatar-role { font-size: 0.67rem; color: var(--ink-muted); }
+    .btn-change-photo { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 4px 12px; border-radius: 6px; font-size: 0.68rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-change-photo:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Toggle switch ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-of-type { border-bottom: none; }
+    .toggle-info { display: flex; align-items: center; gap: 0.55rem; }
+    .toggle-icon { font-size: 1rem; }
+    .toggle-label { font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+    .toggle-sub { font-size: 0.64rem; color: var(--ink-muted); }
+    .toggle-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track { position: absolute; inset: 0; border-radius: 22px; background: var(--border-mid); cursor: pointer; transition: background 0.25s; }
+    .toggle-track::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: white; top: 3px; right: 3px; transition: right 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle-switch input:checked + .toggle-track { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-track::after { right: calc(100% - 19px); }
+
+    /* ── Data table ── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); }
+    .data-table td { padding: 0.7rem 1.2rem; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background 0.1s ease; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .user-chip { display: flex; align-items: center; gap: 0.5rem; }
+    .uc-av { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .uc-name { font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+    .uc-email { font-size: 0.62rem; color: var(--ink-muted); }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; }
+    .pill-active { background: rgba(22,163,74,0.08); color: var(--green); border: 1px solid rgba(22,163,74,0.18); }
+    .pill-owner { background: rgba(184,149,42,0.1); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); }
+    .pill-full  { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .pill-limited { background: var(--off-white); color: var(--ink-muted); border: 1px solid var(--border); }
+    .row-btn { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 2px 9px; border-radius: 5px; font-size: 0.62rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .row-btn-red { border-color: rgba(220,38,38,0.2); color: var(--red); }
+    .row-btn-red:hover { background: var(--red-dim); border-color: var(--red); }
+
+    /* ── Password strength ── */
+    .pw-strength { margin-top: 0.3rem; }
+    .pw-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .pw-fill { height: 100%; border-radius: 2px; width: 0%; transition: width 0.3s, background 0.3s; }
+    .pw-label { font-size: 0.62rem; color: var(--ink-muted); margin-top: 0.2rem; }
+
+    /* ── Sessions table ── */
+    .session-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .session-row:last-child { border-bottom: none; }
+    .session-device { display: flex; align-items: center; gap: 0.6rem; }
+    .session-icon { font-size: 1.3rem; }
+    .session-name { font-size: 0.8rem; font-weight: 600; color: var(--ink); }
+    .session-meta { font-size: 0.63rem; color: var(--ink-muted); }
+    .session-badge { background: var(--accent-dim); color: var(--accent); font-size: 0.58rem; font-weight: 700; padding: 1px 7px; border-radius: 2rem; border: 1px solid var(--accent-border); }
+
+    /* ── Plan card ── */
+    .plan-card { background: linear-gradient(135deg, #0d3322, #1a5e3f); border-radius: 12px; padding: 1.5rem; color: white; position: relative; overflow: hidden; }
+    .plan-card::before { content: ''; position: absolute; top: -40px; left: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+    .plan-badge { background: linear-gradient(135deg, var(--gold), #e6b93a); color: white; font-size: 0.6rem; font-weight: 900; padding: 3px 10px; border-radius: 2rem; display: inline-block; margin-bottom: 0.6rem; letter-spacing: 0.5px; }
+    .plan-name { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.2rem; letter-spacing: -0.5px; }
+    .plan-tagline { font-size: 0.72rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+    .plan-features { display: flex; flex-direction: column; gap: 0.35rem; }
+    .plan-feat { font-size: 0.75rem; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 0.4rem; }
+    .plan-feat::before { content: '✓'; color: #6ee7a8; font-weight: 700; }
+    .usage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .usage-item { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; }
+    .usage-label { font-size: 0.67rem; color: var(--ink-muted); font-weight: 600; margin-bottom: 0.3rem; }
+    .usage-val { font-size: 0.95rem; font-weight: 900; color: var(--ink); margin-bottom: 0.4rem; }
+    .usage-track { height: 5px; background: var(--border-mid); border-radius: 2px; overflow: hidden; }
+    .usage-fill-green { height: 100%; background: var(--accent); border-radius: 2px; }
+
+    /* ── Integration cards ── */
+    .integrations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .int-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.18s; }
+    .int-card:hover { border-color: var(--border-mid); box-shadow: 0 4px 16px rgba(15,20,25,0.08); }
+    .int-header { display: flex; align-items: center; gap: 0.6rem; }
+    .int-logo { font-size: 1.6rem; width: 40px; height: 40px; background: var(--off-white); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .int-name { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
+    .int-desc { font-size: 0.63rem; color: var(--ink-muted); }
+    .int-status-green { background: rgba(22,163,74,0.1); color: var(--green); border: 1px solid rgba(22,163,74,0.2); font-size: 0.6rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; display: inline-flex; align-items: center; gap: 3px; width: fit-content; }
+    .int-status-gray  { background: var(--off-white); color: var(--ink-muted); border: 1px solid var(--border); font-size: 0.6rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; display: inline-flex; align-items: center; gap: 3px; width: fit-content; }
+    .int-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem; }
+
+    /* ── Appearance ── */
+    .theme-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+    .theme-opt { border: 2px solid var(--border); border-radius: 10px; padding: 0.8rem; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .theme-opt.selected { border-color: var(--accent); background: var(--accent-dim); }
+    .theme-preview { height: 40px; border-radius: 6px; margin-bottom: 0.5rem; }
+    .tp-light { background: linear-gradient(135deg, #f7f6f3 50%, #fff 50%); border: 1px solid var(--border); }
+    .tp-dark { background: linear-gradient(135deg, #1a1f2e 50%, #0f1419 50%); }
+    .tp-auto { background: linear-gradient(135deg, #f7f6f3 50%, #1a1f2e 50%); }
+    .theme-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .lang-opts { display: flex; gap: 0.7rem; }
+    .lang-btn { flex: 1; padding: 0.5rem; border: 2px solid var(--border); border-radius: 8px; font-size: 0.78rem; font-weight: 600; font-family: 'Cairo', sans-serif; cursor: pointer; background: var(--off-white); color: var(--ink-light); text-align: center; transition: all 0.15s; }
+    .lang-btn.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+    .size-opts { display: flex; gap: 0.7rem; }
+    .size-btn { flex: 1; padding: 0.45rem; border: 2px solid var(--border); border-radius: 8px; font-size: 0.75rem; font-weight: 600; font-family: 'Cairo', sans-serif; cursor: pointer; background: var(--off-white); color: var(--ink-light); text-align: center; transition: all 0.15s; }
+    .size-btn.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+
+    /* ── User invite checkboxes ── */
+    .perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .perm-item { display: flex; align-items: center; gap: 0.45rem; font-size: 0.75rem; color: var(--ink-mid); }
+    .perm-item input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+
+    /* ── Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--white); border-radius: 14px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); transform: translateY(18px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: linear-gradient(to bottom, var(--off-white), var(--white)); }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+
+    /* ── Toast ── */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    @media (max-width: 1100px) { .settings-layout { grid-template-columns: 1fr; } .settings-menu { position: static; } }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } }
+    @media (max-width: 768px) { .btn-new, .row-btn { min-height: 44px; } }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .integrations-grid { grid-template-columns: 1fr; } .theme-options { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .modal-overlay { align-items: flex-end; } .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; } }
+
+    /* ── Roles legend ── */
+    .roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .role-legend { border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .rl-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 9px; border-radius: 2rem; display: inline-flex; align-items: center; gap: 4px; width: fit-content; }
+    .rl-badge-owner { background: rgba(184,149,42,0.12); color: var(--gold); border: 1px solid rgba(184,149,42,0.25); }
+    .rl-badge-senior { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .rl-badge-lawyer { background: rgba(59,130,246,0.08); color: #3B82F6; border: 1px solid rgba(59,130,246,0.2); }
+    .rl-desc { font-size: 0.68rem; color: var(--ink-muted); line-height: 1.5; }
+
+    /* ── Users summary table ── */
+    .perm-mini { display: flex; gap: 3px; flex-wrap: wrap; }
+    .pm-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .pm-green { background: var(--accent); }
+    .pm-red   { background: var(--red); }
+    .pm-gold  { background: var(--gold); }
+
+    /* ── Matrix ── */
+    .matrix-wrap { overflow-x: auto; }
+    .matrix-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    .matrix-table th { padding: 0.5rem 0.6rem; font-size: 0.6rem; font-weight: 700; color: var(--ink-muted); text-align: center; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+    .matrix-table th.col-user { text-align: right; padding-right: 1.1rem; min-width: 170px; }
+    .matrix-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+    .matrix-table td.col-user { padding-right: 1.1rem; text-align: right; }
+    .matrix-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .matrix-table tr:last-child td { border-bottom: none; }
+    .mx-user { display: flex; align-items: center; gap: 0.5rem; }
+    .mx-av { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.52rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .mx-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .mx-role { font-size: 0.6rem; color: var(--ink-muted); }
+    .mx-actions { display: flex; gap: 3px; justify-content: center; margin-top: 2px; }
+    .mx-sel-btn { font-size: 0.55rem; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border); background: none; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo',sans-serif; transition: all 0.12s; white-space: nowrap; }
+    .mx-sel-btn:hover { border-color: var(--accent); color: var(--accent); }
+    /* Matrix checkbox */
+    .mx-cb { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--border-mid); cursor: pointer; transition: all 0.15s; position: relative; background: var(--off-white); }
+    .mx-cb:checked { background: var(--accent); border-color: var(--accent); }
+    .mx-cb:checked::after { content: '✓'; position: absolute; top: -1px; left: 2px; font-size: 0.65rem; color: white; font-weight: 700; }
+    .mx-cb:hover:not(:disabled) { border-color: var(--accent); }
+    .mx-cb:disabled { opacity: 0.35; cursor: not-allowed; }
+    .matrix-save-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.1rem; border-top: 1px solid var(--border); background: var(--off-white); }
+    .matrix-save-hint { font-size: 0.68rem; color: var(--ink-muted); }
+
+    /* ── Audit log ── */
+    .audit-list { display: flex; flex-direction: column; gap: 0; }
+    .audit-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.65rem 1.1rem; border-bottom: 1px solid var(--border); }
+    .audit-item:last-child { border-bottom: none; }
+    .audit-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .audit-dot-green { background: var(--green); }
+    .audit-dot-red   { background: var(--red); }
+    .audit-dot-gold  { background: var(--gold); }
+    .audit-text { font-size: 0.76rem; color: var(--ink-mid); flex: 1; }
+    .audit-time { font-size: 0.63rem; color: var(--ink-muted); white-space: nowrap; }
+
+    /* ── Security alerts ── */
+    .sec-alert { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--border); }
+    .sec-alert:last-child { border-bottom: none; }
+    .sec-alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .sec-alert-text { font-size: 0.76rem; color: var(--ink-mid); flex: 1; }
+    .sec-alert-badge-gold  { background: rgba(184,149,42,0.1); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.6rem; font-weight: 700; padding: 1px 8px; border-radius: 2rem; white-space: nowrap; }
+    .sec-alert-badge-green { background: rgba(22,163,74,0.1); color: var(--green); border: 1px solid rgba(22,163,74,0.2); font-size: 0.6rem; font-weight: 700; padding: 1px 8px; border-radius: 2rem; white-space: nowrap; }
+
+    /* ── Role card selector (modal) ── */
+    .role-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.6rem; }
+    .role-card-opt { border: 2px solid var(--border); border-radius: 9px; padding: 0.7rem 0.6rem; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--off-white); }
+    .role-card-opt:hover { border-color: var(--accent-border); }
+    .role-card-opt.selected { border-color: var(--accent); background: var(--accent-dim); }
+    .rco-icon { font-size: 1.3rem; margin-bottom: 0.2rem; }
+    .rco-label { font-size: 0.7rem; font-weight: 700; color: var(--ink); }
+    .rco-sub { font-size: 0.58rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* ── Temp password field ── */
+    .pw-gen-row { display: flex; gap: 0.5rem; align-items: center; }
+    .pw-gen-row .form-input { font-family: monospace; letter-spacing: 2px; flex: 1; }
+    .btn-copy { background: var(--off-white); border: 1px solid var(--border-mid); color: var(--ink-muted); padding: 0.52rem 0.7rem; border-radius: 7px; font-size: 0.75rem; cursor: pointer; font-family: 'Cairo',sans-serif; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+    .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-copy.copied { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    @media (max-width: 800px) { .roles-grid { grid-template-columns: 1fr; } .matrix-table { min-width: 600px; } }
+
+    /* ── z-index stacking fix ── */
+    .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; overflow-y: auto !important; align-items: flex-start !important; justify-content: center !important; padding: 2rem 1rem !important; }
+    .modal-overlay.open { display: flex !important; }
+    .modal-card { position: relative !important; z-index: 10000 !important; margin: auto !important; flex-shrink: 0 !important; }
+    .set-card, .int-card, .usage-item { isolation: isolate; }
+  </style>
+</head>
+<body>
+  <!-- App Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item active" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">الإعدادات</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في الإعدادات...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">الإعدادات</div>
+          <div class="ph-sub">إدارة حساب المكتب والتفضيلات والتكاملات</div>
+        </div>
+      </div>
+
+      <div class="settings-layout">
+
+        <!-- Settings Menu -->
+        <div class="settings-menu">
+          <div class="sm-head">القائمة</div>
+          <div class="sm-item active" data-section="profile"><span class="sm-icon">👤</span> الملف الشخصي</div>
+          <div class="sm-item" data-section="office"><span class="sm-icon">🏢</span> معلومات المكتب</div>
+          <div class="sm-item" data-section="users"><span class="sm-icon">👥</span> المستخدمون والصلاحيات</div>
+          <div class="sm-item" data-section="notifs"><span class="sm-icon">🔔</span> الإشعارات</div>
+          <div class="sm-item" data-section="security"><span class="sm-icon">🔒</span> الأمان وكلمة المرور</div>
+          <div class="sm-item" data-section="billing"><span class="sm-icon">🧾</span> الفوترة والاشتراك</div>
+          <div class="sm-item" data-section="integrations"><span class="sm-icon">🔗</span> التكاملات</div>
+          <div class="sm-item" data-section="appearance"><span class="sm-icon">🎨</span> المظهر واللغة</div>
+          <div class="sm-item" data-section="demo"><span class="sm-icon">🗂️</span> البيانات التجريبية</div>
+        </div>
+
+        <!-- Panels -->
+        <div id="panelsContainer">
+
+          <!-- 1. Profile -->
+          <div class="settings-panel active" id="panel-profile">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">الملف الشخصي</div>
+                <div class="set-card-sub">معلوماتك الشخصية داخل النظام</div>
+              </div>
+              <div class="set-card-body">
+                <div class="avatar-section">
+                  <div class="avatar-circle" title="تغيير الصورة">
+                    ع.م
+                    <div class="avatar-overlay">📷</div>
+                  </div>
+                  <div>
+                    <div class="avatar-name">عبدالعزيز المطيري</div>
+                    <div class="avatar-role">شريك مؤسس · صاحب المكتب</div>
+                  </div>
+                  <button class="btn-change-photo">تغيير الصورة</button>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">الاسم الأول</label>
+                    <input type="text" class="form-input" value="عبدالعزيز">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">الاسم الأخير</label>
+                    <input type="text" class="form-input" value="المطيري">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">البريد الإلكتروني <span class="verified-badge">✓ موثق</span></label>
+                  <div class="input-suffix">
+                    <input type="email" class="form-input" value="abdulaziz@almuteiri.law">
+                    <span class="suffix-icon">✓</span>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">رقم الهاتف</label>
+                    <input type="tel" class="form-input" value="+966 50 123 4567">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">اللقب الوظيفي</label>
+                    <input type="text" class="form-input" value="شريك مؤسس">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">المدينة</label>
+                  <select class="form-select">
+                    <option selected>الرياض</option>
+                    <option>جدة</option>
+                    <option>مكة المكرمة</option>
+                    <option>المدينة المنورة</option>
+                    <option>الدمام</option>
+                    <option>الخبر</option>
+                    <option>تبوك</option>
+                    <option>أبها</option>
+                  </select>
+                </div>
+                <button class="btn-save" onclick="saveSection(this)">حفظ التغييرات</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Office -->
+          <div class="settings-panel" id="panel-office">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">معلومات المكتب</div>
+                <div class="set-card-sub">البيانات الرسمية للمكتب كما تظهر في الفواتير والوثائق</div>
+              </div>
+              <div class="set-card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">اسم المكتب</label>
+                    <input type="text" class="form-input firm-name-input" value="مكتب المطيري للمحاماة">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">رقم السجل التجاري</label>
+                    <input type="text" class="form-input" value="1010XXXXXX">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">رقم ترخيص هيئة المحامين</label>
+                    <input type="text" class="form-input" value="SAR-2019-XXXXX">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">الموقع الإلكتروني</label>
+                    <input type="url" class="form-input" value="https://almuteiri.law">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">العنوان</label>
+                  <input type="text" class="form-input" value="طريق الملك فهد، برج المملكة، الدور 18، الرياض">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">شعار المكتب</label>
+                  <div style="border: 2px dashed var(--border-mid); border-radius: 10px; padding: 1.2rem; text-align: center; cursor: pointer; background: var(--off-white); transition: all 0.15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border-mid)'">
+                    <div style="font-size:1.6rem;margin-bottom:0.35rem;">🏛️</div>
+                    <div style="font-size:0.75rem;font-weight:600;color:var(--ink-mid);">اسحب الشعار أو انقر للرفع</div>
+                    <div style="font-size:0.62rem;color:var(--ink-muted);margin-top:0.2rem;">PNG · SVG · JPG — بحد أقصى 2 MB</div>
+                  </div>
+                </div>
+                <button class="btn-save" onclick="saveSection(this)">حفظ التغييرات</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Users & Permissions -->
+          <div class="settings-panel" id="panel-users">
+
+            <!-- Roles legend -->
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">تعريف الأدوار</div>
+                <div class="set-card-sub">مستويات الوصول المتاحة في النظام</div>
+              </div>
+              <div class="set-card-body">
+                <div class="roles-grid">
+                  <div class="role-legend">
+                    <span class="rl-badge rl-badge-owner">👑 صاحب المكتب</span>
+                    <div class="rl-desc">وصول كامل لكل شيء — إدارة المستخدمين والإعدادات والتقارير والفواتير</div>
+                  </div>
+                  <div class="role-legend">
+                    <span class="rl-badge rl-badge-senior">⚖️ محامي أول</span>
+                    <div class="rl-desc">وصول لجميع القضايا والجلسات والفواتير مع تقارير محدودة — بدون إدارة المستخدمين</div>
+                  </div>
+                  <div class="role-legend">
+                    <span class="rl-badge rl-badge-lawyer">📋 محامي</span>
+                    <div class="rl-desc">وصول لقضاياه وجلساته وأرشيفه فقط — بدون صلاحيات مالية أو إدارية</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Users summary table -->
+            <div class="set-card">
+              <div class="set-card-head" style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div class="set-card-title">المستخدمون النشطون</div>
+                  <div class="set-card-sub" id="usersCountSub">1 مستخدم في النظام</div>
+                </div>
+                <button class="btn-new" id="btnAddUser">+ إضافة مستخدم</button>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>المستخدم</th>
+                    <th>الدور</th>
+                    <th>آخر دخول</th>
+                    <th>الحالة</th>
+                    <th>الصلاحيات</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td><div class="user-chip"><div class="uc-av">ع.م</div><div><div class="uc-name">عبدالعزيز المطيري</div><div class="uc-email">abdulaziz@almuteiri.law</div></div></div></td>
+                    <td><span class="rl-badge rl-badge-owner">👑 صاحب المكتب</span></td>
+                    <td style="font-size:0.72rem;color:var(--green);font-weight:600;">اليوم</td>
+                    <td><span class="pill pill-active">نشط</span></td>
+                    <td><div class="perm-mini"><span class="pm-dot pm-green" title="مسموح"></span><span class="pm-dot pm-green" title="مسموح"></span><span class="pm-dot pm-green" title="مسموح"></span><span class="pm-dot pm-green" title="مسموح"></span><span class="pm-dot pm-green" title="مسموح"></span></div></td>
+                    <td>—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Permissions matrix -->
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">مصفوفة الصلاحيات</div>
+                <div class="set-card-sub">انقر على أي خانة لمنح أو سحب الصلاحية فوراً</div>
+              </div>
+              <div class="matrix-wrap">
+                <table class="matrix-table" id="matrixTable">
+                  <thead>
+                    <tr>
+                      <th class="col-user">المستخدم</th>
+                      <th>عرض<br>الدعاوى</th>
+                      <th>إضافة<br>دعاوى</th>
+                      <th>حذف<br>دعاوى</th>
+                      <th>عرض<br>الجلسات</th>
+                      <th>إضافة<br>جلسات</th>
+                      <th>عرض<br>الفواتير</th>
+                      <th>إصدار<br>فواتير</th>
+                      <th>عرض<br>الموكلين</th>
+                      <th>إضافة<br>موكلين</th>
+                      <th>عرض<br>الأرشيف</th>
+                      <th>رفع<br>مستندات</th>
+                      <th>حذف<br>مستندات</th>
+                      <th>عرض<br>التقارير</th>
+                      <th>إدارة<br>المستخدمين</th>
+                      <th>الإعدادات<br>العامة</th>
+                    </tr>
+                  </thead>
+                  <tbody id="matrixBody">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="matrix-save-bar">
+                <span class="matrix-save-hint">🔒 يتم تطبيق التغييرات فور الحفظ على جميع الأجهزة</span>
+                <button class="btn-save" style="width:auto;padding:0.48rem 1.4rem;" id="btnSaveMatrix" onclick="saveMatrix()">حفظ الصلاحيات</button>
+              </div>
+            </div>
+
+            <!-- Audit log -->
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">سجل تغييرات الصلاحيات</div>
+                <div class="set-card-sub">آخر التعديلات على صلاحيات المستخدمين</div>
+              </div>
+              <div class="audit-list" id="auditList">
+                <div style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.8rem">لا يوجد سجل تغييرات بعد</div>
+              </div>
+            </div>
+
+            <!-- Security alerts -->
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">تنبيهات الأمان</div>
+                <div class="set-card-sub">حالة أمان حسابات المستخدمين</div>
+              </div>
+              <div class="sec-alert">
+                <span class="sec-alert-icon">🟢</span>
+                <div class="sec-alert-text">لا توجد تنبيهات أمان حالياً</div>
+                <span class="sec-alert-badge-green">آمن</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 4. Notifications -->
+          <div class="settings-panel" id="panel-notifs">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">الإشعارات</div>
+                <div class="set-card-sub">تحكم في كيفية وصول التنبيهات إليك</div>
+              </div>
+              <div class="set-card-body">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-icon">🔔</span>
+                    <div><div class="toggle-label">تنبيهات الجلسات عبر واتساب</div><div class="toggle-sub">إشعار فوري قبل كل جلسة</div></div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-icon">📱</span>
+                    <div><div class="toggle-label">تنبيهات الجلسات عبر SMS</div><div class="toggle-sub">رسالة نصية قصيرة للموكل والمحامي</div></div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-icon">📧</span>
+                    <div><div class="toggle-label">تقرير أسبوعي عبر البريد الإلكتروني</div><div class="toggle-sub">ملخص الأنشطة كل إثنين صباحاً</div></div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-icon">⚠️</span>
+                    <div><div class="toggle-label">تنبيهات الفواتير المتأخرة</div><div class="toggle-sub">تذكير عند تجاوز موعد السداد</div></div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-icon">📊</span>
+                    <div><div class="toggle-label">تقرير الأداء الشهري</div><div class="toggle-sub">إحصائيات مفصلة في نهاية كل شهر</div></div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox"><span class="toggle-track"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <span class="toggle-icon">🔒</span>
+                    <div><div class="toggle-label">تنبيهات تسجيل الدخول الجديد</div><div class="toggle-sub">إشعار عند تسجيل دخول من جهاز جديد</div></div>
+                  </div>
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"></span></label>
+                </div>
+
+                <div style="padding-top:0.4rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:0.8rem;">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">التذكير قبل الجلسة بـ</label>
+                      <select class="form-select">
+                        <option>ساعتين</option>
+                        <option selected>24 ساعة</option>
+                        <option>48 ساعة</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">رقم واتساب للإشعارات</label>
+                      <input type="tel" class="form-input" value="+966 50 123 4567">
+                    </div>
+                  </div>
+                </div>
+                <button class="btn-save" onclick="saveSection(this)">حفظ إعدادات الإشعارات</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Security -->
+          <div class="settings-panel" id="panel-security">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">تغيير كلمة المرور</div>
+                <div class="set-card-sub">يُنصح بتغييرها كل 90 يوماً</div>
+              </div>
+              <div class="set-card-body">
+                <div class="form-group">
+                  <label class="form-label">كلمة المرور الحالية</label>
+                  <input type="password" class="form-input" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">كلمة المرور الجديدة</label>
+                  <input type="password" class="form-input" id="newPw" placeholder="••••••••" oninput="checkStrength(this.value)">
+                  <div class="pw-strength">
+                    <div class="pw-track"><div class="pw-fill" id="pwFill"></div></div>
+                    <div class="pw-label" id="pwLabel">أدخل كلمة مرور جديدة</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+                  <input type="password" class="form-input" placeholder="••••••••">
+                </div>
+                <button class="btn-save" onclick="saveSection(this)">تحديث كلمة المرور</button>
+              </div>
+            </div>
+
+            <div class="set-card">
+              <div class="set-card-head" style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div class="set-card-title">المصادقة الثنائية (2FA)</div>
+                  <div class="set-card-sub">طبقة حماية إضافية لحسابك</div>
+                </div>
+                <label class="toggle-switch" style="margin-top:0">
+                  <input type="checkbox" id="toggle2fa">
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+              <div class="set-card-body" style="padding-top:0.8rem;">
+                <p style="font-size:0.75rem;color:var(--ink-muted);">عند التفعيل، سيُطلب منك إدخال رمز التحقق عبر تطبيق المصادقة في كل تسجيل دخول.</p>
+              </div>
+            </div>
+
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">الجلسات النشطة</div>
+                <div class="set-card-sub">الأجهزة المتصلة حالياً بحسابك</div>
+              </div>
+              <div class="set-card-body">
+                <div class="session-row">
+                  <div class="session-device">
+                    <span class="session-icon">💻</span>
+                    <div>
+                      <div class="session-name">MacBook Pro — Chrome</div>
+                      <div class="session-meta">الرياض، المملكة العربية السعودية · الآن</div>
+                    </div>
+                  </div>
+                  <span class="session-badge">الجهاز الحالي</span>
+                </div>
+                <div class="session-row">
+                  <div class="session-device">
+                    <span class="session-icon">📱</span>
+                    <div>
+                      <div class="session-name">iPhone 15 — Safari</div>
+                      <div class="session-meta">الرياض، المملكة العربية السعودية · منذ ساعتين</div>
+                    </div>
+                  </div>
+                  <button class="row-btn row-btn-red" onclick="showToast('تم إنهاء الجلسة')">إنهاء الجلسة</button>
+                </div>
+                <div class="session-row">
+                  <div class="session-device">
+                    <span class="session-icon">💻</span>
+                    <div>
+                      <div class="session-name">Windows PC — Edge</div>
+                      <div class="session-meta">جدة، المملكة العربية السعودية · منذ يوم</div>
+                    </div>
+                  </div>
+                  <button class="row-btn row-btn-red" onclick="showToast('تم إنهاء الجلسة')">إنهاء الجلسة</button>
+                </div>
+                <button class="btn-danger" style="margin-top:0.4rem;" onclick="showToast('تم تسجيل الخروج من جميع الأجهزة')">تسجيل الخروج من جميع الأجهزة</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Billing -->
+          <div class="settings-panel" id="panel-billing">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">خطة الاشتراك</div>
+                <div class="set-card-sub">خطتك الحالية وتفاصيل الاستخدام</div>
+              </div>
+              <div class="set-card-body">
+                <div class="plan-card">
+                  <div class="plan-badge">✦ نسخة المؤسس</div>
+                  <div class="plan-name">Founder's Edition</div>
+                  <div class="plan-tagline">مجانية للأبد — شكراً لكونك من أوائل المستخدمين</div>
+                  <div class="plan-features">
+                    <div class="plan-feat">جميع الميزات بدون قيود</div>
+                    <div class="plan-feat">مستخدمون غير محدودين</div>
+                    <div class="plan-feat">100 GB تخزين سحابي</div>
+                    <div class="plan-feat">دعم أولوية على مدار الساعة</div>
+                    <div class="plan-feat">تكامل ZATCA وناجز</div>
+                  </div>
+                </div>
+
+                <div class="usage-grid">
+                  <div class="usage-item">
+                    <div class="usage-label">📦 التخزين</div>
+                    <div class="usage-val">24.3 / 100 GB</div>
+                    <div class="usage-track"><div class="usage-fill-green" style="width:24.3%"></div></div>
+                  </div>
+                  <div class="usage-item">
+                    <div class="usage-label">👥 المستخدمون</div>
+                    <div class="usage-val">5 / غير محدود</div>
+                    <div class="usage-track"><div class="usage-fill-green" style="width:5%"></div></div>
+                  </div>
+                  <div class="usage-item">
+                    <div class="usage-label">⚖️ الدعاوى النشطة</div>
+                    <div class="usage-val">142 / غير محدود</div>
+                    <div class="usage-track"><div class="usage-fill-green" style="width:15%"></div></div>
+                  </div>
+                  <div class="usage-item">
+                    <div class="usage-label">🗂️ المستندات</div>
+                    <div class="usage-val">1,247 / غير محدود</div>
+                    <div class="usage-track"><div class="usage-fill-green" style="width:12%"></div></div>
+                  </div>
+                </div>
+
+                <button class="btn-save btn-disabled" title="أنت على أفضل خطة" onclick="void(0)" style="opacity:0.5;cursor:not-allowed;">ترقية الخطة — أنت على أفضل خطة ✦</button>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="set-card" style="border-color:rgba(220,38,38,0.2);">
+              <div class="set-card-head" style="background:var(--red-dim);">
+                <div class="set-card-title" style="color:var(--red);">منطقة الخطر</div>
+                <div class="set-card-sub">هذه الإجراءات لا يمكن التراجع عنها</div>
+              </div>
+              <div class="set-card-body">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                  <div>
+                    <div style="font-size:0.82rem;font-weight:700;color:var(--ink);">مسح جميع البيانات</div>
+                    <div style="font-size:0.68rem;color:var(--ink-muted);margin-top:2px;">حذف جميع القضايا والجلسات والموكلين والمهام والأتعاب والفواتير والأرشيف من هذا الجهاز</div>
+                  </div>
+                  <button class="btn-danger" style="white-space:nowrap;" onclick="clearAllData()">مسح جميع البيانات</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Integrations -->
+          <div class="settings-panel" id="panel-integrations">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">التكاملات</div>
+                <div class="set-card-sub">ربط المكتب بالمنصات الحكومية والخدمات الخارجية</div>
+              </div>
+              <div class="set-card-body">
+                <div class="integrations-grid">
+                  <div class="int-card">
+                    <div class="int-header">
+                      <div class="int-logo">⚖️</div>
+                      <div>
+                        <div class="int-name">ناجز</div>
+                        <div class="int-desc">منصة وزارة العدل للتقاضي الإلكتروني</div>
+                      </div>
+                    </div>
+                    <div class="int-status-green">● متصل ✓</div>
+                    <div class="int-actions">
+                      <span style="font-size:0.63rem;color:var(--ink-muted);">آخر مزامنة: قبل 3 دقائق</span>
+                      <button class="btn-outline">إدارة</button>
+                    </div>
+                  </div>
+                  <div class="int-card">
+                    <div class="int-header">
+                      <div class="int-logo">🧾</div>
+                      <div>
+                        <div class="int-name">ZATCA</div>
+                        <div class="int-desc">هيئة الزكاة والضريبة والجمارك</div>
+                      </div>
+                    </div>
+                    <div class="int-status-green">● متصل ✓</div>
+                    <div class="int-actions">
+                      <span style="font-size:0.63rem;color:var(--ink-muted);">الفاتورة الإلكترونية نشطة</span>
+                      <button class="btn-outline">إدارة</button>
+                    </div>
+                  </div>
+                  <div class="int-card">
+                    <div class="int-header">
+                      <div class="int-logo">💬</div>
+                      <div>
+                        <div class="int-name">واتساب Business</div>
+                        <div class="int-desc">بوابة الإشعارات الفورية للموكلين</div>
+                      </div>
+                    </div>
+                    <div class="int-status-green">● متصل ✓</div>
+                    <div class="int-actions">
+                      <span style="font-size:0.63rem;color:var(--ink-muted);">+966 50 123 4567</span>
+                      <button class="btn-outline">إدارة</button>
+                    </div>
+                  </div>
+                  <div class="int-card" style="opacity:0.65;">
+                    <div class="int-header">
+                      <div class="int-logo">🪪</div>
+                      <div>
+                        <div class="int-name">أبشر</div>
+                        <div class="int-desc">منصة الهوية الرقمية الوطنية</div>
+                      </div>
+                    </div>
+                    <div class="int-status-gray">● قريباً</div>
+                    <div class="int-actions">
+                      <span style="font-size:0.63rem;color:var(--ink-muted);">قيد التطوير</span>
+                      <button class="btn-outline btn-disabled" disabled style="cursor:not-allowed;opacity:0.6;">ربط</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. Appearance -->
+          <div class="settings-panel" id="panel-appearance">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">المظهر واللغة</div>
+                <div class="set-card-sub">تخصيص تجربة الاستخدام</div>
+              </div>
+              <div class="set-card-body">
+                <div class="form-group">
+                  <label class="form-label">اللغة</label>
+                  <div class="lang-opts">
+                    <button class="lang-btn selected" onclick="selectLang(this)">العربية ✓</button>
+                    <button class="lang-btn" onclick="selectLang(this)">English</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">السمة اللونية</label>
+                  <div class="theme-options">
+                    <div class="theme-opt selected" onclick="selectTheme(this)">
+                      <div class="theme-preview tp-light"></div>
+                      <div class="theme-label">فاتح ✓</div>
+                    </div>
+                    <div class="theme-opt" onclick="selectTheme(this)">
+                      <div class="theme-preview tp-dark"></div>
+                      <div class="theme-label">داكن</div>
+                    </div>
+                    <div class="theme-opt" onclick="selectTheme(this)">
+                      <div class="theme-preview tp-auto"></div>
+                      <div class="theme-label">تلقائي</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">حجم الخط</label>
+                  <div class="size-opts">
+                    <button class="size-btn" onclick="selectSize(this)">صغير</button>
+                    <button class="size-btn selected" onclick="selectSize(this)">متوسط ✓</button>
+                    <button class="size-btn" onclick="selectSize(this)">كبير</button>
+                  </div>
+                </div>
+                <button class="btn-save" onclick="saveSection(this)">حفظ التفضيلات</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Demo Data -->
+          <div class="settings-panel" id="panel-demo">
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">البيانات التجريبية</div>
+                <div class="set-card-sub">تحميل بيانات نموذجية لاستعراض النظام — مناسبة للعرض والتجربة</div>
+              </div>
+              <div class="set-card-body">
+                <div style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:0.35rem;">ما سيتم تحميله</div>
+                  <ul style="font-size:0.78rem;color:var(--ink-mid);padding-right:1.2rem;line-height:2;margin:0;">
+                    <li>4 محامين نموذجيين (خالد، سارة، محمد، نورة)</li>
+                    <li>5 موكلين (أفراد وشركات)</li>
+                    <li>5 قضايا نشطة مع أرقام مرجعية</li>
+                    <li>3 جلسات قادمة (خلال الأيام 7 التالية)</li>
+                    <li>4 فواتير ضريبية (مدفوعة، معلقة، متأخرة)</li>
+                    <li>بيانات بوابة الموكل — رمز الدخول: 1234</li>
+                  </ul>
+                </div>
+                <button class="btn-save" id="btnSeedDemo" onclick="runSeed()">تحميل البيانات التجريبية</button>
+              </div>
+            </div>
+
+            <div class="set-card" style="border-color:rgba(220,38,38,0.25);background:rgba(220,38,38,0.02);">
+              <div class="set-card-head">
+                <div class="set-card-title" style="color:var(--red)">⚠️ مسح جميع البيانات</div>
+                <div class="set-card-sub">حذف كل البيانات المحفوظة في المتصفح — لا يمكن التراجع عن هذا الإجراء</div>
+              </div>
+              <div class="set-card-body">
+                <button class="btn-save" style="background:var(--red);border-color:var(--red);" onclick="confirmReset()">مسح جميع البيانات والبدء من جديد</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /panelsContainer -->
+      </div><!-- /settings-layout -->
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- Add User Modal -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-card" style="max-width:580px;">
+      <div class="modal-head">
+        <div class="modal-title">إضافة مستخدم جديد</div>
+        <button class="modal-close" id="btnCloseUserModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل <span style="color:var(--red)">*</span></label>
+            <input type="text" class="form-input" id="uName" placeholder="الاسم الكامل">
+          </div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني <span style="color:var(--red)">*</span></label>
+            <input type="email" class="form-input" id="uEmail" placeholder="email@almuteiri.law">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">رقم الهاتف <span style="color:var(--red)">*</span></label>
+          <input type="tel" class="form-input" id="uPhone" placeholder="+966 5X XXX XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الدور الوظيفي</label>
+          <div class="role-cards" id="roleCards">
+            <div class="role-card-opt selected" data-role="owner">
+              <div class="rco-icon">👑</div>
+              <div class="rco-label">صاحب المكتب</div>
+              <div class="rco-sub">وصول كامل</div>
+            </div>
+            <div class="role-card-opt" data-role="senior">
+              <div class="rco-icon">⚖️</div>
+              <div class="rco-label">محامي أول</div>
+              <div class="rco-sub">وصول موسع</div>
+            </div>
+            <div class="role-card-opt" data-role="lawyer">
+              <div class="rco-icon">📋</div>
+              <div class="rco-label">محامي</div>
+              <div class="rco-sub">وصول محدود</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور المؤقتة</label>
+          <div class="pw-gen-row">
+            <input type="text" class="form-input" id="uTempPw" readonly placeholder="...">
+            <button class="btn-copy" id="btnCopyPw" onclick="copyTempPw()">نسخ</button>
+          </div>
+          <div style="font-size:0.62rem;color:var(--ink-muted);margin-top:0.25rem;">سيُطلب من المستخدم تغييرها عند أول دخول</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">الصلاحيات — تُملأ تلقائياً حسب الدور</label>
+          <div class="perm-grid" id="modalPermGrid">
+            <label class="perm-item"><input type="checkbox" id="mp0"> عرض الدعاوى</label>
+            <label class="perm-item"><input type="checkbox" id="mp1"> إضافة دعاوى</label>
+            <label class="perm-item"><input type="checkbox" id="mp2"> حذف دعاوى</label>
+            <label class="perm-item"><input type="checkbox" id="mp3"> عرض الجلسات</label>
+            <label class="perm-item"><input type="checkbox" id="mp4"> إضافة جلسات</label>
+            <label class="perm-item"><input type="checkbox" id="mp5"> عرض الفواتير</label>
+            <label class="perm-item"><input type="checkbox" id="mp6"> إصدار فواتير</label>
+            <label class="perm-item"><input type="checkbox" id="mp7"> عرض الموكلين</label>
+            <label class="perm-item"><input type="checkbox" id="mp8"> إضافة موكلين</label>
+            <label class="perm-item"><input type="checkbox" id="mp9"> عرض الأرشيف</label>
+            <label class="perm-item"><input type="checkbox" id="mp10"> رفع مستندات</label>
+            <label class="perm-item"><input type="checkbox" id="mp11"> عرض التقارير</label>
+            <label class="perm-item"><input type="checkbox" id="mp12"> إدارة المستخدمين</label>
+            <label class="perm-item"><input type="checkbox" id="mp13"> الإعدادات العامة</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="btnCancelUserModal">إلغاء</button>
+        <button class="btn-new" id="btnSubmitUser">إرسال الدعوة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function(){
+    /* ── Settings menu navigation ── */
+    var STORAGE_KEY = 'settings_active_section';
+    var menuItems = document.querySelectorAll('.sm-item');
+    var panels    = document.querySelectorAll('.settings-panel');
+
+    function activateSection(sectionId) {
+      menuItems.forEach(function(it){ it.classList.toggle('active', it.getAttribute('data-section') === sectionId); });
+      panels.forEach(function(p){ p.classList.toggle('active', p.id === 'panel-' + sectionId); });
+      try { localStorage.setItem(STORAGE_KEY, sectionId); } catch(e){}
+    }
+
+    menuItems.forEach(function(item){
+      item.addEventListener('click', function(){ activateSection(this.getAttribute('data-section')); });
+    });
+
+    /* restore on load */
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && document.getElementById('panel-' + saved)) activateSection(saved);
+    } catch(e){}
+
+    /* ── Save button ── */
+    window.saveSection = function(btn) {
+      if (btn.classList.contains('btn-disabled')) return;
+      btn.disabled = true;
+      btn.classList.add('saving');
+      btn.textContent = 'جاري الحفظ...';
+      setTimeout(function(){
+        btn.classList.remove('saving');
+        btn.classList.add('saved');
+        btn.textContent = 'تم الحفظ ✓';
+        showToast('تم حفظ التغييرات بنجاح');
+        setTimeout(function(){
+          btn.disabled = false;
+          btn.classList.remove('saved');
+          btn.textContent = btn.getAttribute('data-label') || 'حفظ التغييرات';
+        }, 2000);
+      }, 1200);
+    };
+
+    /* store original labels */
+    document.querySelectorAll('.btn-save').forEach(function(b){
+      b.setAttribute('data-label', b.textContent.trim());
+    });
+
+    /* ── Password strength ── */
+    window.checkStrength = function(val) {
+      var fill  = document.getElementById('pwFill');
+      var label = document.getElementById('pwLabel');
+      if (!val) { fill.style.width='0%'; fill.style.background=''; label.textContent='أدخل كلمة مرور جديدة'; label.style.color=''; return; }
+      var score = 0;
+      if (val.length >= 8)  score++;
+      if (val.length >= 12) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      var levels = [
+        { pct:'20%', color:'#ef4444', text:'ضعيفة جداً' },
+        { pct:'40%', color:'#f97316', text:'ضعيفة' },
+        { pct:'60%', color:'#eab308', text:'متوسطة' },
+        { pct:'80%', color:'#22c55e', text:'قوية' },
+        { pct:'100%',color:'#16a34a', text:'قوية جداً ✓' }
+      ];
+      var lv = levels[Math.min(score - 1, 4)] || levels[0];
+      fill.style.width   = lv.pct;
+      fill.style.background = lv.color;
+      label.textContent  = lv.text;
+      label.style.color  = lv.color;
+    };
+
+    /* ──────────────────────────────────────────
+       PERMISSIONS MATRIX
+    ────────────────────────────────────────── */
+    var PERMS = [
+      'عرض الدعاوى','إضافة دعاوى','حذف دعاوى',
+      'عرض الجلسات','إضافة جلسات',
+      'عرض الفواتير','إصدار فواتير',
+      'عرض الموكلين','إضافة موكلين',
+      'عرض الأرشيف','رفع مستندات','حذف مستندات',
+      'عرض التقارير','إدارة المستخدمين','الإعدادات العامة'
+    ];
+
+    /* Default per-role: true = granted */
+    var ROLE_DEFAULTS = {
+      owner:  [1,1,1, 1,1, 1,1, 1,1, 1,1,1, 1,1,1],
+      senior: [1,1,1, 1,1, 1,1, 1,1, 1,1,1, 1,0,0],
+      lawyer: [1,1,0, 1,1, 0,0, 1,0, 1,1,0, 0,0,0]
+    };
+
+    var USERS = [
+      { id:'u0', name:'عبدالعزيز المطيري', av:'ع.م', role:'owner',  perms: ROLE_DEFAULTS.owner.slice(),  disabled: true },
+      { id:'u1', name:'خالد العتيبي',       av:'خ.ع', role:'senior', perms: ROLE_DEFAULTS.senior.slice(), disabled: false },
+      { id:'u2', name:'سارة المحمد',        av:'س.م', role:'lawyer', perms: ROLE_DEFAULTS.lawyer.slice(), disabled: false },
+      { id:'u3', name:'محمد الرشيد',        av:'م.ر', role:'lawyer', perms: ROLE_DEFAULTS.lawyer.slice(), disabled: false },
+      { id:'u4', name:'نورة الأحمد',        av:'ن.أ', role:'lawyer', perms: ROLE_DEFAULTS.lawyer.slice(), disabled: false }
+    ];
+
+    function buildMatrix() {
+      var tbody = document.getElementById('matrixBody');
+      tbody.innerHTML = '';
+      USERS.forEach(function(u, ui) {
+        var tr = document.createElement('tr');
+        /* user cell */
+        var tdUser = document.createElement('td');
+        tdUser.className = 'col-user';
+        tdUser.innerHTML =
+          '<div class="mx-user">' +
+            '<div class="mx-av">' + u.av + '</div>' +
+            '<div><div class="mx-name">' + u.name + '</div>' +
+            (!u.disabled ? '<div class="mx-actions">' +
+              '<button class="mx-sel-btn" onclick="matrixSelectAll(' + ui + ')">تحديد الكل</button>' +
+              '<button class="mx-sel-btn" onclick="matrixClearAll(' + ui + ')">إلغاء الكل</button>' +
+            '</div>' : '') +
+            '</div>' +
+          '</div>';
+        tr.appendChild(tdUser);
+        /* permission cells */
+        u.perms.forEach(function(val, pi) {
+          var td = document.createElement('td');
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'mx-cb';
+          cb.checked = !!val;
+          cb.disabled = u.disabled;
+          cb.title = PERMS[pi];
+          cb.addEventListener('change', function() {
+            u.perms[pi] = this.checked ? 1 : 0;
+            logAudit(this.checked ? 'green' : 'red',
+              (this.checked ? 'تم منح ' : 'تم سحب صلاحية ') +
+              PERMS[pi] + (this.checked ? ' لـ ' : ' من ') + u.name);
+          });
+          td.appendChild(cb);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.matrixSelectAll = function(ui) {
+      USERS[ui].perms = USERS[ui].perms.map(function(){ return 1; });
+      buildMatrix();
+    };
+    window.matrixClearAll = function(ui) {
+      USERS[ui].perms = USERS[ui].perms.map(function(){ return 0; });
+      buildMatrix();
+    };
+
+    window.saveMatrix = function() {
+      var btn = document.getElementById('btnSaveMatrix');
+      btn.disabled = true; btn.textContent = 'جاري الحفظ...';
+      setTimeout(function(){
+        btn.textContent = 'تم حفظ الصلاحيات ✓';
+        btn.style.background = 'var(--green)';
+        showToast('تم حفظ مصفوفة الصلاحيات');
+        setTimeout(function(){
+          btn.disabled = false; btn.textContent = 'حفظ الصلاحيات';
+          btn.style.background = '';
+        }, 2000);
+      }, 1100);
+    };
+
+    /* Revoke user */
+    window.revokeUser = function(btn, name) {
+      var tr = btn.closest('tr');
+      tr.style.transition = 'opacity 0.3s';
+      tr.style.opacity = '0.4';
+      btn.textContent = 'موقوف';
+      btn.disabled = true;
+      logAudit('red', 'تم إيقاف حساب ' + name);
+      showToast('تم إيقاف حساب ' + name);
+    };
+
+    /* Audit log */
+    function logAudit(color, text) {
+      var list = document.getElementById('auditList');
+      var item = document.createElement('div');
+      item.className = 'audit-item';
+      item.style.animation = 'panelFade 0.3s ease';
+      item.innerHTML =
+        '<div class="audit-dot audit-dot-' + color + '"></div>' +
+        '<div class="audit-text">' + text + '</div>' +
+        '<div class="audit-time">الآن</div>';
+      list.insertBefore(item, list.firstChild);
+      /* keep max 8 entries */
+      var items = list.querySelectorAll('.audit-item');
+      if (items.length > 8) items[items.length - 1].remove();
+    }
+
+    buildMatrix();
+
+    /* ──────────────────────────────────────────
+       USER MODAL (enhanced)
+    ────────────────────────────────────────── */
+    var userModal = document.getElementById('userModal');
+    var selectedRole = 'owner';
+
+    function openUserModal() {
+      selectedRole = 'owner';
+      /* highlight default role card */
+      document.querySelectorAll('.role-card-opt').forEach(function(c){
+        c.classList.toggle('selected', c.getAttribute('data-role') === 'owner');
+      });
+      applyRoleDefaults('owner');
+      generateTempPw();
+      userModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeUserModal() {
+      userModal.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('uName').value = '';
+      document.getElementById('uEmail').value = '';
+      document.getElementById('uPhone').value = '';
+    }
+
+    document.getElementById('btnAddUser').addEventListener('click', openUserModal);
+    document.getElementById('btnCloseUserModal').addEventListener('click', closeUserModal);
+    document.getElementById('btnCancelUserModal').addEventListener('click', closeUserModal);
+    userModal.addEventListener('click', function(e){ if(e.target===userModal) closeUserModal(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && userModal.classList.contains('open')) closeUserModal(); });
+
+    /* Role card selection */
+    document.querySelectorAll('.role-card-opt').forEach(function(card){
+      card.addEventListener('click', function(){
+        document.querySelectorAll('.role-card-opt').forEach(function(c){ c.classList.remove('selected'); });
+        this.classList.add('selected');
+        selectedRole = this.getAttribute('data-role');
+        applyRoleDefaults(selectedRole);
+      });
+    });
+
+    function applyRoleDefaults(role) {
+      var defs = ROLE_DEFAULTS[role] || ROLE_DEFAULTS.lawyer;
+      for (var i = 0; i < 14; i++) {
+        var cb = document.getElementById('mp' + i);
+        if (cb) cb.checked = !!defs[i];
+      }
+    }
+
+    /* Temp password */
+    function generateTempPw() {
+      var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+      var pw = '';
+      for (var i = 0; i < 8; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+      document.getElementById('uTempPw').value = pw;
+      var copyBtn = document.getElementById('btnCopyPw');
+      copyBtn.textContent = 'نسخ'; copyBtn.classList.remove('copied');
+    }
+
+    window.copyTempPw = function() {
+      var val = document.getElementById('uTempPw').value;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(val).catch(function(){});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = val; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+      }
+      var btn = document.getElementById('btnCopyPw');
+      btn.textContent = 'تم ✓'; btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = 'نسخ'; btn.classList.remove('copied'); }, 2000);
+    };
+
+    /* Submit new user */
+    document.getElementById('btnSubmitUser').addEventListener('click', function(){
+      var name  = document.getElementById('uName').value.trim();
+      var email = document.getElementById('uEmail').value.trim();
+      var phone = document.getElementById('uPhone').value.trim();
+      var pw    = document.getElementById('uTempPw').value;
+      if (!name || !email || !phone) { showToast('يرجى تعبئة جميع الحقول المطلوبة'); return; }
+
+      var perms = [];
+      for (var i = 0; i < 15; i++) {
+        var cb = document.getElementById('mp' + i);
+        perms.push(cb && cb.checked ? 1 : 0);
+      }
+      var avParts = name.split(' ');
+      var av = (avParts[0][0] + (avParts[1] ? avParts[1][0] : '')).substring(0,2);
+
+      USERS.push({ id:'u'+Date.now(), name:name, av:av, role:selectedRole, perms:perms, disabled:false });
+
+      buildMatrix();
+      logAudit('green', 'تمت إضافة مستخدم جديد: ' + name);
+
+      var usersCount = document.getElementById('usersCountSub');
+      if (usersCount) usersCount.textContent = USERS.length + ' مستخدمون في النظام';
+
+      closeUserModal();
+      showToast('تم إرسال الدعوة إلى ' + email + ' — كلمة المرور المؤقتة: ' + pw);
+    });
+
+    /* ── Appearance selectors ── */
+    window.selectTheme = function(el) {
+      el.closest('.theme-options').querySelectorAll('.theme-opt').forEach(function(o){ o.classList.remove('selected'); });
+      el.classList.add('selected');
+    };
+    window.selectLang = function(el) {
+      el.closest('.lang-opts').querySelectorAll('.lang-btn').forEach(function(b){ b.classList.remove('selected'); });
+      el.classList.add('selected');
+    };
+    window.selectSize = function(el) {
+      el.closest('.size-opts').querySelectorAll('.size-btn').forEach(function(b){ b.classList.remove('selected'); });
+      el.classList.add('selected');
+    };
+
+    /* ── Toast ── */
+    window.showToast = function(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg;
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 3000);
+    };
+
+  })();
+
+  function clearAllData() {
+    if (confirm('هل أنت متأكد من مسح جميع البيانات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  }
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+  <script src="demo-data.js"></script>
+  <script>
+  function runSeed() {
+    var btn = document.getElementById('btnSeedDemo');
+    btn.disabled = true; btn.textContent = 'جاري التحميل...';
+    setTimeout(function() {
+      seedDemoData();
+      var t = document.getElementById('toast');
+      if (t) { t.textContent = '✓ تم تحميل البيانات التجريبية بنجاح'; t.classList.add('show'); }
+      setTimeout(function() { location.reload(); }, 1200);
+    }, 600);
+  }
+  function confirmReset() {
+    if (confirm('هل أنت متأكد؟ سيتم حذف جميع البيانات ولا يمكن التراجع عن هذا الإجراء.')) {
+      resetDemoData();
+    }
+  }
+  </script>
+</body>
+</html>

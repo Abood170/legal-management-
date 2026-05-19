@@ -1,0 +1,989 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الأرشيف</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; animation: pageIn 0.2s ease both; }
+    @keyframes pageIn { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Main/Topbar */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); box-shadow: 0 1px 0 var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
+    .topbar-search:hover { border-color: var(--border-mid); }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+
+    /* Content */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
+    .card-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 0.83rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Page header */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
+    .kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.2rem; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); transition: box-shadow 0.2s; }
+    .kpi-card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--accent); border-radius: 14px 14px 0 0; }
+    .kpi-card.kpi-gold::before { background: var(--gold); }
+    .kpi-card.kpi-red::before { background: var(--red); }
+    .kpi-card.kpi-blue::before { background: #3B82F6; }
+    .kpi-icon { font-size: 1.5rem; margin-bottom: 0.6rem; }
+    .kpi-val { font-size: 1.55rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; line-height: 1; }
+    .kpi-label { font-size: 0.7rem; color: var(--ink-muted); margin-top: 0.3rem; font-weight: 600; }
+    .kpi-trend { font-size: 0.63rem; margin-top: 0.45rem; display: flex; align-items: center; gap: 0.3rem; }
+    .trend-up { color: var(--green); } .trend-down { color: var(--red); } .trend-neu { color: var(--ink-muted); }
+
+    /* Storage bar */
+    .storage-card { padding: 1.3rem 1.4rem; }
+    .storage-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .storage-label { font-size: 0.8rem; font-weight: 700; color: var(--ink); }
+    .storage-nums { font-size: 0.72rem; color: var(--ink-muted); }
+    .storage-nums span { color: var(--ink); font-weight: 700; }
+    .storage-track { height: 10px; background: var(--off-white); border-radius: 2rem; overflow: hidden; border: 1px solid var(--border); }
+    .storage-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 2rem; transition: width 0.8s ease; }
+    .storage-pct { font-size: 0.67rem; color: var(--ink-muted); margin-top: 0.4rem; text-align: left; }
+    .storage-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; margin-top: 1.1rem; }
+    .st-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .st-top { display: flex; align-items: center; justify-content: space-between; }
+    .st-name { font-size: 0.72rem; color: var(--ink-mid); font-weight: 600; display: flex; align-items: center; gap: 0.3rem; }
+    .st-count { font-size: 0.63rem; color: var(--ink-muted); }
+    .st-track { height: 5px; background: var(--off-white); border-radius: 2rem; overflow: hidden; margin-top: 0.2rem; }
+    .st-fill { height: 100%; border-radius: 2rem; }
+    .st-fill-pdf { background: var(--accent); }
+    .st-fill-img { background: #3B82F6; }
+    .st-fill-audio { background: var(--gold); }
+    .st-fill-doc { background: #8B5CF6; }
+    .st-size { font-size: 0.7rem; color: var(--ink-light); font-weight: 700; margin-top: 0.15rem; }
+    .storage-note { font-size: 0.68rem; color: var(--ink-muted); margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.4rem; }
+
+    /* Filters bar */
+    .filters-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.2rem; flex-wrap: wrap; }
+    .filter-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; flex: 1; min-width: 220px; max-width: 320px; transition: border-color 0.15s; }
+    .filter-search:focus-within { border-color: var(--accent-border); }
+    .filter-search input { border: none; background: transparent; outline: none; font-family: 'Cairo', sans-serif; font-size: 0.78rem; color: var(--ink); width: 100%; }
+    .filter-search input::placeholder { color: var(--ink-muted); }
+    .filter-select { background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem 0.42rem 1.8rem; font-size: 0.78rem; color: var(--ink-light); font-family: 'Cairo', sans-serif; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.6rem center; transition: border-color 0.15s; }
+    .filter-select:hover, .filter-select:focus { border-color: var(--border-mid); color: var(--ink); }
+    .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin-right: auto; }
+    .vt-btn { background: var(--off-white); border: none; padding: 0.42rem 0.7rem; font-size: 0.82rem; cursor: pointer; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; }
+    .vt-btn.active { background: var(--accent); color: white; }
+
+    /* Data table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .data-table td { padding: 0.72rem 1.2rem; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background 0.1s ease; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .doc-name { font-weight: 600; color: var(--ink); font-size: 0.82rem; display: flex; align-items: center; gap: 0.5rem; }
+    .doc-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .type-tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 2rem; font-size: 0.61rem; font-weight: 700; white-space: nowrap; }
+    .type-pdf  { background: rgba(28,94,62,0.08);  color: var(--accent); border: 1px solid rgba(28,94,62,0.15); }
+    .type-img  { background: rgba(59,130,246,0.08); color: #3B82F6; border: 1px solid rgba(59,130,246,0.15); }
+    .type-audio{ background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); }
+    .type-doc  { background: rgba(139,92,246,0.08); color: #8B5CF6; border: 1px solid rgba(139,92,246,0.15); }
+    .case-link { font-size: 0.72rem; color: var(--accent); font-weight: 600; text-decoration: none; }
+    .case-link:hover { text-decoration: underline; }
+    .lawyer-chip { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--ink-light); }
+    .lawyer-av { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.52rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .size-cell { font-size: 0.72rem; color: var(--ink-muted); font-family: monospace; }
+    .date-cell { font-size: 0.72rem; color: var(--ink-light); white-space: nowrap; }
+    .row-actions { display: flex; align-items: center; gap: 0.35rem; }
+    .row-btn { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 2px 9px; border-radius: 5px; font-size: 0.63rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .row-btn-dl { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+    .row-btn-dl:hover { background: var(--accent); color: white; }
+    .row-btn-del { color: var(--red); border-color: rgba(220,38,38,0.2); }
+    .row-btn-del:hover { background: var(--red-dim); border-color: var(--red); }
+    .no-results { text-align: center; padding: 3rem 1.5rem; color: var(--ink-muted); font-size: 0.82rem; }
+    .no-results-icon { font-size: 2rem; margin-bottom: 0.6rem; line-height: 1; }
+    .no-results-title { font-size: 0.88rem; font-weight: 700; color: var(--ink-mid); margin-bottom: 0.3rem; }
+    .no-results-sub { font-size: 0.74rem; color: var(--ink-muted); }
+
+    /* Grid view */
+    .grid-view { display: none; padding: 1.2rem; }
+    .grid-view.active { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem; }
+    .file-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; transition: box-shadow 0.18s, border-color 0.18s; cursor: default; position: relative; isolation: isolate; }
+    .file-card:hover { border-color: var(--accent-border); box-shadow: 0 4px 16px rgba(28,94,62,0.1); }
+    .fc-icon { font-size: 2.2rem; line-height: 1; }
+    .fc-name { font-size: 0.78rem; font-weight: 700; color: var(--ink); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .fc-case { font-size: 0.63rem; color: var(--accent); font-weight: 600; margin-top: 0.1rem; }
+    .fc-meta { font-size: 0.61rem; color: var(--ink-muted); display: flex; align-items: center; justify-content: space-between; margin-top: 0.2rem; }
+    .fc-actions { display: flex; gap: 0.4rem; margin-top: 0.3rem; }
+    .fc-btn { flex: 1; text-align: center; background: var(--white); border: 1px solid var(--border-mid); color: var(--ink-light); padding: 3px 0; border-radius: 5px; font-size: 0.62rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .fc-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .fc-badge { position: absolute; top: 0.6rem; left: 0.6rem; }
+
+    /* Security bar */
+    .security-bar { background: linear-gradient(135deg, #0a1f14, #0d2a1a); color: rgba(255,255,255,0.85); padding: 0.75rem 1.4rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2px; border-radius: 10px; }
+    .security-bar span { color: rgba(255,255,255,0.45); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-card { background: var(--white); border-radius: 14px; width: 100%; max-width: 540px; box-shadow: 0 20px 60px rgba(15,20,25,0.15), 0 4px 16px rgba(15,20,25,0.08); transform: translateY(18px); transition: transform 0.2s ease; max-height: 90vh; overflow-y: auto; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: linear-gradient(to bottom, var(--off-white), var(--white)); }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1; flex-shrink: 0; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .form-input, .form-select, .form-textarea { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .form-textarea { resize: vertical; }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+
+    /* Drop zone */
+    .drop-zone { border: 2px dashed var(--border-mid); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--off-white); }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-dim); }
+    .dz-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .dz-text { font-size: 0.78rem; color: var(--ink-mid); font-weight: 600; }
+    .dz-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 0.25rem; }
+    .dz-hint { font-size: 0.62rem; color: var(--ink-muted); margin-top: 0.4rem; }
+    .dz-selected { background: rgba(28,94,62,0.06); border-color: var(--accent); border-style: solid; }
+    .dz-file-name { font-size: 0.78rem; color: var(--accent); font-weight: 700; margin-top: 0.3rem; }
+    .dz-file-size { font-size: 0.65rem; color: var(--ink-muted); }
+
+    /* Upload progress */
+    .upload-progress { display: none; flex-direction: column; gap: 0.5rem; }
+    .upload-progress.active { display: flex; }
+    .up-label { font-size: 0.75rem; color: var(--ink-mid); font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+    .up-track { height: 6px; background: var(--off-white); border-radius: 2rem; overflow: hidden; }
+    .up-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 2rem; width: 0%; transition: width 0.1s linear; }
+
+    /* Confirm modal */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.52); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .confirm-overlay.open { opacity: 1; pointer-events: auto; }
+    .confirm-card { background: var(--white); border-radius: 12px; padding: 1.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(15,20,25,0.15); transform: translateY(14px) scale(0.98); transition: all 0.2s ease; }
+    .confirm-overlay.open .confirm-card { transform: translateY(0) scale(1); }
+    .confirm-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .confirm-title { font-size: 0.9rem; font-weight: 700; color: var(--ink); margin-bottom: 0.4rem; }
+    .confirm-text { font-size: 0.75rem; color: var(--ink-muted); line-height: 1.6; margin-bottom: 1.1rem; }
+    .confirm-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+    .btn-confirm-del { background: var(--red); color: white; border: none; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-confirm-del:hover { background: #b91c1c; }
+
+    /* Preview panel */
+    .panel-overlay { position: fixed; inset: 0; background: rgba(15,20,25,0.4); z-index: 499; opacity: 0; pointer-events: none; transition: opacity 0.2s; cursor: pointer; }
+    .panel-overlay.open { opacity: 1; pointer-events: auto; }
+    .preview-panel { position: fixed; top: 0; right: 0; left: auto; width: 380px; height: 100vh; overflow-y: auto; background: var(--white); border-left: 1px solid var(--border); box-shadow: -4px 0 24px rgba(15,20,25,0.12); transform: translateX(100%); transition: transform 0.3s ease; z-index: 500; display: flex; flex-direction: column; cursor: default; }
+    .panel-overlay.open .preview-panel { transform: translateX(0); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--border); }
+    .panel-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); }
+    .panel-body { flex: 1; overflow-y: auto; padding: 1.3rem; }
+    .panel-icon { font-size: 3.5rem; text-align: center; margin-bottom: 1rem; padding: 1.5rem; background: var(--off-white); border-radius: 12px; }
+    .panel-docname { font-size: 0.92rem; font-weight: 700; color: var(--ink); text-align: center; margin-bottom: 0.3rem; }
+    .panel-case { font-size: 0.72rem; color: var(--accent); text-align: center; font-weight: 600; margin-bottom: 1.2rem; }
+    .panel-meta { display: flex; flex-direction: column; gap: 0.55rem; }
+    .pm-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+    .pm-key { color: var(--ink-muted); font-weight: 600; }
+    .pm-val { color: var(--ink); font-weight: 600; }
+    .panel-foot { padding: 1rem 1.3rem; border-top: 1px solid var(--border); display: flex; gap: 0.6rem; }
+    .btn-panel-dl { flex: 1; background: var(--accent); color: white; border: none; padding: 0.55rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-panel-dl:hover { background: var(--accent-light); }
+    .btn-panel-del { background: none; border: 1px solid rgba(220,38,38,0.3); color: var(--red); padding: 0.55rem 0.9rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-panel-del:hover { background: var(--red-dim); }
+
+    /* Toast */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Highlight animation */
+    @keyframes highlightRow { 0%{background:rgba(28,94,62,0.1);} 100%{background:transparent;} }
+    .new-row td { animation: highlightRow 2s ease forwards; }
+    @keyframes highlightCard { 0%{box-shadow:0 0 0 3px rgba(28,94,62,0.3);} 100%{box-shadow:none;} }
+    .new-card { animation: highlightCard 2s ease forwards; }
+
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
+    .loading-dots { animation: dotsFade 1s ease infinite; }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } .storage-types { grid-template-columns: repeat(2,1fr); } .grid-view.active { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .btn-new, .row-btn { min-height: 44px; } }
+    @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .modal-overlay { align-items: flex-end; } .modal-card { border-radius: 14px 14px 0 0; max-width: 100%; } }
+
+    /* ── z-index stacking fix ── */
+    .modal-overlay {
+      position: fixed !important;
+      top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      width: 100vw !important; height: 100vh !important;
+      z-index: 9999 !important;
+      overflow-y: auto !important;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      padding: 2rem 1rem !important;
+    }
+    .modal-overlay.open { display: flex !important; }
+    .modal-card {
+      position: relative !important;
+      z-index: 10000 !important;
+      margin: auto !important;
+      flex-shrink: 0 !important;
+    }
+    .confirm-overlay { z-index: 10001 !important; }
+    .confirm-overlay.open { display: flex !important; }
+    .panel-overlay {
+      position: fixed !important;
+      top: 0 !important; right: 0 !important; left: 0 !important; bottom: 0 !important;
+      z-index: 9998 !important;
+    }
+    .preview-panel {
+      position: fixed !important;
+      top: 0 !important; right: 0 !important; left: auto !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      overflow-y: auto !important;
+      transform: translateX(100%) !important;
+      transition: transform 0.3s ease !important;
+    }
+    .panel-overlay.open .preview-panel { transform: translateX(0) !important; }
+    .kpi-card, .card { isolation: isolate; }
+    .kpi-card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+    .card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+    .file-card:hover { box-shadow: 0 4px 16px rgba(28,94,62,0.1); transform: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item active" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">الأرشيف الرقمي</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">🔍 بحث في الأرشيف...</div>
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">الأرشيف الرقمي</div>
+          <div class="ph-sub">حفظ آمن ومشفر لجميع مستندات المكتب</div>
+        </div>
+        <button class="btn-new" id="btnUpload">+ رفع مستند</button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">🗂️</div>
+          <div class="kpi-val" id="kpiTotal">0</div>
+          <div class="kpi-label">إجمالي المستندات</div>
+          <div class="kpi-trend trend-neu">لا توجد مستندات بعد</div>
+        </div>
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-icon">💾</div>
+          <div class="kpi-val">0 GB</div>
+          <div class="kpi-label">حجم التخزين</div>
+          <div class="kpi-trend trend-neu" style="color:var(--gold)">من 100 GB متاح</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon">📤</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-label">مستندات هذا الشهر</div>
+          <div class="kpi-trend trend-neu">لا توجد مستندات بعد</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-icon">⏳</div>
+          <div class="kpi-val">0</div>
+          <div class="kpi-label">مستندات معلقة</div>
+          <div class="kpi-trend trend-neu">لا توجد مستندات بعد</div>
+        </div>
+      </div>
+
+      <!-- Storage Bar -->
+      <div class="card">
+        <div class="storage-card">
+          <div class="storage-header">
+            <div class="storage-label">استخدام التخزين</div>
+            <div class="storage-nums"><span>0 GB</span> من <span>100 GB</span></div>
+          </div>
+          <div class="storage-track">
+            <div class="storage-fill" id="storageFill" style="width: 0%"></div>
+          </div>
+          <div class="storage-pct">0% مستخدم · 100 GB متبقي</div>
+
+          <div class="storage-types">
+            <div class="st-item">
+              <div class="st-top">
+                <div class="st-name">📄 PDF</div>
+                <div class="st-count">0 ملف</div>
+              </div>
+              <div class="st-track"><div class="st-fill st-fill-pdf" style="width:0%"></div></div>
+              <div class="st-size">0 GB</div>
+            </div>
+            <div class="st-item">
+              <div class="st-top">
+                <div class="st-name">🖼️ صور</div>
+                <div class="st-count">0 ملف</div>
+              </div>
+              <div class="st-track"><div class="st-fill st-fill-img" style="width:0%"></div></div>
+              <div class="st-size">0 GB</div>
+            </div>
+            <div class="st-item">
+              <div class="st-top">
+                <div class="st-name">🎙️ تسجيلات</div>
+                <div class="st-count">0 ملف</div>
+              </div>
+              <div class="st-track"><div class="st-fill st-fill-audio" style="width:0%"></div></div>
+              <div class="st-size">0 GB</div>
+            </div>
+            <div class="st-item">
+              <div class="st-top">
+                <div class="st-name">📝 Word</div>
+                <div class="st-count">0 ملف</div>
+              </div>
+              <div class="st-track"><div class="st-fill st-fill-doc" style="width:0%"></div></div>
+              <div class="st-size">0 GB</div>
+            </div>
+          </div>
+
+          <div class="storage-note">
+            🔒 جميع الملفات مشفرة بمعيار AES-256 — استضافة داخل المملكة
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters + Table -->
+      <div class="card">
+        <div class="filters-bar">
+          <div class="filter-search">
+            <span style="color:var(--ink-muted);font-size:0.82rem;">🔍</span>
+            <input type="text" id="aSearch" placeholder="ابحث باسم المستند أو القضية...">
+          </div>
+          <select class="filter-select" id="aType">
+            <option value="">نوع الملف — الكل</option>
+            <option value="PDF">PDF</option>
+            <option value="JPG">صور</option>
+            <option value="MP3">تسجيلات</option>
+            <option value="DOCX">Word</option>
+          </select>
+          <select class="filter-select" id="aCase">
+            <option value="">القضية — الكل</option>
+            <option>قضية المالكي</option>
+            <option>نزاع الخليج للتجارة</option>
+            <option>قضية السالم</option>
+            <option>استئناف النور</option>
+            <option>قضية العمري</option>
+            <option>قضية الحربي</option>
+            <option>نزاع الورثة</option>
+            <option>قضية الدوسري</option>
+          </select>
+          <select class="filter-select" id="aLawyer">
+            <option value="">المحامي — الكل</option>
+            <option>خالد العتيبي</option>
+            <option>سارة المحمد</option>
+            <option>محمد الرشيد</option>
+            <option>نورة الأحمد</option>
+          </select>
+          <div class="view-toggle">
+            <button class="vt-btn active" id="btnList" title="قائمة">☰</button>
+            <button class="vt-btn" id="btnGrid" title="شبكة">⊞</button>
+          </div>
+        </div>
+
+        <!-- List View -->
+        <div id="listView">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>اسم المستند</th>
+                <th>نوع الملف</th>
+                <th>القضية المرتبطة</th>
+                <th>رفعه</th>
+                <th>الحجم</th>
+                <th>تاريخ الرفع</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody id="archiveBody">
+              <tr id="archiveNoResults">
+                <td colspan="7" class="no-results"><div class="no-results-icon">🗂️</div><div class="no-results-title">لا توجد مستندات بعد</div><div class="no-results-sub">ابدأ برفع مستند جديد من زر «+ رفع مستند»</div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Grid View -->
+        <div class="grid-view" id="gridView">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Security Bar -->
+      <div class="security-bar">
+        🔒 الأرشيف محمي بتشفير AES-256
+        <span>·</span>
+        استضافة داخل المملكة وفق متطلبات SDAIA
+        <span>·</span>
+        صلاحيات وصول مُدارة لكل مستخدم
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-title">رفع مستند جديد</div>
+        <button class="modal-close" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">اسم المستند <span style="color:var(--red)">*</span></label>
+            <input type="text" class="form-input" id="fDocName" placeholder="أدخل اسم المستند">
+          </div>
+          <div class="form-group">
+            <label class="form-label">القضية المرتبطة</label>
+            <select class="form-select" id="fDocCase">
+              <option value="">— اختر القضية —</option>
+              <option>قضية المالكي</option>
+              <option>نزاع الخليج للتجارة</option>
+              <option>قضية السالم</option>
+              <option>استئناف النور</option>
+              <option>قضية العمري</option>
+              <option>قضية الحربي</option>
+              <option>نزاع الورثة</option>
+              <option>قضية الدوسري</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">نوع المستند</label>
+          <select class="form-select" id="fDocType">
+            <option value="">— اختر النوع —</option>
+            <option>لائحة دعوى</option>
+            <option>عقد</option>
+            <option>وكالة</option>
+            <option>مذكرة</option>
+            <option>تسجيل</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <!-- Drop zone -->
+        <div class="form-group">
+          <label class="form-label">رفع الملف</label>
+          <div class="drop-zone" id="dropZone">
+            <div class="dz-icon">📁</div>
+            <div class="dz-text">اسحب الملف هنا أو انقر للتصفح</div>
+            <div class="dz-sub">PDF · JPG · PNG · DOCX · MP3 · MP4</div>
+            <div class="dz-hint">الحجم الأقصى 50 MB</div>
+          </div>
+          <input type="file" id="fileInput" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.docx,.doc,.mp3,.mp4">
+        </div>
+        <!-- Upload progress -->
+        <div class="upload-progress" id="uploadProgress">
+          <div class="up-label"><span id="upFileName">جاري الرفع...</span><span id="upPct">0%</span></div>
+          <div class="up-track"><div class="up-fill" id="upFill"></div></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ملاحظات</label>
+          <textarea class="form-textarea" id="fDocNote" rows="2" placeholder="ملاحظات إضافية (اختياري)..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="btnCancelUpload">إلغاء</button>
+        <button class="btn-new" id="btnSubmitUpload">رفع المستند</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete Modal -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-card">
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-title">حذف المستند</div>
+      <div class="confirm-text">هل أنت متأكد من حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء.</div>
+      <div class="confirm-actions">
+        <button class="btn-cancel" id="btnCancelDel">إلغاء</button>
+        <button class="btn-confirm-del" id="btnConfirmDel">نعم، احذف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Panel Overlay -->
+  <div class="panel-overlay" id="panelOverlay">
+    <div class="preview-panel" id="previewPanel">
+      <div class="panel-head">
+        <div class="panel-title">معاينة المستند</div>
+        <button class="modal-close" id="btnClosePanel">✕</button>
+      </div>
+      <div class="panel-body" id="panelBody"></div>
+      <div class="panel-foot">
+        <button class="btn-panel-dl" id="btnPanelDl">⬇ تحميل الملف</button>
+        <button class="btn-panel-del" id="btnPanelDel">🗑️ حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function(){
+    /* ── Data ── */
+    var DOCS = [
+      { id:0,  name:'لائحة الدعوى الابتدائية',      type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية المالكي',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'2.4 MB',  date:'12 يناير 2025' },
+      { id:1,  name:'عقد الشراكة الأصلي',            type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية المالكي',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'1.8 MB',  date:'10 يناير 2025' },
+      { id:2,  name:'تسجيل جلسة أولى',              type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'نزاع الخليج للتجارة', lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'45 MB',   date:'8 يناير 2025' },
+      { id:3,  name:'صورة صك الملكية',              type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية السالم',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'3.2 MB',  date:'7 يناير 2025' },
+      { id:4,  name:'مذكرة الدفاع الختامية',         type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'استئناف النور',      lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'890 KB',  date:'6 يناير 2025' },
+      { id:5,  name:'وكالة شرعية موثقة',            type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية العمري',        lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'1.1 MB',  date:'5 يناير 2025' },
+      { id:6,  name:'صور الأضرار التجارية',          type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية الحربي',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'7.8 MB',  date:'3 يناير 2025' },
+      { id:7,  name:'حكم المحكمة الابتدائية',        type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'نزاع الورثة',        lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'4.2 MB',  date:'29 ديسمبر 2024' },
+      { id:8,  name:'تسجيل جلسة الصلح',             type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'قضية الدوسري',       lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'28 MB',   date:'27 ديسمبر 2024' },
+      { id:9,  name:'عريضة الاستئناف',              type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'قضية المالكي',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'1.3 MB',  date:'22 ديسمبر 2024' },
+      { id:10, name:'مخطط العقار المتنازع عليه',     type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية السالم',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'5.6 MB',  date:'20 ديسمبر 2024' },
+      { id:11, name:'تقرير الخبير المالي',           type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'استئناف النور',      lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'6.1 MB',  date:'15 ديسمبر 2024' },
+      { id:12, name:'عقد الإيجار التجاري',           type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية الحربي',        lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'2.9 MB',  date:'10 ديسمبر 2024' },
+      { id:13, name:'مسودة اتفاقية التسوية',         type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'نزاع الورثة',        lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'760 KB',  date:'5 ديسمبر 2024' },
+      { id:14, name:'تسجيل اجتماع الموكل',          type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'قضية العمري',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'18 MB',   date:'1 ديسمبر 2024' }
+    ];
+    var totalCount = DOCS.length;
+
+    /* ── Animate storage bar ── */
+    setTimeout(function(){ document.getElementById('storageFill').style.width = '24%'; }, 100);
+
+    /* ── Build grid view ── */
+    function buildGrid(docs) {
+      var gv = document.getElementById('gridView');
+      gv.innerHTML = '';
+      docs.forEach(function(d) {
+        var card = document.createElement('div');
+        card.className = 'file-card';
+        card.setAttribute('data-id', d.id);
+        card.innerHTML =
+          '<div class="fc-icon">' + d.icon + '</div>' +
+          '<div class="fc-name">' + d.name + '</div>' +
+          '<div class="fc-case">' + d.case + '</div>' +
+          '<div class="fc-meta"><span>' + d.size + '</span><span>' + d.date.split(' ').slice(-2).join(' ') + '</span></div>' +
+          '<div class="fc-actions">' +
+            '<button class="fc-btn" onclick="openPreview(' + d.id + ')">عرض</button>' +
+            '<button class="fc-btn" onclick="simDownload(this)">تحميل</button>' +
+          '</div>';
+        gv.appendChild(card);
+      });
+    }
+    buildGrid(DOCS);
+
+    /* ── View toggle ── */
+    var btnList = document.getElementById('btnList');
+    var btnGrid = document.getElementById('btnGrid');
+    var listView = document.getElementById('listView');
+    var gridView = document.getElementById('gridView');
+
+    btnList.addEventListener('click', function(){
+      btnList.classList.add('active'); btnGrid.classList.remove('active');
+      listView.style.display = ''; gridView.classList.remove('active');
+    });
+    btnGrid.addEventListener('click', function(){
+      btnGrid.classList.add('active'); btnList.classList.remove('active');
+      listView.style.display = 'none'; gridView.classList.add('active');
+    });
+
+    /* ── Filters ── */
+    function filterRows() {
+      var q      = document.getElementById('aSearch').value.trim().toLowerCase();
+      var fType  = document.getElementById('aType').value;
+      var fCase  = document.getElementById('aCase').value;
+      var fLawyer= document.getElementById('aLawyer').value;
+      var rows   = document.querySelectorAll('#archiveBody tr[data-type]');
+      var matched = [];
+
+      rows.forEach(function(tr) {
+        var name   = tr.querySelector('.doc-name').textContent.toLowerCase();
+        var type   = tr.getAttribute('data-type');
+        var cas    = tr.getAttribute('data-case');
+        var lawyer = tr.getAttribute('data-lawyer');
+
+        var ok = true;
+        if (q && name.indexOf(q) === -1 && cas.indexOf(q) === -1) ok = false;
+        if (fType && type !== fType) ok = false;
+        if (fCase && cas !== fCase) ok = false;
+        if (fLawyer && lawyer !== fLawyer) ok = false;
+
+        tr.style.display = ok ? '' : 'none';
+        if (ok) matched.push(parseInt(tr.getAttribute('data-id')));
+      });
+
+      document.getElementById('archiveNoResults').style.display = matched.length === 0 ? '' : 'none';
+      var filteredDocs = DOCS.filter(function(d){ return matched.indexOf(d.id) !== -1; });
+      buildGrid(filteredDocs);
+    }
+
+    ['aSearch','aType','aCase','aLawyer'].forEach(function(id){
+      document.getElementById(id).addEventListener('input', filterRows);
+      document.getElementById(id).addEventListener('change', filterRows);
+    });
+
+    /* ── Modal ── */
+    var overlay = document.getElementById('modalOverlay');
+    document.getElementById('btnUpload').addEventListener('click', function(){ overlay.classList.add('open'); document.body.style.overflow = 'hidden'; });
+    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+    document.getElementById('btnCancelUpload').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('fDocName').value = '';
+      document.getElementById('fDocCase').value = '';
+      document.getElementById('fDocType').value = '';
+      document.getElementById('fDocNote').value = '';
+      document.getElementById('fileInput').value = '';
+      resetDropZone();
+      document.getElementById('uploadProgress').classList.remove('active');
+    }
+
+    /* ── Drop zone ── */
+    var dz = document.getElementById('dropZone');
+    var fi = document.getElementById('fileInput');
+    var selectedFile = null;
+
+    dz.addEventListener('click', function(){ fi.click(); });
+    dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', function(){ dz.classList.remove('dragover'); });
+    dz.addEventListener('drop', function(e){
+      e.preventDefault(); dz.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fi.addEventListener('change', function(){ if(fi.files.length) handleFile(fi.files[0]); });
+
+    function handleFile(f) {
+      selectedFile = f;
+      var sizeStr = f.size > 1048576 ? (f.size/1048576).toFixed(1) + ' MB' : Math.round(f.size/1024) + ' KB';
+      dz.classList.add('dz-selected');
+      dz.innerHTML =
+        '<div class="dz-icon">✅</div>' +
+        '<div class="dz-file-name">' + f.name + '</div>' +
+        '<div class="dz-file-size">' + sizeStr + '</div>';
+    }
+
+    function resetDropZone() {
+      selectedFile = null;
+      dz.classList.remove('dz-selected','dragover');
+      dz.innerHTML =
+        '<div class="dz-icon">📁</div>' +
+        '<div class="dz-text">اسحب الملف هنا أو انقر للتصفح</div>' +
+        '<div class="dz-sub">PDF · JPG · PNG · DOCX · MP3 · MP4</div>' +
+        '<div class="dz-hint">الحجم الأقصى 50 MB</div>';
+    }
+
+    /* ── Submit upload ── */
+    document.getElementById('btnSubmitUpload').addEventListener('click', function(){
+      var name = document.getElementById('fDocName').value.trim();
+      if (!name) { document.getElementById('fDocName').focus(); return; }
+
+      var btn = this;
+      btn.disabled = true;
+      btn.innerHTML = 'جاري الرفع <span class="loading-dots">...</span>';
+      btn.classList.add('btn-loading');
+
+      var prog = document.getElementById('uploadProgress');
+      var fill = document.getElementById('upFill');
+      var pct  = document.getElementById('upPct');
+      var fname = document.getElementById('upFileName');
+
+      prog.classList.add('active');
+      fname.textContent = selectedFile ? selectedFile.name : name;
+
+      var pctVal = 0;
+      var iv = setInterval(function(){
+        pctVal = Math.min(pctVal + Math.random() * 18 + 8, 98);
+        fill.style.width = pctVal + '%';
+        pct.textContent = Math.round(pctVal) + '%';
+        if (pctVal >= 98) clearInterval(iv);
+      }, 100);
+
+      setTimeout(function(){
+        clearInterval(iv);
+        fill.style.width = '100%';
+        pct.textContent = '100%';
+
+        setTimeout(function(){
+          var docCase  = document.getElementById('fDocCase').value || '—';
+          var docTypeVal = document.getElementById('fDocType').value || 'أخرى';
+          var sizeStr  = selectedFile ? (selectedFile.size > 1048576 ? (selectedFile.size/1048576).toFixed(1) + ' MB' : Math.round(selectedFile.size/1024) + ' KB') : '—';
+          var extMap   = { 'pdf':'PDF','jpg':'JPG','jpeg':'JPG','png':'JPG','doc':'DOCX','docx':'DOCX','mp3':'MP3','mp4':'MP4' };
+          var typeStr  = 'PDF';
+          if (selectedFile) {
+            var ext = selectedFile.name.split('.').pop().toLowerCase();
+            typeStr = extMap[ext] || ext.toUpperCase();
+          }
+          var typeClassMap = { 'PDF':'type-pdf','JPG':'type-img','MP3':'type-audio','MP4':'type-audio','DOCX':'type-doc' };
+          var tClass = typeClassMap[typeStr] || 'type-pdf';
+          var iconMap  = { 'PDF':'📄','JPG':'🖼️','MP3':'🎙️','MP4':'🎙️','DOCX':'📝' };
+          var ico = iconMap[typeStr] || '📄';
+
+          var newId = Date.now();
+          var newDoc = { id:newId, name:name, type:typeStr, typeClass:tClass, icon:ico, case:docCase, lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:sizeStr, date:'الآن' };
+          DOCS.unshift(newDoc);
+
+          // Add to list
+          var tbody = document.getElementById('archiveBody');
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-type', typeStr);
+          tr.setAttribute('data-case', docCase);
+          tr.setAttribute('data-lawyer', 'خالد العتيبي');
+          tr.setAttribute('data-id', newId);
+          tr.innerHTML =
+            '<td><div class="doc-name"><span class="doc-icon">' + ico + '</span> ' + name + '</div></td>' +
+            '<td><span class="type-tag ' + tClass + '">' + typeStr + '</span></td>' +
+            '<td><a class="case-link" href="#">' + docCase + '</a></td>' +
+            '<td><span class="lawyer-chip"><span class="lawyer-av">خ.ع</span> خالد العتيبي</span></td>' +
+            '<td><span class="size-cell">' + sizeStr + '</span></td>' +
+            '<td><span class="date-cell">الآن</span></td>' +
+            '<td><div class="row-actions">' +
+              '<button class="row-btn" onclick="openPreview(' + newId + ')">عرض</button>' +
+              '<button class="row-btn row-btn-dl" onclick="simDownload(this)">تحميل</button>' +
+              '<button class="row-btn row-btn-del" onclick="confirmDelete(this)">حذف</button>' +
+            '</div></td>';
+          tbody.insertBefore(tr, tbody.firstChild);
+          tr.classList.add('new-row');
+          saveArchive();
+
+          // Update grid
+          buildGrid(DOCS);
+
+          // Update KPI
+          totalCount++;
+          document.getElementById('kpiTotal').textContent = totalCount.toLocaleString('ar');
+
+          btn.disabled = false;
+          btn.innerHTML = 'رفع المستند';
+          btn.classList.remove('btn-loading');
+          closeModal();
+          showToast('تم رفع المستند بنجاح');
+        }, 300);
+      }, 1500);
+    });
+
+    /* ── Delete confirm ── */
+    var confirmOverlay = document.getElementById('confirmOverlay');
+    var pendingDeleteRow = null;
+
+    window.confirmDelete = function(btn) {
+      pendingDeleteRow = btn.closest('tr');
+      confirmOverlay.classList.add('open');
+    };
+
+    document.getElementById('btnCancelDel').addEventListener('click', function(){
+      confirmOverlay.classList.remove('open');
+      pendingDeleteRow = null;
+    });
+    confirmOverlay.addEventListener('click', function(e){ if(e.target === confirmOverlay){ confirmOverlay.classList.remove('open'); pendingDeleteRow = null; } });
+
+    document.getElementById('btnConfirmDel').addEventListener('click', function(){
+      if (pendingDeleteRow) {
+        var id = parseInt(pendingDeleteRow.getAttribute('data-id'));
+        pendingDeleteRow.style.transition = 'opacity 0.3s, transform 0.3s';
+        pendingDeleteRow.style.opacity = '0';
+        pendingDeleteRow.style.transform = 'translateX(20px)';
+        setTimeout(function(){
+          pendingDeleteRow.remove();
+          DOCS = DOCS.filter(function(d){ return d.id !== id; });
+          buildGrid(DOCS);
+          totalCount = Math.max(0, totalCount - 1);
+          document.getElementById('kpiTotal').textContent = totalCount.toLocaleString('ar');
+        }, 300);
+        confirmOverlay.classList.remove('open');
+        pendingDeleteRow = null;
+        showToast('تم حذف المستند');
+      }
+    });
+
+    /* ── Preview panel ── */
+    var panelOverlay = document.getElementById('panelOverlay');
+
+    window.openPreview = function(id) {
+      var doc = DOCS.find(function(d){ return d.id === id; });
+      if (!doc) return;
+      var body = document.getElementById('panelBody');
+      body.innerHTML =
+        '<div class="panel-icon">' + doc.icon + '</div>' +
+        '<div class="panel-docname">' + doc.name + '</div>' +
+        '<div class="panel-case">' + doc.case + '</div>' +
+        '<div class="panel-meta">' +
+          '<div class="pm-row"><span class="pm-key">نوع الملف</span><span class="pm-val">' + doc.type + '</span></div>' +
+          '<div class="pm-row"><span class="pm-key">الحجم</span><span class="pm-val">' + doc.size + '</span></div>' +
+          '<div class="pm-row"><span class="pm-key">رُفع بواسطة</span><span class="pm-val">' + doc.lawyer + '</span></div>' +
+          '<div class="pm-row"><span class="pm-key">تاريخ الرفع</span><span class="pm-val">' + doc.date + '</span></div>' +
+          '<div class="pm-row"><span class="pm-key">التشفير</span><span class="pm-val" style="color:var(--green)">AES-256 ✓</span></div>' +
+          '<div class="pm-row"><span class="pm-key">الحالة</span><span class="pm-val" style="color:var(--green)">محفوظ ✓</span></div>' +
+        '</div>';
+
+      document.getElementById('btnPanelDel').onclick = function(){ closePreview(); confirmDelete({ closest: function(){ return document.querySelector('[data-id="' + id + '"]'); } }); };
+      document.getElementById('btnPanelDl').onclick = function(){ showToast('جاري تحميل ' + doc.name + ' ...'); };
+
+      panelOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    function closePreview() {
+      panelOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('btnClosePanel').addEventListener('click', closePreview);
+    panelOverlay.addEventListener('click', function(e){ if(e.target === panelOverlay) closePreview(); });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && panelOverlay.classList.contains('open')) closePreview();
+    });
+
+    /* ── Download sim ── */
+    window.simDownload = function(btn) {
+      var row = btn.closest('tr');
+      var name = row ? row.querySelector('.doc-name').textContent.trim() : 'الملف';
+      showToast('جاري تحميل ' + name + ' ...');
+    };
+
+    /* ── Toast ── */
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg;
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 3000);
+    }
+
+  })();
+
+  function saveArchive() {
+    var rows = [];
+    document.querySelectorAll('#archiveBody tr').forEach(function(tr) {
+      if (!tr.classList.contains('no-results') && !tr.querySelector('.empty-state') && tr.id !== 'archiveNoResults') {
+        rows.push(tr.innerHTML);
+      }
+    });
+    localStorage.setItem('archive_data', JSON.stringify(rows));
+  }
+
+  function loadArchive() {
+    var saved = localStorage.getItem('archive_data');
+    if (saved) {
+      try {
+        var rows = JSON.parse(saved);
+        if (rows.length > 0) {
+          var tbody = document.getElementById('archiveBody');
+          rows.forEach(function(html) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+          });
+          var nr = document.getElementById('archiveNoResults');
+          if (nr) nr.style.display = 'none';
+        }
+      } catch(e) {}
+    }
+  }
+
+  window.addEventListener('load', loadArchive);
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>

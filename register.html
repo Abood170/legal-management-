@@ -1,0 +1,918 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة المحاماة — إنشاء حساب</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #ffffff;
+  --off-white: #F7F6F3;
+  --ink: #0F1419;
+  --ink-mid: #2D3748;
+  --ink-light: #64748B;
+  --ink-muted: #94A3B8;
+  --accent: #1C5E3E;
+  --accent-light: #24764E;
+  --accent-dim: rgba(28,94,62,0.08);
+  --accent-border: rgba(28,94,62,0.15);
+  --gold: #B8952A;
+  --border: rgba(15,20,25,0.08);
+  --border-mid: rgba(15,20,25,0.12);
+  --error: #DC2626;
+  --error-dim: rgba(220,38,38,0.07);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--off-white);
+  color: var(--ink);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LEFT PANEL (brand) ── */
+.brand-panel {
+  background: var(--ink);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-panel::before {
+  content: '';
+  position: absolute;
+  top: -100px; left: -100px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28,94,62,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.brand-top { position: relative; z-index: 1; }
+
+.brand-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  text-decoration: none;
+  margin-bottom: 3rem;
+}
+
+.brand-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+}
+
+.brand-logo-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  margin-bottom: 3px;
+}
+
+.brand-headline {
+  font-size: 2rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  margin-bottom: 1rem;
+}
+
+.brand-headline em {
+  font-style: normal;
+  color: #6EE7B7;
+}
+
+.brand-desc {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.8;
+}
+
+/* Pilot badge */
+.pilot-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6EE7B7;
+  border: 1px solid rgba(110,231,183,0.25);
+  background: rgba(110,231,183,0.08);
+  padding: 0.4rem 1rem;
+  border-radius: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.pilot-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Brand features list */
+.brand-features {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.brand-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.55;
+}
+
+.brand-feature-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(110,231,183,0.12);
+  border: 1px solid rgba(110,231,183,0.25);
+  display: flex; align-items: center; justify-content: center;
+  color: #6EE7B7;
+  font-size: 0.6rem;
+  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Brand bottom */
+.brand-bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.brand-compliance {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.brand-compliance::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(110,231,183,0.4);
+}
+
+/* ── RIGHT PANEL (form) ── */
+.form-panel {
+  background: var(--white);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.form-inner {
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.form-header { margin-bottom: 2.5rem; }
+
+.form-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.form-title {
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+}
+
+.form-subtitle {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.6;
+}
+
+.form-subtitle a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-subtitle a:hover { text-decoration: underline; }
+
+/* Steps indicator */
+.steps-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.step-num.active { background: var(--accent); color: white; }
+.step-num.done { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+.step-num.todo { background: var(--off-white); color: var(--ink-muted); border: 1px solid var(--border); }
+
+.step-label { font-size: 0.7rem; color: var(--ink-muted); font-weight: 500; }
+.step-label.active { color: var(--accent); font-weight: 700; }
+
+.step-line { flex: 1; height: 1px; background: var(--border); margin: 0 0.5rem; }
+
+/* Form fields */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+}
+
+.field-label span {
+  color: var(--error);
+  margin-right: 2px;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-mid);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-family: 'Cairo', sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  transition: all 0.15s;
+  outline: none;
+}
+
+.field-input::placeholder { color: var(--ink-muted); }
+
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.field-input:invalid:not(:placeholder-shown) {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px var(--error-dim);
+}
+
+.field-hint {
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+
+/* Select */
+select.field-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 1rem center;
+  padding-left: 2.5rem;
+}
+
+/* Password strength */
+.password-wrap { position: relative; }
+
+.password-toggle {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  padding: 0;
+  font-family: 'Cairo', sans-serif;
+  transition: color 0.15s;
+}
+
+.password-toggle:hover { color: var(--ink); }
+
+.strength-bar {
+  display: flex;
+  gap: 3px;
+  margin-top: 0.4rem;
+}
+
+.strength-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+
+.strength-seg.weak { background: var(--error); }
+.strength-seg.medium { background: var(--gold); }
+.strength-seg.strong { background: var(--accent); }
+
+.strength-label {
+  font-size: 0.65rem;
+  color: var(--ink-muted);
+  margin-top: 0.3rem;
+}
+
+/* Divider */
+.form-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Terms */
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+}
+
+.terms-check {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border-mid);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  appearance: none;
+  background: white;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.terms-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.terms-check:checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.terms-text {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  line-height: 1.6;
+}
+
+.terms-text a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.terms-text a:hover { text-decoration: underline; }
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  padding: 0.95rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.btn-submit:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(28,94,62,0.2);
+}
+
+.btn-submit:active { transform: translateY(0); }
+
+.btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Login link */
+.login-link {
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--ink-light);
+}
+
+.login-link a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-link a:hover { text-decoration: underline; }
+
+/* Success state */
+.success-state {
+  display: none;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.success-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 1.5rem;
+}
+
+.success-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.success-desc {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  body { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+  .form-panel { padding: 2rem 1.5rem; }
+}
+
+/* ── Visual Polish ── */
+body { line-height: 1.75; }
+.form-eyebrow { font-size: 0.68rem; }
+.field-input { padding: 0.78rem 1rem; border-radius: 8px; }
+.field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(28,94,62,0.08); }
+.btn-submit { letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+.btn-submit:hover { box-shadow: 0 8px 24px rgba(28,94,62,0.22); transform: translateY(-1px); }
+button, a { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 768px) { .btn-submit { min-height: 44px; } }
+</style>
+<style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px;}</style>
+</head>
+<body>
+
+<!-- BRAND PANEL -->
+<div class="brand-panel">
+  <div class="brand-grid"></div>
+
+  <div class="brand-top">
+    <a href="index.html" class="brand-logo">
+      <span class="brand-logo-text">نظام إدارة المحاماة</span>
+      <div class="brand-logo-dot"></div>
+    </a>
+
+    <div class="pilot-badge">Founder's Edition · مفتوح الآن</div>
+
+    <h2 class="brand-headline">
+      انضم إلى أوائل<br>
+      مكاتب المحاماة في<br>
+      <em>التحول الرقمي</em>
+    </h2>
+
+    <p class="brand-desc">
+      سجّل مكتبك الآن واحصل على النظام الكامل مجاناً
+      ضمن برنامج الشراكة المحدود.
+    </p>
+
+    <ul class="brand-features">
+      <li class="brand-feature">
+        <div class="brand-feature-check">✓</div>
+        التطوير البرمجي مجاني بالكامل
+      </li>
+      <li class="brand-feature">
+        <div class="brand-feature-check">✓</div>
+        إطلاق في 9 أسابيع فقط من التسجيل
+      </li>
+      <li class="brand-feature">
+        <div class="brand-feature-check">✓</div>
+        استضافة آمنة داخل المملكة · SDAIA
+      </li>
+      <li class="brand-feature">
+        <div class="brand-feature-check">✓</div>
+        فوترة ZATCA المرحلة الثانية جاهزة
+      </li>
+      <li class="brand-feature">
+        <div class="brand-feature-check">✓</div>
+        دعم فني مباشر طوال أيام الأسبوع
+      </li>
+    </ul>
+  </div>
+
+  <div class="brand-bottom">
+    <div class="brand-compliance">ZATCA Phase 2</div>
+    <div class="brand-compliance">SDAIA Compliant</div>
+    <div class="brand-compliance">ناجز Integration</div>
+  </div>
+</div>
+
+<!-- FORM PANEL -->
+<div class="form-panel">
+  <div class="form-inner">
+
+    <div class="form-header">
+      <div class="form-eyebrow">إنشاء حساب · Register</div>
+      <h1 class="form-title">سجّل مكتبك الآن</h1>
+      <p class="form-subtitle">
+        عندك حساب بالفعل؟
+        <a href="login.html">سجّل دخولك هنا</a>
+      </p>
+    </div>
+
+    <!-- STEPS -->
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num active" id="s1">١</div>
+        <div class="step-label active">معلومات المكتب</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-num todo" id="s2">٢</div>
+        <div class="step-label" id="sl2">المسؤول</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item">
+        <div class="step-num todo" id="s3">٣</div>
+        <div class="step-label" id="sl3">تأكيد</div>
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="step1">
+      <div class="form-row">
+        <div class="field">
+          <label class="field-label">اسم المكتب <span>*</span></label>
+          <input type="text" class="field-input" placeholder="مكتب المطيري للمحاماة" id="officeName">
+        </div>
+        <div class="field">
+          <label class="field-label">نوع الكيان <span>*</span></label>
+          <select class="field-input" id="officeType">
+            <option value="" disabled selected>اختر...</option>
+            <option>مكتب محاماة فردي</option>
+            <option>شركة مهنية</option>
+            <option>مكتب شراكة</option>
+            <option>إدارة قانونية</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label class="field-label">المدينة <span>*</span></label>
+          <select class="field-input" id="city">
+            <option value="" disabled selected>اختر...</option>
+            <option>الرياض</option>
+            <option>جدة</option>
+            <option>الدمام</option>
+            <option>مكة المكرمة</option>
+            <option>المدينة المنورة</option>
+            <option>أبها</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">عدد المحامين <span>*</span></label>
+          <select class="field-input" id="lawyerCount">
+            <option value="" disabled selected>اختر...</option>
+            <option>1–5 محامين</option>
+            <option>6–15 محامي</option>
+            <option>16–30 محامي</option>
+            <option>+30 محامي</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">رقم السجل التجاري</label>
+        <input type="text" class="field-input" placeholder="1010XXXXXX (اختياري)">
+        <div class="field-hint">يساعدنا في التحقق من الكيان القانوني للمكتب</div>
+      </div>
+
+      <button class="btn-submit" onclick="goStep2()">
+        التالي — معلومات المسؤول
+        <span>←</span>
+      </button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" style="display:none">
+      <div class="form-row">
+        <div class="field">
+          <label class="field-label">الاسم الأول <span>*</span></label>
+          <input type="text" class="field-input" placeholder="عبدالعزيز" id="firstName">
+        </div>
+        <div class="field">
+          <label class="field-label">اسم العائلة <span>*</span></label>
+          <input type="text" class="field-input" placeholder="المطيري" id="lastName">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">البريد الإلكتروني <span>*</span></label>
+        <input type="email" class="field-input" placeholder="name@firm.com.sa" id="email">
+      </div>
+
+      <div class="field">
+        <label class="field-label">رقم الجوال <span>*</span></label>
+        <input type="tel" class="field-input" placeholder="05XXXXXXXX" id="phone">
+      </div>
+
+      <div class="field">
+        <label class="field-label">كلمة المرور <span>*</span></label>
+        <div class="password-wrap">
+          <input type="password" class="field-input" placeholder="8 أحرف على الأقل" id="password"
+            oninput="checkStrength(this.value)" style="padding-left:3.5rem">
+          <button type="button" class="password-toggle" onclick="togglePwd()">إظهار</button>
+        </div>
+        <div class="strength-bar">
+          <div class="strength-seg" id="seg1"></div>
+          <div class="strength-seg" id="seg2"></div>
+          <div class="strength-seg" id="seg3"></div>
+          <div class="strength-seg" id="seg4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel">أدخل كلمة مرور قوية</div>
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-bottom:1.2rem">
+        <button class="btn-submit" style="background:var(--off-white);color:var(--ink-mid);box-shadow:none;border:1px solid var(--border-mid)" onclick="goStep1()">← رجوع</button>
+        <button class="btn-submit" onclick="goStep3()">التالي — التأكيد ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" style="display:none">
+      <div style="background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:1.4rem;margin-bottom:1.5rem">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--ink-muted);letter-spacing:1px;margin-bottom:1rem">ملخص التسجيل · Summary</div>
+        <div style="display:flex;flex-direction:column;gap:0.65rem">
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem">
+            <span style="color:var(--ink-muted)">اسم المكتب</span>
+            <span style="font-weight:600;color:var(--ink)" id="sum-office">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem">
+            <span style="color:var(--ink-muted)">المدينة</span>
+            <span style="font-weight:600;color:var(--ink)" id="sum-city">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem">
+            <span style="color:var(--ink-muted)">عدد المحامين</span>
+            <span style="font-weight:600;color:var(--ink)" id="sum-lawyers">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem">
+            <span style="color:var(--ink-muted)">البريد الإلكتروني</span>
+            <span style="font-weight:600;color:var(--ink)" id="sum-email">—</span>
+          </div>
+          <div style="height:1px;background:var(--border);margin:0.3rem 0"></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.82rem">
+            <span style="color:var(--ink-muted)">الباقة</span>
+            <span style="font-weight:700;color:var(--accent)">Founder's Edition — مجاناً</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="terms-row">
+        <input type="checkbox" class="terms-check" id="terms">
+        <label for="terms" class="terms-text">
+          أوافق على <a href="#">شروط الاستخدام</a> و<a href="#">سياسة الخصوصية</a>،
+          وأقرّ بأن المعلومات المدخلة صحيحة وتمثل كيانًا قانونيًا مرخصًا في المملكة العربية السعودية.
+        </label>
+      </div>
+
+      <div style="display:flex;gap:1rem;margin-bottom:1.2rem">
+        <button class="btn-submit" style="background:var(--off-white);color:var(--ink-mid);box-shadow:none;border:1px solid var(--border-mid);flex:0 0 auto;width:auto;padding:0.95rem 1.5rem" onclick="goStep2()">← رجوع</button>
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+          إنشاء الحساب والبدء
+        </button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-state" id="successState">
+      <div class="success-icon">✓</div>
+      <div class="success-title">تم التسجيل بنجاح!</div>
+      <div class="success-desc">
+        سيتواصل معك فريقنا خلال 24 ساعة لبدء عملية الإعداد.
+        تحقق من بريدك الإلكتروني لتأكيد الحساب.
+      </div>
+      <a href="dashboard.html" class="btn-submit" style="text-decoration:none;justify-content:center">
+        الذهاب للوحة التحكم ←
+      </a>
+    </div>
+
+    <div style="background:var(--off-white);border:1px solid var(--border);border-radius:8px;padding:0.8rem 1rem;text-align:center;margin-bottom:1rem;">
+      <div style="font-size:0.8rem;font-weight:700;color:var(--ink-mid);margin-bottom:0.3rem;">موكل وليس محامياً؟</div>
+      <a href="client-login.html" style="font-size:0.8rem;color:var(--accent);font-weight:600;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">تابع قضيتك من بوابة الموكل ←</a>
+    </div>
+
+    <div class="login-link" id="loginLink">
+      عندك حساب بالفعل؟ <a href="login.html">سجّل دخولك</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Step navigation
+function goStep2() {
+  const name = document.getElementById('officeName').value.trim();
+  const type = document.getElementById('officeType').value;
+  const city = document.getElementById('city').value;
+  const count = document.getElementById('lawyerCount').value;
+  if (!name || !type || !city || !count) {
+    alert('يرجى تعبئة جميع الحقول المطلوبة');
+    return;
+  }
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  setStep(2);
+}
+
+function goStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  setStep(1);
+}
+
+function goStep3() {
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const pwd = document.getElementById('password').value;
+  if (!email || !phone || pwd.length < 8) {
+    alert('يرجى تعبئة جميع الحقول وتأكد أن كلمة المرور 8 أحرف على الأقل');
+    return;
+  }
+  // Fill summary
+  document.getElementById('sum-office').textContent = document.getElementById('officeName').value;
+  document.getElementById('sum-city').textContent = document.getElementById('city').value;
+  document.getElementById('sum-lawyers').textContent = document.getElementById('lawyerCount').value;
+  document.getElementById('sum-email').textContent = email;
+
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step3').style.display = 'block';
+  setStep(3);
+}
+
+function submitForm() {
+  if (!document.getElementById('terms').checked) {
+    alert('يرجى الموافقة على الشروط والأحكام');
+    return;
+  }
+  var firstName = document.getElementById('firstName').value.trim();
+  var lastName = document.getElementById('lastName').value.trim();
+  var firmData = {
+    ownerName: (firstName + ' ' + lastName).trim(),
+    email: document.getElementById('email').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    firmName: document.getElementById('officeName').value.trim(),
+    officeType: document.getElementById('officeType').value,
+    city: document.getElementById('city').value.trim(),
+    lawyerCount: document.getElementById('lawyerCount').value,
+    createdAt: new Date().toISOString()
+  };
+  localStorage.setItem('firm_data', JSON.stringify(firmData));
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('successState').style.display = 'block';
+  document.getElementById('loginLink').style.display = 'none';
+  document.querySelector('.steps-row').style.display = 'none';
+  document.querySelector('.form-header').style.display = 'none';
+  setTimeout(function() { window.location.href = 'dashboard.html'; }, 2000);
+}
+
+function setStep(n) {
+  [1,2,3].forEach(i => {
+    const num = document.getElementById('s'+i);
+    const lbl = document.getElementById('sl'+i) || document.querySelector(`.step-item:nth-child(${i*2-1}) .step-label`);
+    num.className = 'step-num ' + (i < n ? 'done' : i === n ? 'active' : 'todo');
+  });
+}
+
+// Password strength
+function checkStrength(val) {
+  const segs = [1,2,3,4].map(i => document.getElementById('seg'+i));
+  const lbl = document.getElementById('strengthLabel');
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val) || /[\u0600-\u06FF]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const classes = ['weak','weak','medium','strong'];
+  const labels = ['', 'ضعيفة', 'متوسطة', 'قوية', 'قوية جداً'];
+
+  document.querySelectorAll('.strength-seg').forEach((s,i) => {
+    s.className = 'strength-seg' + (i < score ? ' ' + classes[score-1] : '');
+  });
+  lbl.textContent = val.length === 0 ? 'أدخل كلمة مرور قوية' : 'قوة كلمة المرور: ' + labels[score];
+}
+
+// Toggle password visibility
+function togglePwd() {
+  const inp = document.getElementById('password');
+  const btn = document.querySelector('.password-toggle');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = 'إخفاء'; }
+  else { inp.type = 'password'; btn.textContent = 'إظهار'; }
+}
+</script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+</body>
+</html>
