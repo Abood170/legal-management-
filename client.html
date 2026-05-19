@@ -520,13 +520,25 @@
         var idEl = cells[0].querySelector('.case-id');
         var num  = idEl ? idEl.textContent.trim() : cells[0].textContent.trim();
         if (num.indexOf(caseNum) === -1 && html.indexOf(caseNum) === -1) return false;
-        var lawyerEl = cells[4] ? (cells[4].querySelector('.lawyer-chip') || cells[4]) : null;
         var statusEl = cells[6] ? cells[6].querySelector('.pill') : null;
+        /* Extract lawyer name WITHOUT the avatar initials inside .lawyer-chip */
+        var lawyerName = '';
+        if (cells[4]) {
+          var chip = cells[4].querySelector('.lawyer-chip');
+          if (chip) {
+            var chipClone = chip.cloneNode(true);
+            var avEl = chipClone.querySelector('.lawyer-av');
+            if (avEl) avEl.remove();
+            lawyerName = chipClone.textContent.replace(/\s+/g,' ').trim();
+          } else {
+            lawyerName = cells[4].textContent.replace(/\s+/g,' ').trim();
+          }
+        }
         caseInfo = {
           client: cells[1] ? cells[1].textContent.replace(/\s+/g,' ').trim() : '',
           type:   cells[2] ? cells[2].textContent.replace(/\s+/g,' ').trim() : '',
           court:  cells[3] ? cells[3].textContent.replace(/\s+/g,' ').trim() : '',
-          lawyer: lawyerEl ? lawyerEl.textContent.replace(/\s+/g,' ').trim() : '',
+          lawyer: lawyerName,
           status: statusEl ? statusEl.textContent.trim() : ''
         };
         return true;

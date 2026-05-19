@@ -282,7 +282,7 @@
       <div class="page-hdr">
         <div>
           <div class="ph-title">الموكلون</div>
-          <div class="ph-sub">إجمالي 0 موكل</div>
+          <div class="ph-sub">إجمالي <span id="totalClientsCount">0</span> موكل</div>
         </div>
         <button class="btn-new" id="btnNewClient2">+ موكل جديد</button>
       </div>
@@ -291,18 +291,18 @@
       <div class="kpi-row">
         <div class="kpi-card">
           <div class="kpi-label">إجمالي الموكلين</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد</div>
+          <div class="kpi-val" id="kpiClientsTotal">0</div>
+          <div class="kpi-sub" id="kpiClientsSub">لا توجد بيانات بعد</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">قضايا نشطة</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد</div>
+          <div class="kpi-val" id="kpiCasesActive">0</div>
+          <div class="kpi-sub" id="kpiCasesActiveSub">لا توجد بيانات بعد</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">قضايا مغلقة</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد</div>
+          <div class="kpi-val" id="kpiCasesClosed">0</div>
+          <div class="kpi-sub">من إجمالي القضايا</div>
         </div>
       </div>
 
@@ -603,6 +603,8 @@
         tbody.insertBefore(tr, tbody.firstChild);
         tr.classList.add('new-row');
         saveClients();
+        refreshClientCaseCounts();
+        updateClientStats();
 
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'إضافة الموكل';
@@ -615,29 +617,72 @@
     /* ── Side Panel ── */
     var panel = document.getElementById('sidePanel');
 
+    function _clParseTr(html) {
+      var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+      return Array.from(doc.querySelectorAll('tr > td'));
+    }
+    function _loadRows(key) {
+      try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
+    }
+
     window.openPanel = function(idx) {
+      /* find the row in the table that contains openPanel(idx) */
+      var targetRow = null;
+      document.querySelectorAll('#clientsBody tr').forEach(function(tr) {
+        if (tr.innerHTML.indexOf('openPanel(' + idx + ')') !== -1) targetRow = tr;
+      });
+      /* fallback to CLIENTS array for backwards compat */
       var c = CLIENTS[idx];
-      if (!c) return;
-      var initials = c.name.split(' ').slice(0, 2).map(function(w){ return w[0]; }).join('');
-      document.getElementById('panelAv').textContent        = initials;
-      document.getElementById('panelName').textContent      = c.name;
-      document.getElementById('panelTitle').textContent     = c.name;
-      document.getElementById('panelPhone').textContent     = c.phone;
-      document.getElementById('panelEmail').textContent     = c.email;
+      var name, phone, email, type;
+      if (targetRow) {
+        var cells = targetRow.querySelectorAll('td');
+        var nameEl  = cells[0] ? cells[0].querySelector('.client-name-cell') : null;
+        var phEl    = cells[2] ? cells[2].querySelector('.phone-cell')  : null;
+        var emEl    = cells[3] ? cells[3].querySelector('.email-cell')  : null;
+        var typeEl  = cells[1] ? cells[1].querySelector('.type-badge')  : null;
+        name  = nameEl ? nameEl.textContent.trim() : (c ? c.name  : '');
+        phone = phEl   ? phEl.textContent.trim()   : (c ? c.phone : '');
+        email = emEl   ? emEl.textContent.trim()   : (c ? c.email : '');
+        type  = typeEl && typeEl.classList.contains('type-company') ? 'company' : 'person';
+      } else if (c) {
+        name = c.name; phone = c.phone; email = c.email; type = c.type;
+      } else { return; }
+
+      var ini = name.split(' ').slice(0,2).map(function(w){ return w[0]; }).join('');
+      document.getElementById('panelAv').textContent    = ini;
+      document.getElementById('panelName').textContent  = name;
+      document.getElementById('panelTitle').textContent = name;
+      document.getElementById('panelPhone').textContent = phone;
+      document.getElementById('panelEmail').textContent = email;
       var typeBadge = document.getElementById('panelTypeBadge');
-      typeBadge.innerHTML = c.type === 'company'
+      typeBadge.innerHTML = type === 'company'
         ? '<span class="type-badge type-company" style="margin-top:4px">شركة</span>'
         : '<span class="type-badge type-person" style="margin-top:4px">فرد</span>';
+
+      /* load real cases from cases_data */
+      var clientCases = [];
+      _loadRows('cases_data').forEach(function(html) {
+        var tds = _clParseTr(html);
+        var clientCell = tds[1] ? tds[1].textContent.replace(/\s+/g,' ').trim() : '';
+        if (clientCell === name) {
+          var cNameEl = tds[0] ? tds[0].querySelector('.case-name') : null;
+          var cIdEl   = tds[0] ? tds[0].querySelector('.case-id')   : null;
+          clientCases.push({
+            name: cNameEl ? cNameEl.textContent.trim() : '—',
+            id:   cIdEl   ? cIdEl.textContent.trim()   : '—'
+          });
+        }
+      });
       var casesList = document.getElementById('panelCases');
-      if (c.cases.length === 0) {
-        casesList.innerHTML = '<div style="font-size:0.75rem;color:var(--ink-muted);padding:0.6rem 0;">لا توجد قضايا نشطة</div>';
-      } else {
-        casesList.innerHTML = c.cases.map(function(cs) {
-          return '<div class="panel-case-item">' +
-            '<div><div class="panel-case-name">' + cs.name + '</div><div class="panel-case-id">' + cs.id + '</div></div>' +
-            '<span class="pill pill-active">نشطة</span></div>';
-        }).join('');
-      }
+      casesList.innerHTML = clientCases.length > 0
+        ? clientCases.map(function(cs) {
+            return '<div class="panel-case-item">' +
+              '<div><div class="panel-case-name">' + cs.name + '</div>' +
+              '<div class="panel-case-id">' + cs.id + '</div></div>' +
+              '<span class="pill pill-active">نشطة</span></div>';
+          }).join('')
+        : '<div style="font-size:0.75rem;color:var(--ink-muted);padding:0.6rem 0;">لا توجد قضايا مرتبطة بهذا الموكل بعد</div>';
+
       showOverlay(closePanel);
       panel.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -713,7 +758,55 @@
     }
   }
 
-  window.addEventListener('load', loadClients);
+  function updateClientStats() {
+    var clientCount = document.querySelectorAll('#clientsBody tr:not(.no-results):not(#clNoResults)').length;
+    var el = document.getElementById('totalClientsCount');
+    if (el) el.textContent = clientCount;
+    var totEl = document.getElementById('kpiClientsTotal');
+    if (totEl) { totEl.textContent = clientCount; document.getElementById('kpiClientsSub').textContent = clientCount > 0 ? 'موكل في المنظومة' : 'لا توجد بيانات بعد'; }
+    /* count active/closed cases from cases_data */
+    var activeCases = 0, closedCases = 0;
+    try {
+      JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
+        if (/pill-active/.test(html)) activeCases++;
+        else if (/pill-closed/.test(html)) closedCases++;
+      });
+    } catch(e) {}
+    var acEl = document.getElementById('kpiCasesActive');
+    if (acEl) { acEl.textContent = activeCases; document.getElementById('kpiCasesActiveSub').textContent = activeCases > 0 ? 'قضية نشطة حالياً' : 'لا توجد بيانات بعد'; }
+    var ccEl = document.getElementById('kpiCasesClosed');
+    if (ccEl) ccEl.textContent = closedCases;
+  }
+
+  function refreshClientCaseCounts() {
+    /* For each client row, count their cases from cases_data */
+    var casesByClient = {};
+    try {
+      JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
+        var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+        var tds = doc.querySelectorAll('td');
+        if (tds[1]) {
+          var n = tds[1].textContent.replace(/\s+/g,' ').trim();
+          if (n) casesByClient[n] = (casesByClient[n] || 0) + 1;
+        }
+      });
+    } catch(e) {}
+    document.querySelectorAll('#clientsBody tr').forEach(function(tr) {
+      var nameEl  = tr.querySelector('.client-name-cell');
+      var countEl = tr.querySelector('.cases-count');
+      if (!nameEl || !countEl) return;
+      var n = nameEl.textContent.trim();
+      var count = casesByClient[n] || 0;
+      countEl.textContent = count;
+      countEl.className = 'cases-count ' + (count > 0 ? 'has-cases' : 'no-cases');
+    });
+  }
+
+  window.addEventListener('load', function() {
+    loadClients();
+    refreshClientCaseCounts();
+    updateClientStats();
+  });
   </script>
 
   <script src="sidebar-badges.js"></script>

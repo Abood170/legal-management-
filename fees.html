@@ -278,23 +278,23 @@
       <div class="kpi-row">
         <div class="kpi-card kpi-green">
           <div class="kpi-label">إجمالي الأتعاب</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+          <div class="kpi-val" id="kpiFeesTotal">0</div>
+          <div class="kpi-sub" id="kpiFeesTotalSub">لا توجد بيانات بعد · ر.س</div>
         </div>
         <div class="kpi-card kpi-green">
           <div class="kpi-label">محصّلة</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+          <div class="kpi-val" id="kpiFeesPaid">0</div>
+          <div class="kpi-sub" id="kpiFeesPaidSub">لا توجد بيانات بعد · ر.س</div>
         </div>
         <div class="kpi-card kpi-gold">
           <div class="kpi-label">معلقة التحصيل</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+          <div class="kpi-val" id="kpiFeesPending">0</div>
+          <div class="kpi-sub" id="kpiFeesPendingSub">لا توجد بيانات بعد · ر.س</div>
         </div>
         <div class="kpi-card kpi-red">
           <div class="kpi-label">مصاريف نثرية</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد · ر.س</div>
+          <div class="kpi-val" id="kpiFeesExp">0</div>
+          <div class="kpi-sub" id="kpiFeesExpSub">لا توجد بيانات بعد · ر.س</div>
         </div>
       </div>
 
@@ -622,6 +622,7 @@
         tbody.insertBefore(tr, tbody.firstChild);
         tr.classList.add('new-row');
         saveFees();
+        updateFeesKPIs();
 
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'تسجيل الأتعاب';
@@ -662,7 +663,50 @@
     }
   }
 
-  window.addEventListener('load', loadFees);
+  function _fmtAr(n) { return n.toLocaleString('en-US', {maximumFractionDigits:0}); }
+
+  function updateFeesKPIs() {
+    var total = 0, paid = 0, pending = 0, expenses = 0;
+    document.querySelectorAll('#feesBody tr').forEach(function(tr) {
+      if (!tr.querySelector('.fee-name') && !tr.querySelector('.amount-cell')) return;
+      var tds = tr.querySelectorAll('td');
+      var amtTd = tds[4];
+      if (!amtTd) return;
+      var amount;
+      var raw = amtTd.getAttribute('data-amount');
+      if (raw) {
+        amount = parseFloat(raw);
+      } else {
+        var txt = amtTd.textContent.trim()
+          .replace(/[٠-٩]/g, function(d){ return d.charCodeAt(0) - 0x0660; })
+          .replace(/[^\d.]/g, '');
+        amount = parseFloat(txt);
+      }
+      if (isNaN(amount)) return;
+      var pill    = tr.querySelector('.pill');
+      var typeTag = tr.querySelector('.type-tag');
+      var isPaid  = pill && pill.classList.contains('pill-paid');
+      var isExp   = typeTag && typeTag.classList.contains('type-exp');
+      if (isPaid) paid += amount; else pending += amount;
+      if (isExp) expenses += amount;
+      total += amount;
+    });
+    var fmt = _fmtAr;
+    var set = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set('kpiFeesTotal',   fmt(total));
+    set('kpiFeesPaid',    fmt(paid));
+    set('kpiFeesPending', fmt(pending));
+    set('kpiFeesExp',     fmt(expenses));
+    set('kpiFeesTotalSub',   total   > 0 ? 'ر.س · إجمالي' : 'لا توجد بيانات بعد · ر.س');
+    set('kpiFeesPaidSub',    paid    > 0 ? 'ر.س · محصّلة'  : 'لا توجد بيانات بعد · ر.س');
+    set('kpiFeesPendingSub', pending > 0 ? 'ر.س · معلقة'   : 'لا توجد بيانات بعد · ر.س');
+    set('kpiFeesExpSub',     expenses> 0 ? 'ر.س · نثريات'  : 'لا توجد بيانات بعد · ر.س');
+  }
+
+  window.addEventListener('load', function() {
+    loadFees();
+    updateFeesKPIs();
+  });
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>

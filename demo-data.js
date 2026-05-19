@@ -209,6 +209,126 @@
     };
     localStorage.setItem('dynamicCases', JSON.stringify(dynCases));
     sessionStorage.setItem('dynamicCases', JSON.stringify(dynCases));
+
+    /* tasks_data — Bug #9 */
+    var months = MONTHS_AR;
+    function sd(d) { return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear(); }
+    localStorage.setItem('tasks_data', JSON.stringify([
+      /* متأخرة · عالية · خالد العتيبي */
+      '<td><div class="task-name">تقديم لائحة اعتراض</div><div class="task-case">قضية #2026-0001</div></td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">قضية #2026-0001</td>' +
+      '<td><div class="assignee-chip"><div class="av-xs">خع</div> خالد العتيبي</div></td>' +
+      '<td><span class="pill pill-high">عالية</span></td>' +
+      '<td><div class="date-cell">' + sd(addDays(-3)) + '</div></td>' +
+      '<td><span class="pill pill-late">متأخرة</span></td>' +
+      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
+
+      /* قيد التنفيذ · متوسطة · سارة القحطاني */
+      '<td><div class="task-name">تحضير مذكرة استئناف</div><div class="task-case">قضية #2026-0002</div></td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">قضية #2026-0002</td>' +
+      '<td><div class="assignee-chip"><div class="av-xs">سق</div> سارة القحطاني</div></td>' +
+      '<td><span class="pill pill-mid">متوسطة</span></td>' +
+      '<td><div class="date-cell">' + sd(addDays(4)) + '</div></td>' +
+      '<td><span class="pill pill-progress">قيد التنفيذ</span></td>' +
+      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
+
+      /* جديدة · منخفضة · سارة القحطاني */
+      '<td><div class="task-name">اتصال بالموكل — الفارس</div></td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">—</td>' +
+      '<td><div class="assignee-chip"><div class="av-xs">سق</div> سارة القحطاني</div></td>' +
+      '<td><span class="pill pill-low">منخفضة</span></td>' +
+      '<td><div class="date-cell">' + sd(addDays(0)) + '</div></td>' +
+      '<td><span class="pill pill-new">جديدة</span></td>' +
+      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
+
+      /* قيد التنفيذ · منخفضة · نورة الشمري */
+      '<td><div class="task-name">مراجعة عقد — مجموعة النور</div></td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">—</td>' +
+      '<td><div class="assignee-chip"><div class="av-xs">نش</div> نورة الشمري</div></td>' +
+      '<td><span class="pill pill-low">منخفضة</span></td>' +
+      '<td><div class="date-cell">' + sd(addDays(6)) + '</div></td>' +
+      '<td><span class="pill pill-progress">قيد التنفيذ</span></td>' +
+      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
+
+      /* مكتملة · منخفضة · محمد الزهراني */
+      '<td><div class="task-name">إيداع رسوم محكمة</div><div class="task-case">قضية #2026-0003</div></td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">قضية #2026-0003</td>' +
+      '<td><div class="assignee-chip"><div class="av-xs">مز</div> محمد الزهراني</div></td>' +
+      '<td><span class="pill pill-low">منخفضة</span></td>' +
+      '<td><div class="date-cell">' + sd(addDays(-5)) + '</div></td>' +
+      '<td><span class="pill pill-done">مكتملة</span></td>' +
+      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>'
+    ]));
+
+    /* fees_data — Bug #10 */
+    var today = shortDate(new Date());
+    localStorage.setItem('fees_data', JSON.stringify([
+      /* استشارة قانونية · المالكي · 5000 · خالد · مدفوعة · أتعاب */
+      '<td><div class="fee-name">أتعاب محاماة — عبدالرحمن المالكي</div><div class="fee-id">#FEE-1001</div></td>' +
+      '<td style="font-size:0.78rem">عبدالرحمن المالكي</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0001</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">خع</div> خالد العتيبي</div></td>' +
+      '<td data-amount="5000"><div class="amount-cell amount-gold">5,000</div></td>' +
+      '<td><span class="type-tag type-fee">أتعاب محاماة</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-paid">مدفوعة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* أتعاب تمثيل · الفارس · 12000 · سارة · معلقة · أتعاب */
+      '<td><div class="fee-name">أتعاب محاماة — شركة الفارس للتجارة</div><div class="fee-id">#FEE-1002</div></td>' +
+      '<td style="font-size:0.78rem">شركة الفارس للتجارة</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0003</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">سق</div> سارة القحطاني</div></td>' +
+      '<td data-amount="12000"><div class="amount-cell amount-gold">12,000</div></td>' +
+      '<td><span class="type-tag type-fee">أتعاب محاماة</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-pending">معلقة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* أتعاب استشارة عقارية · الشهري · 3500 · محمد · معلقة · أتعاب */
+      '<td><div class="fee-name">أتعاب محاماة — فيصل الشهري</div><div class="fee-id">#FEE-1003</div></td>' +
+      '<td style="font-size:0.78rem">فيصل الشهري</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0004</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">مز</div> محمد الزهراني</div></td>' +
+      '<td data-amount="3500"><div class="amount-cell amount-gold">3,500</div></td>' +
+      '<td><span class="type-tag type-fee">أتعاب محاماة</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-pending">معلقة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* مصاريف تصوير مستندات · 350 · نثرية · مدفوعة */
+      '<td><div class="fee-name">مصاريف نثرية — تصوير مستندات</div><div class="fee-id">#FEE-1004</div></td>' +
+      '<td style="font-size:0.78rem">—</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">—</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">—</div> —</div></td>' +
+      '<td data-amount="350"><div class="amount-cell amount-gold">350</div></td>' +
+      '<td><span class="type-tag type-exp">مصاريف نثرية</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-paid">مدفوعة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* رسوم محكمة · 800 · نثرية · مدفوعة */
+      '<td><div class="fee-name">مصاريف نثرية — رسوم محكمة</div><div class="fee-id">#FEE-1005</div></td>' +
+      '<td style="font-size:0.78rem">—</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">—</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">—</div> —</div></td>' +
+      '<td data-amount="800"><div class="amount-cell amount-gold">800</div></td>' +
+      '<td><span class="type-tag type-exp">مصاريف نثرية</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-paid">مدفوعة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* أتعاب قضية إدارية · النور · 8000 · نورة · مدفوعة · أتعاب */
+      '<td><div class="fee-name">أتعاب محاماة — مجموعة النور الاستثمارية</div><div class="fee-id">#FEE-1006</div></td>' +
+      '<td style="font-size:0.78rem">مجموعة النور الاستثمارية</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0005</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">نش</div> نورة الشمري</div></td>' +
+      '<td data-amount="8000"><div class="amount-cell amount-gold">8,000</div></td>' +
+      '<td><span class="type-tag type-fee">أتعاب محاماة</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-paid">مدفوعة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>'
+    ]));
   }
 
   window.seedDemoData  = seedDemoData;

@@ -256,7 +256,7 @@
       <div class="page-hdr">
         <div>
           <div class="ph-title">الدعاوى</div>
-          <div class="ph-sub">إجمالي 142 دعوى نشطة</div>
+          <div class="ph-sub">إجمالي <span id="totalCasesCount">0</span> دعوى نشطة</div>
         </div>
         <button class="btn-new" id="btnNewCase">+ دعوى جديدة</button>
       </div>
@@ -601,6 +601,7 @@
         tbody.insertBefore(tr, tbody.firstChild);
         saveCases();
         updateSidebarBadges();
+        updateCasesHeader();
 
         btn.disabled = false;
         btn.innerHTML = 'إنشاء الدعوى';
@@ -738,7 +739,17 @@
     }
   }
 
-  window.addEventListener('load', loadCases);
+  function updateCasesHeader() {
+    var count = 0;
+    try { count = JSON.parse(localStorage.getItem('cases_data') || '[]').length; } catch(e) {}
+    var el = document.getElementById('totalCasesCount');
+    if (el) el.textContent = count;
+  }
+
+  window.addEventListener('load', function() {
+    loadCases();
+    updateCasesHeader();
+  });
   </script>
 
   <!-- Case Side Panel -->
@@ -839,6 +850,7 @@
         activePanelRow.remove();
         saveCases();
         updateSidebarBadges();
+        updateCasesHeader();
         window.closeCasePanel();
         showToast('تم حذف الدعوى');
       }, 260);
@@ -853,6 +865,7 @@
         row.remove();
         saveCases();
         updateSidebarBadges();
+        updateCasesHeader();
         showToast('تم حذف الدعوى');
       }, 260);
     };

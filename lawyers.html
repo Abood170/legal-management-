@@ -321,17 +321,17 @@
         </div>
         <div class="kpi-card kc-gold">
           <div class="kpi-label">متوسط القضايا</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-sub">لا توجد بيانات بعد</div>
+          <div class="kpi-val" id="kpiAvgCases">0</div>
+          <div class="kpi-sub" id="kpiAvgCasesSub">لا توجد بيانات بعد</div>
         </div>
         <div class="kpi-card kc-green">
           <div class="kpi-label">أعلى نسبة فوز</div>
-          <div class="kpi-val">—</div>
-          <div class="kpi-sub">لا توجد بيانات بعد</div>
+          <div class="kpi-val" id="kpiMaxWin">—</div>
+          <div class="kpi-sub" id="kpiMaxWinSub">لا توجد بيانات بعد</div>
         </div>
         <div class="kpi-card kc-blue">
           <div class="kpi-label">إجمالي الأتعاب</div>
-          <div class="kpi-val">0</div>
+          <div class="kpi-val" id="kpiTotalFees">0</div>
           <div class="kpi-sub">ر.س · هذا العام</div>
         </div>
       </div>
@@ -694,6 +694,8 @@
         var es = document.getElementById('emptyState');
         if (es) es.style.display = 'none';
         saveLawyers();
+        refreshLawyerCaseCounts();
+        updateLawyerKPIs();
 
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'إضافة المحامي';
@@ -769,12 +771,38 @@
     document.getElementById('panelSpec').textContent  = specRaw;
     document.getElementById('panelPhone').textContent = contactTxt(contactRows[0]);
     document.getElementById('panelEmail').textContent = contactTxt(contactRows[1]);
-    document.getElementById('panelCases').textContent = txt('.lc-stat-val.green') || '—';
-    document.getElementById('panelWin').textContent   = '—';
-    document.getElementById('panelFee').textContent   = '—';
-    document.getElementById('panelChart').innerHTML   = '';
-    document.getElementById('panelCasesList').innerHTML =
-      '<div style="font-size:0.75rem;color:var(--ink-muted);text-align:center;padding:0.5rem">لا توجد قضايا مرتبطة بعد</div>';
+    var lawyerNameForPanel = txt('.lc-name');
+    var casesCount = parseInt(txt('.lc-stat-val.green')) || 0;
+    document.getElementById('panelCases').textContent = casesCount;
+    document.getElementById('panelWin').textContent   = txt('.lc-stat:nth-child(2) .lc-stat-val') || '—';
+    document.getElementById('panelFee').textContent   = txt('.lc-stat:nth-child(3) .lc-stat-val') || '—';
+    /* Hide monthly chart — data not available yet */
+    var chartSection = document.getElementById('panelChart');
+    if (chartSection) {
+      chartSection.innerHTML = '<div style="font-size:0.72rem;color:var(--ink-muted);text-align:center;padding:0.6rem;background:var(--off-white);border-radius:8px;">البيانات الشهرية ستتوفر بعد 3 أشهر من التشغيل</div>';
+    }
+    /* Load real cases for this lawyer */
+    var lawyerCases = [];
+    _parseRows('cases_data').forEach(function(html) {
+      var cells = _parseTr(html);
+      if (_lawyerFromChip(cells[4]) === lawyerNameForPanel) {
+        var nameEl = cells[0] ? cells[0].querySelector('.case-name') : null;
+        var idEl   = cells[0] ? cells[0].querySelector('.case-id')   : null;
+        lawyerCases.push({
+          name: nameEl ? nameEl.textContent.trim() : '—',
+          id:   idEl   ? idEl.textContent.trim()   : '—'
+        });
+      }
+    });
+    var last5 = lawyerCases.slice(-5);
+    document.getElementById('panelCasesList').innerHTML = last5.length > 0
+      ? last5.map(function(c) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border)">' +
+            '<div><div style="font-size:0.78rem;font-weight:600;color:var(--ink)">' + c.name + '</div>' +
+            '<div style="font-size:0.65rem;color:var(--ink-muted)">' + c.id + '</div></div>' +
+            '<span class="pill pill-active" style="font-size:0.6rem">نشطة</span></div>';
+        }).join('')
+      : '<div style="font-size:0.75rem;color:var(--ink-muted);text-align:center;padding:0.5rem">لا توجد قضايا مرتبطة بعد</div>';
 
     var p = document.getElementById('sidePanel');
     p.scrollTop = 0;
@@ -793,11 +821,73 @@
     }
   });
 
-  window.addEventListener('load', loadLawyers);
+  window.addEventListener('load', function() {
+    loadLawyers();
+    refreshLawyerCaseCounts();
+    updateLawyerKPIs();
+  });
+
+  function _parseRows(key) {
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
+  }
+  function _parseTr(html) {
+    var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+    return Array.from(doc.querySelectorAll('tr > td'));
+  }
+  function _lawyerFromChip(td) {
+    if (!td) return '';
+    var chip = td.querySelector('.lawyer-chip');
+    if (!chip) return td.textContent.replace(/\s+/g,' ').trim();
+    var clone = chip.cloneNode(true);
+    var av = clone.querySelector('.lawyer-av');
+    if (av) av.remove();
+    return clone.textContent.replace(/\s+/g,' ').trim();
+  }
+
+  function refreshLawyerCaseCounts() {
+    var counts = {};
+    _parseRows('cases_data').forEach(function(html) {
+      var cells = _parseTr(html);
+      var name = _lawyerFromChip(cells[4]);
+      if (name) counts[name] = (counts[name] || 0) + 1;
+    });
+    document.querySelectorAll('#lawyersGrid .lawyer-card').forEach(function(card) {
+      var nameEl = card.querySelector('.lc-name');
+      if (!nameEl) return;
+      var el = card.querySelector('.lc-stat-val.green');
+      if (el) el.textContent = counts[nameEl.textContent.trim()] || 0;
+    });
+  }
 
   function updateLawyerCount() {
     document.getElementById('kpiCount').textContent =
       document.querySelectorAll('#lawyersGrid .lawyer-card').length;
+  }
+
+  function updateLawyerKPIs() {
+    var cards = document.querySelectorAll('#lawyersGrid .lawyer-card');
+    var count = cards.length;
+    document.getElementById('kpiCount').textContent = count;
+    if (count === 0) return;
+    var totalCases = 0, maxWin = 0, totalFees = 0;
+    cards.forEach(function(card) {
+      var stats = card.querySelectorAll('.lc-stat');
+      if (stats[0]) totalCases += parseInt(stats[0].querySelector('.lc-stat-val').textContent) || 0;
+      if (stats[1]) {
+        var wv = parseFloat(stats[1].querySelector('.lc-stat-val').textContent);
+        if (!isNaN(wv) && wv > maxWin) maxWin = wv;
+      }
+      if (stats[2]) {
+        var fv = parseFloat(stats[2].querySelector('.lc-stat-val').textContent.replace(/,/g,'').replace(/\s/g,''));
+        if (!isNaN(fv)) totalFees += fv;
+      }
+    });
+    var avgEl = document.getElementById('kpiAvgCases');
+    if (avgEl) { avgEl.textContent = Math.round(totalCases / count); document.getElementById('kpiAvgCasesSub').textContent = 'قضية لكل محامٍ'; }
+    var winEl = document.getElementById('kpiMaxWin');
+    if (winEl) { winEl.textContent = maxWin > 0 ? maxWin + '%' : '—'; document.getElementById('kpiMaxWinSub').textContent = maxWin > 0 ? 'أعلى معدل فوز' : 'لا توجد بيانات بعد'; }
+    var feesEl = document.getElementById('kpiTotalFees');
+    if (feesEl) feesEl.textContent = totalFees > 0 ? totalFees.toLocaleString('en-US') : '0';
   }
 
   function syncEmptyState() {
@@ -819,7 +909,7 @@
     setTimeout(function() {
       card.remove();
       saveLawyers();
-      updateLawyerCount();
+      updateLawyerKPIs();
       syncEmptyState();
       window.showToast('تم حذف المحامي بنجاح');
     }, 300);
@@ -835,7 +925,7 @@
     });
     window.closePanel();
     saveLawyers();
-    updateLawyerCount();
+    updateLawyerKPIs();
     syncEmptyState();
     window.showToast('تم حذف المحامي بنجاح');
   }
