@@ -91,6 +91,19 @@
     .input-suffix .form-input { padding-left: 2.5rem; }
     .suffix-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: var(--green); pointer-events: none; }
 
+    /* Demo Mode Button */
+    .demo-action-row { margin-bottom: 1.4rem; text-align: center; }
+    .btn-demo-mode {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: white; padding: 0.75rem 2rem; border-radius: 10px;
+      font-size: 0.92rem; font-weight: 800; border: none; cursor: pointer;
+      font-family: 'Cairo', sans-serif; letter-spacing: 0.5px;
+      box-shadow: 0 4px 14px rgba(22,163,74,0.35); transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-demo-mode:hover { background: linear-gradient(135deg, #15803d 0%, #166534 100%); box-shadow: 0 6px 18px rgba(22,163,74,0.45); transform: translateY(-1px); }
+    .demo-mode-hint { font-size: 0.76rem; color: var(--ink-mid); margin: 0.6rem 0 0; line-height: 1.6; }
+
     /* Buttons */
     .btn-save { background: var(--accent); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; width: 100%; letter-spacing: 0.3px; }
     .btn-save:hover { background: var(--accent-light); }
@@ -977,6 +990,13 @@
 
           <!-- Demo Data -->
           <div class="settings-panel" id="panel-demo">
+
+            <!-- Full Demo Mode Button -->
+            <div class="demo-action-row">
+              <button id="demoModeBtn" class="btn-demo-mode">🎬 وضع العرض الكامل</button>
+              <p class="demo-mode-hint">يمسح جميع البيانات الحالية، يحمّل بيانات تجريبية كاملة، ثم ينقلك إلى لوحة التحكم — مثالي للعروض التقديمية</p>
+            </div>
+
             <div class="set-card">
               <div class="set-card-head">
                 <div class="set-card-title">البيانات التجريبية</div>
@@ -1438,6 +1458,17 @@
       resetDemoData();
     }
   }
+
+  function activateDemoMode() {
+    if (!confirm('سيتم مسح جميع البيانات الحالية وتحميل بيانات العرض التجريبي الكامل.\nهل تريد المتابعة؟')) return;
+    localStorage.clear();
+    sessionStorage.clear();
+    seedDemoData();
+    window.showToast('🎬 وضع العرض جاهز — جاري إعادة التحميل...');
+    setTimeout(function() { window.location.href = 'dashboard.html'; }, 1200);
+  }
+
+  document.getElementById('demoModeBtn').addEventListener('click', activateDemoMode);
   </script>
 </body>
 </html>

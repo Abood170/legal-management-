@@ -317,7 +317,7 @@
         <div class="kpi-card kc-accent">
           <div class="kpi-label">إجمالي المحامين</div>
           <div class="kpi-val" id="kpiCount">0</div>
-          <div class="kpi-sub">لا يوجد محامون بعد</div>
+          <div class="kpi-sub" id="lawyersCountSub">لا يوجد محامون بعد</div>
         </div>
         <div class="kpi-card kc-gold">
           <div class="kpi-label">متوسط القضايا</div>
@@ -868,6 +868,8 @@
     var cards = document.querySelectorAll('#lawyersGrid .lawyer-card');
     var count = cards.length;
     document.getElementById('kpiCount').textContent = count;
+    var cntSub = document.getElementById('lawyersCountSub');
+    if (cntSub) cntSub.textContent = count > 0 ? 'محامٍ في الفريق' : 'لا يوجد محامون بعد';
     if (count === 0) return;
     var totalCases = 0, maxWin = 0, totalFees = 0;
     cards.forEach(function(card) {

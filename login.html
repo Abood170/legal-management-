@@ -642,9 +642,9 @@ function doLogin() {
   const btnText = document.getElementById('btnText');
   const error = document.getElementById('errorMsg');
 
-  if (!email || !pwd) {
+  if (!email || !email.includes('@')) {
     error.style.display = 'flex';
-    error.textContent = '⚠️ يرجى إدخال البريد الإلكتروني وكلمة المرور';
+    error.textContent = '⚠️ يرجى إدخال بريد إلكتروني صحيح';
     return;
   }
 
@@ -653,11 +653,6 @@ function doLogin() {
   if (!firmData) {
     error.style.display = 'flex';
     error.textContent = '⚠️ لا يوجد حساب مسجّل — يرجى إنشاء حساب أولاً';
-    return;
-  }
-  if (email !== firmData.email) {
-    error.style.display = 'flex';
-    error.textContent = '⚠️ البريد الإلكتروني غير مسجّل';
     return;
   }
 

@@ -198,6 +198,50 @@
     .loading-dots { animation: dotsFade 1s ease infinite; }
   </style>
 <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+  <style>
+    /* ── Password Button ── */
+    .btn-show-pwd { background:rgba(184,149,42,0.1) !important; color:var(--gold) !important; border:1px solid rgba(184,149,42,0.3) !important; }
+    .btn-show-pwd:hover { background:rgba(184,149,42,0.22) !important; border-color:rgba(184,149,42,0.55) !important; }
+    /* ── Password Modal ── */
+    .pwd-modal { position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:1rem; }
+    .pwd-modal-backdrop { position:absolute;inset:0;background:rgba(0,0,0,0.52);backdrop-filter:blur(4px); }
+    .pwd-modal-content { position:relative;background:white;border-radius:14px;padding:2rem;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(15,20,25,0.2);font-family:'Cairo',sans-serif; }
+    .pwd-modal-close { position:absolute;top:1rem;left:1rem;background:none;border:1px solid var(--border);border-radius:6px;width:28px;height:28px;font-size:0.8rem;cursor:pointer;color:var(--ink-muted);display:flex;align-items:center;justify-content:center;line-height:1;transition:all 0.15s; }
+    .pwd-modal-close:hover { border-color:var(--red);color:var(--red); }
+    .pwd-icon { font-size:2.2rem;display:block;text-align:center;margin-bottom:0.5rem; }
+    .pwd-modal-header { text-align:center;margin-bottom:1.5rem; }
+    .pwd-modal-header h3 { font-size:1rem;font-weight:700;color:var(--ink);margin:0.3rem 0; }
+    .pwd-sub { font-size:0.78rem;color:var(--ink-muted); }
+    .pwd-fields { display:flex;flex-direction:column;gap:0.75rem;margin-bottom:0; }
+    .pwd-field label { display:block;font-size:0.65rem;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.3rem; }
+    .pwd-value { background:var(--off-white);padding:0.65rem 1rem;border-radius:8px;font-family:monospace;font-size:0.88rem;border:1px solid var(--border);color:var(--ink); }
+    .pwd-value-big { font-size:2rem;font-weight:900;text-align:center;letter-spacing:0.5rem;color:var(--accent);background:rgba(22,163,74,0.07);border-color:rgba(22,163,74,0.2); }
+    .btn-copy { width:100%;margin-top:0.5rem;padding:0.52rem;background:white;border:1px solid var(--border-mid);border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.78rem;color:var(--ink-light);transition:all 0.15s; }
+    .btn-copy:hover { background:var(--off-white); }
+    .pwd-actions { display:flex;gap:0.6rem;margin-top:1.4rem; }
+    .btn-share-wa { flex:1;padding:0.7rem;background:#25D366;color:white;border:none;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.82rem;font-weight:700;transition:background 0.15s; }
+    .btn-share-wa:hover { background:#1ebd5b; }
+    .btn-close-pwd { padding:0.7rem 1.2rem;background:var(--off-white);border:1px solid var(--border-mid);border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:0.82rem;color:var(--ink-mid);transition:all 0.15s; }
+    .btn-close-pwd:hover { border-color:var(--ink-mid);color:var(--ink); }
+    .pwd-link { text-align:center;margin-top:1rem;font-size:0.68rem;color:var(--ink-muted); }
+    .pwd-link code { background:var(--off-white);padding:1px 6px;border-radius:3px;font-size:0.7rem; }
+    /* ── Doc Requests (panel) ── */
+    .doc-req-section { border-top:1px solid var(--border);padding-top:0.85rem; }
+    .doc-req-sec-title { font-size:0.68rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;justify-content:space-between;margin-bottom:0.65rem; }
+    .btn-doc-req-new { background:var(--accent);color:white;border:none;border-radius:6px;padding:3px 9px;font-size:0.63rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;transition:background 0.15s; }
+    .btn-doc-req-new:hover { background:var(--accent-light); }
+    .doc-req-item { border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.75rem;margin-bottom:0.45rem;background:var(--white); }
+    .doc-req-item:last-child { margin-bottom:0; }
+    .doc-req-item-head { display:flex;justify-content:space-between;align-items:flex-start;gap:0.4rem; }
+    .doc-req-item-title { font-size:0.78rem;font-weight:600;color:var(--ink);flex:1; }
+    .doc-req-item-desc { font-size:0.68rem;color:var(--ink-muted);margin:0.15rem 0 0.35rem; }
+    .doc-req-item-meta { font-size:0.67rem;color:var(--ink-muted);display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-top:0.35rem; }
+    .doc-pill-pending { display:inline-flex;align-items:center;background:rgba(184,149,42,0.1);color:var(--gold);border:1px solid rgba(184,149,42,0.25);border-radius:2rem;padding:2px 8px;font-size:0.6rem;font-weight:700;white-space:nowrap; }
+    .doc-pill-uploaded { display:inline-flex;align-items:center;background:rgba(22,163,74,0.08);color:var(--green);border:1px solid rgba(22,163,74,0.2);border-radius:2rem;padding:2px 8px;font-size:0.6rem;font-weight:700;white-space:nowrap; }
+    .btn-doc-req-del { background:none;border:none;color:var(--ink-muted);font-size:0.65rem;cursor:pointer;font-family:'Cairo',sans-serif;padding:0;text-decoration:underline;flex-shrink:0; }
+    .btn-doc-req-del:hover { color:var(--red); }
+    .doc-req-empty { text-align:center;padding:1.2rem 0.5rem;color:var(--ink-muted);font-size:0.73rem; }
+  </style>
 </head>
 <body>
   <!-- Sidebar -->
@@ -476,14 +520,79 @@
     </div>
   </div>
 
+  <!-- Password View Modal -->
+  <!-- Document Request Modal -->
+  <div class="pwd-modal" id="docReqModal" style="display:none;">
+    <div class="pwd-modal-backdrop" onclick="closeDocReqModal()"></div>
+    <div class="pwd-modal-content" style="max-width:460px;">
+      <button class="pwd-modal-close" onclick="closeDocReqModal()">✕</button>
+      <div class="pwd-modal-header">
+        <span class="pwd-icon">📎</span>
+        <h3>طلب مستند من الموكل</h3>
+        <div class="pwd-sub" id="docReqCaseName" style="font-family:monospace;font-size:0.82rem;color:var(--accent);margin-top:0.2rem;"></div>
+      </div>
+      <div class="pwd-fields">
+        <div class="pwd-field">
+          <label>اسم المستند المطلوب *</label>
+          <input type="text" id="docReqTitle" class="form-input" placeholder="مثال: صورة الهوية الوطنية" maxlength="100">
+        </div>
+        <div class="pwd-field">
+          <label>تفاصيل (اختياري)</label>
+          <textarea id="docReqDesc" class="form-input form-textarea" rows="2" placeholder="مثال: تأكد أن الصورة واضحة من الوجهين"></textarea>
+        </div>
+      </div>
+      <div class="pwd-actions" style="margin-top:1rem;">
+        <button class="btn-close-pwd" onclick="closeDocReqModal()" style="flex:1;">إلغاء</button>
+        <button class="btn-share-wa" onclick="submitDocReq()" style="flex:2;background:var(--accent);">📤 إرسال الطلب للموكل</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pwd-modal" id="pwdModal" style="display:none">
+    <div class="pwd-modal-backdrop" onclick="closePasswordModal()"></div>
+    <div class="pwd-modal-content">
+      <button class="pwd-modal-close" onclick="closePasswordModal()">✕</button>
+      <div class="pwd-modal-header">
+        <span class="pwd-icon">🔑</span>
+        <h3>بيانات دخول الموكل</h3>
+        <p class="pwd-sub">شارك هذه البيانات مع الموكل عبر واتساب أو رسالة نصية</p>
+      </div>
+      <div class="pwd-fields">
+        <div class="pwd-field">
+          <label>رقم القضية</label>
+          <div class="pwd-value" id="pwdCaseId"></div>
+        </div>
+        <div class="pwd-field">
+          <label>اسم الموكل</label>
+          <div class="pwd-value" id="pwdClientName"></div>
+        </div>
+        <div class="pwd-field">
+          <label>كلمة المرور</label>
+          <div class="pwd-value pwd-value-big" id="pwdValue"></div>
+          <button class="btn-copy" onclick="copyPasswordToClipboard()">📋 نسخ كلمة المرور</button>
+        </div>
+      </div>
+      <div class="pwd-actions">
+        <button class="btn-share-wa" onclick="sharePwdWhatsApp()">📱 مشاركة عبر واتساب</button>
+        <button class="btn-close-pwd" onclick="closePasswordModal()">إغلاق</button>
+      </div>
+      <div class="pwd-link">
+        <small>رابط البوابة: <code>client-login.html</code></small>
+      </div>
+    </div>
+  </div>
+
   <script>
   function generatePassword() {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
+  function generateCasePassword() {
+    return String(Math.floor(1000 + Math.random() * 9000)); // 4-digit: 1000-9999
+  }
 
   function showCredentials(caseNum, clientName, pwd) {
     // Save new case to sessionStorage so client-login.html can find it
-    var existingCases = JSON.parse(sessionStorage.getItem('dynamicCases') || '{}');
+    var existingCases = JSON.parse(localStorage.getItem('dynamicCases') || '{}');
     var pending = window._pendingCaseData || {};
     existingCases[caseNum] = {
       pwd: pwd,
@@ -576,7 +685,7 @@
       var dateDisplay = date ? arabicDate(date) : '—';
       var caseId     = '#2025-' + String(counter++).padStart(4, '0');
 
-      var newPwd = generatePassword();
+      var newPwd = generateCasePassword();
 
       btn.disabled = true;
       btn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
@@ -597,7 +706,7 @@
           '<td><div class="lawyer-chip"><div class="lawyer-av">' + lawyerAv + '</div>' + lawyerName + '</div></td>' +
           '<td><div class="date-cell">' + dateDisplay + '</div></td>' +
           '<td><span class="pill pill-active">نشطة</span></td>' +
-          '<td><div class="row-actions"><button class="row-btn view-case-btn">عرض</button><button class="btn-portal" onclick="openClientPortal(\'' + caseId + '\')">بوابة الموكل</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteCase(this)">حذف</button></div></td>';
+          '<td><div class="row-actions"><button class="row-btn view-case-btn">عرض</button><button class="btn-portal" onclick="openClientPortal(\'' + caseId + '\')">بوابة الموكل</button><button class="row-btn btn-show-pwd" onclick="showCasePassword(this)" title="عرض كلمة مرور الموكل">🔑 كلمة المرور</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteCase(this)">حذف</button></div></td>';
         tbody.insertBefore(tr, tbody.firstChild);
         saveCases();
         updateSidebarBadges();
@@ -730,6 +839,19 @@
             tr.querySelectorAll('.row-btn').forEach(function(btn) {
               if (btn.textContent.trim() === 'عرض') btn.classList.add('view-case-btn');
             });
+            // inject password button if missing (covers seed rows + old saved rows)
+            var ra = tr.querySelector('.row-actions');
+            if (ra && !ra.querySelector('.btn-show-pwd')) {
+              var pwdBtn = document.createElement('button');
+              pwdBtn.className = 'row-btn btn-show-pwd';
+              pwdBtn.setAttribute('onclick', 'showCasePassword(this)');
+              pwdBtn.setAttribute('title', 'عرض كلمة مرور الموكل');
+              pwdBtn.textContent = '🔑 كلمة المرور';
+              var delBtn = Array.from(ra.querySelectorAll('button')).find(function(b) {
+                return b.textContent.trim() === 'حذف';
+              });
+              delBtn ? ra.insertBefore(pwdBtn, delBtn) : ra.appendChild(pwdBtn);
+            }
             tbody.appendChild(tr);
           });
           var nr = document.getElementById('cNoResults');
@@ -773,7 +895,8 @@
           <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.82rem;"><span style="color:#6B7280;">الحالة</span><span id="cpStatus"></span></div>
         </div>
       </div>
-      <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.5rem;">
+      <div id="cpDocsSection" style="flex:1;overflow-y:auto;min-height:0;"></div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.5rem;padding-top:0.75rem;flex-shrink:0;">
         <button onclick="closeCasePanel()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#374151;font-family:'Cairo',sans-serif;font-size:0.85rem;cursor:pointer;">إغلاق</button>
         <button onclick="deleteCaseFromPanel()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid rgba(220,38,38,0.3);background:rgba(220,38,38,0.05);color:#DC2626;font-family:'Cairo',sans-serif;font-size:0.85rem;cursor:pointer;">حذف الدعوى</button>
       </div>
@@ -833,6 +956,8 @@
       showOverlay(closeCasePanel);
       panel.classList.add('open');
       document.body.style.overflow = 'hidden';
+      var _cid = document.getElementById('cpCaseId').textContent.trim();
+      if (typeof window.buildDocReqSection === 'function') window.buildDocReqSection(_cid);
     };
 
     window.closeCasePanel = function() {
@@ -884,5 +1009,215 @@
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
+
+  <script>
+  /* ══ Password Modal ══════════════════════════════════════════════ */
+
+  function showCasePassword(btn) {
+    var tr = btn.closest('tr');
+    var caseIdEl = tr ? tr.querySelector('.case-id') : null;
+    var caseId   = caseIdEl ? caseIdEl.textContent.trim() : null;
+    if (!caseId) { alert('لم يتم العثور على رقم القضية'); return; }
+
+    var dynamic  = JSON.parse(localStorage.getItem('dynamicCases') || '{}');
+    var caseData = dynamic[caseId];
+
+    if (!caseData || !caseData.pwd) {
+      alert('لا توجد كلمة مرور محفوظة لهذه القضية.\nاضغط على «بوابة الموكل» أولاً لإنشاء بيانات الدخول.');
+      return;
+    }
+    openPasswordModal(caseId, caseData.client || '—', caseData.pwd);
+  }
+
+  function openPasswordModal(caseId, clientName, password) {
+    document.getElementById('pwdCaseId').textContent     = caseId;
+    document.getElementById('pwdClientName').textContent = clientName;
+    document.getElementById('pwdValue').textContent      = password;
+    window._currentPwdData = { caseId: caseId, clientName: clientName, password: password };
+    document.getElementById('pwdModal').style.display    = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePasswordModal() {
+    document.getElementById('pwdModal').style.display = 'none';
+    document.body.style.overflow = '';
+    window._currentPwdData = null;
+  }
+
+  function copyPasswordToClipboard() {
+    var data = window._currentPwdData;
+    if (!data) return;
+    navigator.clipboard.writeText(data.password).then(function() {
+      var btn = document.querySelector('#pwdModal .btn-copy');
+      if (!btn) return;
+      var orig = btn.textContent;
+      btn.textContent = '✓ تم النسخ';
+      setTimeout(function() { btn.textContent = orig; }, 1500);
+    });
+  }
+
+  function sharePwdWhatsApp() {
+    var data = window._currentPwdData;
+    if (!data) return;
+    var msg = 'مرحباً ' + data.clientName + '،\n\n'
+            + 'يمكنك متابعة قضيتك عبر بوابة الموكل:\n\n'
+            + '🔗 الرابط: client-login.html\n'
+            + '📋 رقم القضية: ' + data.caseId + '\n'
+            + '🔑 كلمة المرور: ' + data.password + '\n\n'
+            + 'للاستفسار، تواصل مع مكتبنا مباشرة.';
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var m = document.getElementById('pwdModal');
+      if (m && m.style.display !== 'none') closePasswordModal();
+    }
+  });
+  </script>
+
+  <script>
+  /* ══ Document Requests ══════════════════════════════════════════ */
+  (function() {
+    var _docReqCaseNum = null;
+
+    function escH(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function relTime(iso) {
+      if (!iso) return '';
+      var diff = Date.now() - new Date(iso).getTime();
+      var m = Math.floor(diff / 60000);
+      if (m < 1)  return 'الآن';
+      if (m < 60) return 'منذ ' + m + ' دقيقة';
+      var h = Math.floor(m / 60);
+      if (h < 24) return 'منذ ' + h + ' ساعة';
+      var d = Math.floor(h / 24);
+      return d === 1 ? 'أمس' : 'قبل ' + d + ' أيام';
+    }
+
+    window.buildDocReqSection = function(caseNum) {
+      var section = document.getElementById('cpDocsSection');
+      if (!section) return;
+      var all = {};
+      try { all = JSON.parse(localStorage.getItem('doc_requests') || '{}'); } catch(e) {}
+      var reqs = all[caseNum] || [];
+
+      var html = '<div class="doc-req-section">';
+      html += '<div class="doc-req-sec-title">' +
+        '<span>📎 المستندات المطلوبة</span>' +
+        '<button class="btn-doc-req-new" onclick="openDocReqModal()">+ طلب جديد</button>' +
+        '</div>';
+
+      if (reqs.length === 0) {
+        html += '<div class="doc-req-empty">' +
+          '<div style="font-size:1.3rem;margin-bottom:0.35rem">📂</div>' +
+          '<div>لا توجد طلبات مستندات</div>' +
+          '<div style="font-size:0.63rem;margin-top:0.2rem">اضغط "+ طلب جديد" لإرسال طلب للموكل</div>' +
+          '</div>';
+      } else {
+        reqs.forEach(function(req) {
+          var up      = req.status === 'uploaded';
+          var safeNum = escH(caseNum).replace(/'/g,"&#39;");
+          var safeId  = escH(req.id).replace(/'/g,"&#39;");
+          html += '<div class="doc-req-item">';
+          html += '<div class="doc-req-item-head">';
+          html += '<div class="doc-req-item-title">📎 ' + escH(req.title) + '</div>';
+          if (!up) {
+            html += '<button class="btn-doc-req-del" ' +
+              'onclick="deleteDocReq(\'' + safeNum + '\',\'' + safeId + '\')">حذف</button>';
+          }
+          html += '</div>';
+          if (req.description) {
+            html += '<div class="doc-req-item-desc">' + escH(req.description) + '</div>';
+          }
+          html += '<div class="doc-req-item-meta">';
+          if (up) {
+            html += '<span class="doc-pill-uploaded">🟢 مرفوع</span>';
+            if (req.fileName) {
+              html += '<span>' + escH(req.fileName) +
+                (req.fileSize ? ' · ' + escH(req.fileSize) : '') + '</span>';
+            }
+            html += '<button class="btn-doc-req-del" style="margin-right:auto;" ' +
+              'onclick="alert(\'التنزيل متاح في النسخة الإنتاجية\')">⬇ تنزيل</button>';
+          } else {
+            html += '<span class="doc-pill-pending">🟡 في انتظار الرفع</span>';
+            if (req.requestedAt) html += '<span>· ' + relTime(req.requestedAt) + '</span>';
+          }
+          html += '</div></div>';
+        });
+      }
+      html += '</div>';
+      section.innerHTML = html;
+    };
+
+    window.openDocReqModal = function() {
+      var caseId = document.getElementById('cpCaseId') ? document.getElementById('cpCaseId').textContent.trim() : '';
+      _docReqCaseNum = caseId;
+      var cn = document.getElementById('docReqCaseName'); if (cn) cn.textContent = caseId;
+      var ti = document.getElementById('docReqTitle');    if (ti) ti.value = '';
+      var de = document.getElementById('docReqDesc');     if (de) de.value = '';
+      var m  = document.getElementById('docReqModal');
+      if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+      setTimeout(function() { var t = document.getElementById('docReqTitle'); if (t) t.focus(); }, 80);
+    };
+
+    window.closeDocReqModal = function() {
+      var m = document.getElementById('docReqModal');
+      if (m) m.style.display = 'none';
+      document.body.style.overflow = '';
+    };
+
+    window.submitDocReq = function() {
+      var ti = document.getElementById('docReqTitle');
+      var title = ti ? ti.value.trim() : '';
+      if (!title) {
+        if (ti) { ti.style.borderColor = 'var(--red)'; setTimeout(function() { ti.style.borderColor = ''; }, 1500); }
+        return;
+      }
+      var de   = document.getElementById('docReqDesc');
+      var desc = de ? de.value.trim() : '';
+      var le   = document.getElementById('cpLawyer');
+      var lawyer = le ? le.textContent.trim() : '';
+
+      var all = {};
+      try { all = JSON.parse(localStorage.getItem('doc_requests') || '{}'); } catch(e) {}
+      if (!all[_docReqCaseNum]) all[_docReqCaseNum] = [];
+      all[_docReqCaseNum].push({
+        id:          'req-' + Date.now(),
+        title:       title,
+        description: desc,
+        requestedAt: new Date().toISOString(),
+        requestedBy: lawyer,
+        status:      'pending',
+        uploadedAt:  null,
+        fileName:    null,
+        fileSize:    null,
+        fileType:    null
+      });
+      localStorage.setItem('doc_requests', JSON.stringify(all));
+      window.closeDocReqModal();
+      window.buildDocReqSection(_docReqCaseNum);
+      if (typeof showToast === 'function') showToast('✓ تم إرسال الطلب للموكل');
+    };
+
+    window.deleteDocReq = function(caseNum, reqId) {
+      var all = {};
+      try { all = JSON.parse(localStorage.getItem('doc_requests') || '{}'); } catch(e) {}
+      if (!all[caseNum]) return;
+      all[caseNum] = all[caseNum].filter(function(r) { return r.id !== reqId; });
+      localStorage.setItem('doc_requests', JSON.stringify(all));
+      window.buildDocReqSection(caseNum);
+      if (typeof showToast === 'function') showToast('تم حذف الطلب');
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var m = document.getElementById('docReqModal');
+        if (m && m.style.display !== 'none') window.closeDocReqModal();
+      }
+    });
+  })();
+  </script>
 </body>
 </html>

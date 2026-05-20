@@ -296,7 +296,7 @@
       <div class="page-hdr">
         <div>
           <div class="ph-title">المهام</div>
-          <div class="ph-sub">0 مهام نشطة</div>
+          <div class="ph-sub" id="taskActiveCount">0 مهام نشطة</div>
         </div>
         <div class="ph-right">
           <div class="view-toggle">
@@ -311,22 +311,22 @@
       <div class="kpi-row">
         <div class="kpi-card">
           <div class="kpi-label">مهام اليوم</div>
-          <div class="kpi-val">0</div>
+          <div class="kpi-val" id="taskTodayCount">0</div>
           <div class="kpi-sub">تستحق الإنجاز اليوم</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">قيد التنفيذ</div>
-          <div class="kpi-val">0</div>
+          <div class="kpi-val" id="taskInProgressCount">0</div>
           <div class="kpi-sub">جارٍ العمل عليها</div>
         </div>
         <div class="kpi-card kpi-red">
           <div class="kpi-label">متأخرة</div>
-          <div class="kpi-val">0</div>
+          <div class="kpi-val" id="taskOverdueCount">0</div>
           <div class="kpi-sub">تجاوزت الموعد المحدد</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">مكتملة</div>
-          <div class="kpi-val">0</div>
+          <div class="kpi-val" id="taskDoneCount">0</div>
           <div class="kpi-sub">هذا الشهر</div>
         </div>
       </div>
@@ -580,6 +580,7 @@
       }
 
       tr.dataset.status = 'done';
+      updateTaskKPIs();
 
       // Mirror in board: move matching card to done column
       var taskText = nameEl.textContent.trim();
@@ -704,6 +705,7 @@
         tbody.insertBefore(tr, tbody.firstChild);
         tr.classList.add('new-row');
         saveTasks();
+        updateTaskKPIs();
 
         // Add to board column 1
         var col1 = document.getElementById('boardCol1');
@@ -759,7 +761,34 @@
     }
   }
 
-  window.addEventListener('load', loadTasks);
+  function updateTaskKPIs() {
+    var today = 0, inProgress = 0, overdue = 0, done = 0;
+    document.querySelectorAll('#tasksBody tr').forEach(function(tr) {
+      if (tr.id === 'tkNoResults') return;
+      var statusTd = tr.querySelector('td:nth-child(6)');
+      if (!statusTd) return;
+      var pill = statusTd.querySelector('.pill');
+      if (!pill) return;
+      var cls = pill.className;
+      if (cls.indexOf('pill-new') > -1)           today++;
+      else if (cls.indexOf('pill-progress') > -1) inProgress++;
+      else if (cls.indexOf('pill-late') > -1)     overdue++;
+      else if (cls.indexOf('pill-done') > -1)     done++;
+    });
+    var active = today + inProgress + overdue;
+    var set = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set('taskTodayCount',      today);
+    set('taskInProgressCount', inProgress);
+    set('taskOverdueCount',    overdue);
+    set('taskDoneCount',       done);
+    var subEl = document.getElementById('taskActiveCount');
+    if (subEl) subEl.textContent = active + ' مهام نشطة';
+  }
+
+  window.addEventListener('load', function() {
+    loadTasks();
+    updateTaskKPIs();
+  });
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>

@@ -160,6 +160,8 @@
     .btn-upload:hover { background: var(--accent-light); transform: translateY(-1px); }
     .btn-view { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); border-radius: 6px; padding: 4px 12px; font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
     .btn-view:hover { border-color: var(--accent); color: var(--accent); }
+    .doc-req-banner { background: rgba(184,149,42,0.08); border: 1px solid rgba(184,149,42,0.22); border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.75rem; font-weight: 600; color: #B8952A; }
+    .pill-warn { background: rgba(184,149,42,0.1); color: #B8952A; border: 1px solid rgba(184,149,42,0.25); }
 
     /* ── Footer ── */
     .client-footer { margin-top: 2rem; padding: 1.2rem 1.4rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
@@ -508,8 +510,19 @@
       if (isNaN(day) || mon === undefined) return null;
       var d = new Date(yr, mon, day); d.setHours(0,0,0,0); return d;
     }
-    function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function fmtNum(n) { return Number((+n).toFixed(2)).toLocaleString('en-US'); }
+    function relTimeC(iso) {
+      if (!iso) return '';
+      var diff = Date.now() - new Date(iso).getTime();
+      var m = Math.floor(diff / 60000);
+      if (m < 1)  return 'الآن';
+      if (m < 60) return 'منذ ' + m + ' دقيقة';
+      var h = Math.floor(m / 60);
+      if (h < 24) return 'منذ ' + h + ' ساعة';
+      var d = Math.floor(h / 24);
+      return d === 1 ? 'أمس' : 'قبل ' + d + ' أيام';
+    }
 
     /* ── Find case in cases_data ── */
     var caseInfo = null;
@@ -537,7 +550,14 @@
         caseInfo = {
           client: cells[1] ? cells[1].textContent.replace(/\s+/g,' ').trim() : '',
           type:   cells[2] ? cells[2].textContent.replace(/\s+/g,' ').trim() : '',
-          court:  cells[3] ? cells[3].textContent.replace(/\s+/g,' ').trim() : '',
+          court: (function(){
+            if (!cells[3]) return '';
+            var d1 = cells[3].querySelector('div:first-child');
+            var ci = cells[3].querySelector('.case-id');
+            var m  = d1 ? d1.textContent.trim() : cells[3].textContent.replace(/\s+/g,' ').trim();
+            var c  = ci ? ci.textContent.trim() : '';
+            return c ? m + ' — ' + c : m;
+          })(),
           lawyer: lawyerName,
           status: statusEl ? statusEl.textContent.trim() : ''
         };
@@ -618,6 +638,103 @@
         for (var i = 0; i < steps.length; i++) { if (steps[i].state !== 'done') { steps[i].state = 'current'; break; } }
       }
       return steps;
+    }
+
+    /* ── Build client documents section from doc_requests ── */
+    function buildClientDocSection() {
+      var docReqs = {};
+      try { docReqs = JSON.parse(localStorage.getItem('doc_requests') || '{}'); } catch(e) {}
+      var reqs = caseNum ? (docReqs[caseNum] || []) : [];
+
+      var docCard = null;
+      document.querySelectorAll('.card').forEach(function(c) {
+        var t = c.querySelector('.card-title');
+        if (t && t.textContent.trim() === 'المستندات') docCard = c;
+      });
+      if (!docCard) return;
+
+      var cardHead = docCard.querySelector('.card-head');
+      var tbody    = docCard.querySelector('tbody');
+      if (!tbody) return;
+
+      var pending  = reqs.filter(function(r){ return r.status === 'pending';  }).length;
+      var uploaded = reqs.filter(function(r){ return r.status === 'uploaded'; }).length;
+
+      /* Info card[0] */
+      var ic = document.querySelectorAll('.info-card');
+      if (ic.length >= 1) {
+        var iv = ic[0].querySelector('.info-card-val'), is = ic[0].querySelector('.info-card-sub');
+        if (reqs.length === 0) {
+          if (iv) iv.textContent = 'لا توجد مستندات';
+          if (is) { is.textContent = 'لم يطلب منك المحامي أي مستندات'; is.className = 'info-card-sub'; }
+        } else if (pending > 0) {
+          if (iv) iv.textContent = reqs.length + ' مستند';
+          if (is) { is.textContent = '⚠ ' + pending + ' يحتاج رفع'; is.className = 'info-card-sub warn'; }
+        } else {
+          if (iv) iv.textContent = reqs.length + ' مستند';
+          if (is) { is.textContent = '✓ جميعها مرفوعة'; is.className = 'info-card-sub ok'; }
+        }
+      }
+
+      /* Card header */
+      if (cardHead) {
+        var cs = cardHead.querySelector('.card-sub'), cp = cardHead.querySelector('.pill');
+        if (reqs.length === 0) {
+          if (cs) cs.textContent = 'لا توجد مستندات مطلوبة';
+          if (cp) cp.style.display = 'none';
+        } else {
+          if (cs) cs.textContent = reqs.length + ' مستند' + (uploaded > 0 ? ' — ' + uploaded + ' مرفوع' : '');
+          if (cp) {
+            cp.style.display = '';
+            if (pending > 0) { cp.className = 'pill pill-warn'; cp.textContent = '⚠ ' + pending + ' مطلوب منك'; }
+            else             { cp.className = 'pill pill-active'; cp.textContent = '✓ جميعها مرفوعة'; }
+          }
+        }
+      }
+
+      /* Table body */
+      if (reqs.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="3" style="text-align:center;padding:2.5rem 1rem;color:var(--ink-muted)">' +
+          '<div style="font-size:1.5rem;margin-bottom:0.4rem">📎</div>' +
+          '<div style="font-size:0.82rem;font-weight:600;color:var(--ink-mid);margin-bottom:0.2rem">لم يطلب منك المحامي أي مستندات حالياً</div>' +
+          '<div style="font-size:0.7rem;margin-bottom:0.8rem">يمكنك رفع مستند طوعياً إذا رأيت ضرورة لذلك</div>' +
+          '<button class="btn-upload" id="openUpload">⬆ رفع مستند طوعي</button>' +
+          '</td></tr>';
+      } else {
+        var rows = '';
+        if (pending > 0) {
+          rows += '<tr><td colspan="3" style="padding:0.75rem 1.2rem 0.35rem;">' +
+            '<div class="doc-req-banner">📋 لديك ' + pending +
+            (pending > 1 ? ' طلبات مستندات' : ' طلب مستند') +
+            ' من المحامي — يرجى الرفع قريباً</div></td></tr>';
+        }
+        reqs.forEach(function(req) {
+          var up = req.status === 'uploaded';
+          rows += '<tr>';
+          rows += '<td><div class="doc-name">📎 ' + esc(req.title) + '</div>';
+          if (req.description) rows += '<div style="font-size:0.7rem;color:var(--ink-muted);margin-top:2px">"' + esc(req.description) + '"</div>';
+          rows += '<div style="font-size:0.68rem;color:var(--ink-muted);margin-top:3px">من المحامي ' +
+            esc(req.requestedBy || 'المحامي المسؤول') + ' · ' + relTimeC(req.requestedAt) + '</div></td>';
+          if (up) {
+            rows += '<td><span class="doc-status-ok">🟢 مرفوع</span>';
+            if (req.fileName) rows += '<div style="font-size:0.68rem;color:var(--ink-muted);margin-top:2px">📄 ' +
+              esc(req.fileName) + (req.fileSize ? ' · ' + esc(req.fileSize) : '') + '</div>';
+            rows += '</td><td></td>';
+          } else {
+            rows += '<td><span class="doc-status-warn">🟡 في انتظار الرفع</span></td>';
+            rows += '<td><button class="btn-upload doc-req-upload-btn" ' +
+              'data-req-id="' + esc(req.id) + '" ' +
+              'data-req-title="' + esc(req.title) + '">⬆ رفع</button></td>';
+          }
+          rows += '</tr>';
+        });
+        rows += '<tr><td colspan="3" style="text-align:center;padding:0.5rem 1.2rem;">' +
+          '<button class="btn-upload" id="openUpload" ' +
+          'style="font-size:0.7rem;padding:0.3rem 0.85rem;opacity:0.65;background:var(--off-white);color:var(--ink-mid);border:1px solid var(--border);">' +
+          '⬆ رفع مستند إضافي</button></td></tr>';
+        tbody.innerHTML = rows;
+      }
     }
 
     /* ── DOM Updates ── */
@@ -765,24 +882,8 @@
         }
       }
 
-      /* Documents: empty state */
-      document.querySelectorAll('.card').forEach(function(card) {
-        var title = card.querySelector('.card-title');
-        if (!title || title.textContent.trim() !== 'المستندات') return;
-        var tbody = card.querySelector('tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2.5rem 1rem;color:var(--ink-muted)">' +
-          '<div style="font-size:1.5rem;margin-bottom:0.4rem">📎</div>' +
-          '<div style="font-size:0.82rem;font-weight:600;color:var(--ink-mid);margin-bottom:0.2rem">لم يطلب منك المحامي أي مستندات حالياً</div>' +
-          '<div style="font-size:0.7rem;margin-bottom:0.8rem">يمكنك رفع مستند طوعياً إذا رأيت ضرورة لذلك</div>' +
-          '<button class="btn-upload" id="openUpload">⬆ رفع مستند طوعي</button>' +
-          '</td></tr>';
-        var cardHead = card.querySelector('.card-head');
-        if (cardHead) {
-          var cSub = cardHead.querySelector('.card-sub'); if (cSub) cSub.textContent = 'لا توجد مستندات مطلوبة';
-          var cPill = cardHead.querySelector('.pill'); if (cPill) cPill.style.display = 'none';
-        }
-      });
+      /* Documents: dynamic from doc_requests */
+      buildClientDocSection();
 
       /* Footer contact */
       var footerContact = document.querySelector('.footer-contact');
@@ -803,15 +904,34 @@
       var selName   = document.getElementById('selectedFileName');
       var submitBtn = document.getElementById('submitUpload');
 
-      function openModal()  { modal.classList.add('open'); }
+      window._uploadingReqId    = null;
+      window._uploadingReqTitle = null;
+
+      function openModal() { modal.classList.add('open'); }
       function closeModal() {
         modal.classList.remove('open');
         fileIn.value = ''; selBox.classList.remove('show'); selName.textContent = '';
         submitBtn.disabled = false; submitBtn.innerHTML = 'رفع المستند'; submitBtn.classList.remove('btn-loading');
+        window._uploadingReqId = null; window._uploadingReqTitle = null;
+        var mt = document.querySelector('#uploadModal .modal-title');
+        if (mt) mt.textContent = '📎 رفع مستند';
       }
 
-      /* Use event delegation for #openUpload (button may be created dynamically) */
-      document.addEventListener('click', function(e) { if (e.target && e.target.id === 'openUpload') openModal(); });
+      /* Voluntary upload (#openUpload) */
+      document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'openUpload') { window._uploadingReqId = null; openModal(); }
+      });
+      /* Doc-request specific upload */
+      document.addEventListener('click', function(e) {
+        var btn = e.target ? e.target.closest('.doc-req-upload-btn') : null;
+        if (!btn) return;
+        window._uploadingReqId    = btn.getAttribute('data-req-id');
+        window._uploadingReqTitle = btn.getAttribute('data-req-title');
+        var mt = document.querySelector('#uploadModal .modal-title');
+        if (mt) mt.textContent = '📎 رفع: ' + (window._uploadingReqTitle || 'المستند');
+        openModal();
+      });
+
       document.getElementById('closeUpload').addEventListener('click', closeModal);
       document.getElementById('cancelUpload').addEventListener('click', closeModal);
       modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
@@ -837,10 +957,34 @@
           setTimeout(function() { dropEl.style.borderColor = ''; }, 1500);
           return;
         }
+        var file = fileIn.files[0];
         submitBtn.disabled = true;
         submitBtn.innerHTML = 'جاري الرفع <span class="loading-dots">...</span>';
         submitBtn.classList.add('btn-loading');
-        setTimeout(function() { closeModal(); showToast('تم رفع المستند بنجاح'); }, 1200);
+        setTimeout(function() {
+          if (window._uploadingReqId && file && caseNum) {
+            /* Update this specific doc_request entry */
+            var allReqs = {};
+            try { allReqs = JSON.parse(localStorage.getItem('doc_requests') || '{}'); } catch(e) {}
+            if (!allReqs[caseNum]) allReqs[caseNum] = [];
+            allReqs[caseNum] = allReqs[caseNum].map(function(r) {
+              if (r.id !== window._uploadingReqId) return r;
+              r.status     = 'uploaded';
+              r.uploadedAt = new Date().toISOString();
+              r.fileName   = file.name;
+              r.fileSize   = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+              r.fileType   = file.type;
+              return r;
+            });
+            localStorage.setItem('doc_requests', JSON.stringify(allReqs));
+            closeModal();
+            showToast('✓ تم رفع المستند بنجاح — المحامي سيراجعه قريباً');
+            buildClientDocSection();
+          } else {
+            closeModal();
+            showToast('تم رفع المستند بنجاح');
+          }
+        }, 1200);
       });
     })();
 

@@ -206,6 +206,18 @@
     .kpi-card, .card { isolation: isolate; }
     .kpi-card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
     .card:hover { box-shadow: 0 8px 24px rgba(15,20,25,0.1); transform: none !important; }
+
+    /* Fee View Modal */
+    .fv-amount-box { background: linear-gradient(135deg, var(--off-white) 0%, var(--cream) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; text-align: center; }
+    .fv-amount-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-muted); margin-bottom: 0.4rem; }
+    .fv-amount-val { font-size: 2.4rem; font-weight: 900; color: var(--gold); letter-spacing: -2px; font-variant-numeric: tabular-nums; direction: ltr; display: block; }
+    .fv-amount-currency { font-size: 0.72rem; color: var(--ink-muted); margin-top: 2px; }
+    .fv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+    .fv-item { background: var(--off-white); border: 1px solid var(--border); border-radius: 8px; padding: 0.65rem 0.85rem; }
+    .fv-key { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-muted); margin-bottom: 0.25rem; }
+    .fv-val { font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+    .btn-danger { background: var(--red-dim); border: 1px solid rgba(220,38,38,0.25); color: var(--red); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+    .btn-danger:hover { background: var(--red); color: white; border-color: var(--red); }
   </style>
   <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
 </head>
@@ -466,6 +478,57 @@
     </div>
   </div>
 
+  <!-- Fee View Modal -->
+  <div class="modal-overlay" id="feeViewModal">
+    <div class="modal-card" style="max-width:480px">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="fvTitle">تفاصيل البند</div>
+          <div style="font-size:0.65rem;color:var(--ink-muted);margin-top:2px;font-family:monospace" id="fvId"></div>
+        </div>
+        <button class="modal-close" onclick="closeFeeView()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="fv-amount-box">
+          <div class="fv-amount-label">المبلغ</div>
+          <div class="fv-amount-val" id="fvAmount">—</div>
+          <div class="fv-amount-currency">ريال سعودي</div>
+          <div id="fvStatusBadge" style="margin-top:0.6rem"></div>
+        </div>
+        <div class="fv-grid">
+          <div class="fv-item">
+            <div class="fv-key">الموكل</div>
+            <div class="fv-val" id="fvClient">—</div>
+          </div>
+          <div class="fv-item">
+            <div class="fv-key">القضية</div>
+            <div class="fv-val" id="fvCase">—</div>
+          </div>
+          <div class="fv-item">
+            <div class="fv-key">المحامي</div>
+            <div class="fv-val" id="fvLawyer">—</div>
+          </div>
+          <div class="fv-item">
+            <div class="fv-key">نوع البند</div>
+            <div class="fv-val" id="fvType">—</div>
+          </div>
+          <div class="fv-item">
+            <div class="fv-key">تاريخ التسجيل</div>
+            <div class="fv-val" id="fvDate">—</div>
+          </div>
+          <div class="fv-item">
+            <div class="fv-key">الحالة</div>
+            <div class="fv-val" id="fvStatus">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot" style="justify-content:space-between">
+        <button class="btn-danger" id="fvDeleteBtn">🗑 حذف البند</button>
+        <button class="btn-cancel" onclick="closeFeeView()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -535,6 +598,7 @@
       t.classList.add('show');
       toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
     }
+    window.showToast = showToast;
 
     document.getElementById('btnNewFee').addEventListener('click', openModal);
     document.getElementById('btnNewFeeTop').addEventListener('click', openModal);
@@ -614,7 +678,7 @@
           '<td style="font-size:0.78rem">' + client + '</td>' +
           '<td style="font-size:0.75rem;color:var(--ink-light)">' + caseVal + '</td>' +
           '<td><div class="lawyer-chip"><div class="av-xs">' + (avMap[lawyer] || '—') + '</div> ' + lawyer + '</div></td>' +
-          '<td><div class="amount-cell amount-gold">' + amtFmt + '</div></td>' +
+          '<td data-amount="' + raw + '"><div class="amount-cell amount-gold">' + amtFmt + '</div></td>' +
           '<td><span class="type-tag ' + typeCls[typeVal] + '">' + typeLabels[typeVal] + '</span></td>' +
           '<td style="font-size:0.73rem;color:var(--ink-light)">' + dateStr + '</td>' +
           '<td><span class="pill pill-pending">معلقة</span></td>' +
@@ -654,6 +718,29 @@
           rows.forEach(function(html) {
             var tr = document.createElement('tr');
             tr.innerHTML = html;
+            // Restore data-* attrs so runFilter() can find these rows
+            var tds    = tr.querySelectorAll('td');
+            var fnEl   = tr.querySelector('.fee-name');
+            var client = tds[1] ? tds[1].textContent.trim() : '';
+            tr.setAttribute('data-search', (fnEl ? fnEl.textContent.trim() : '') + ' ' + client);
+            var typeTag = tr.querySelector('.type-tag');
+            if (typeTag) {
+              var tk = ['fee','exp','gov','consult'].filter(function(k){ return typeTag.classList.contains('type-'+k); })[0];
+              if (tk) tr.setAttribute('data-type', tk);
+            }
+            var pill = tr.querySelector('.pill');
+            if (pill) {
+              var sm = {'pill-paid':'collected','pill-pending':'pending','pill-late':'late'};
+              var pk = Object.keys(sm).filter(function(k){ return pill.classList.contains(k); })[0];
+              tr.setAttribute('data-status', pk ? sm[pk] : 'pending');
+            }
+            var chip = tr.querySelector('.lawyer-chip');
+            if (chip) {
+              var cl = chip.cloneNode(true);
+              var av = cl.querySelector('.av-xs');
+              if (av) av.remove();
+              tr.setAttribute('data-lawyer', cl.textContent.replace(/\s+/g,' ').trim());
+            }
             tbody.appendChild(tr);
           });
           var nr = document.getElementById('fNoResults');
@@ -703,9 +790,97 @@
     set('kpiFeesExpSub',     expenses> 0 ? 'ر.س · نثريات'  : 'لا توجد بيانات بعد · ر.س');
   }
 
+  /* ── Fee View Modal ── */
+  var _viewRow = null;
+
+  function openFeeView(btn) {
+    var tr = btn.closest('tr');
+    if (!tr) return;
+    _viewRow = tr;
+    var tds = tr.querySelectorAll('td');
+
+    var feeNameEl = tds[0] && tds[0].querySelector('.fee-name');
+    var feeIdEl   = tds[0] && tds[0].querySelector('.fee-id');
+    document.getElementById('fvTitle').textContent = feeNameEl ? feeNameEl.textContent.trim() : (tds[0] ? tds[0].textContent.trim() : '—');
+    document.getElementById('fvId').textContent    = feeIdEl   ? feeIdEl.textContent.trim()   : '';
+
+    document.getElementById('fvClient').textContent = tds[1] ? tds[1].textContent.trim() : '—';
+    document.getElementById('fvCase').textContent   = tds[2] ? tds[2].textContent.trim() : '—';
+
+    var lawyerName = '—';
+    if (tds[3]) {
+      var chip = tds[3].querySelector('.lawyer-chip');
+      if (chip) {
+        var cl = chip.cloneNode(true);
+        var av = cl.querySelector('.av-xs');
+        if (av) av.remove();
+        lawyerName = cl.textContent.replace(/\s+/g, ' ').trim();
+      } else {
+        lawyerName = tds[3].textContent.replace(/\s+/g, ' ').trim();
+      }
+    }
+    document.getElementById('fvLawyer').textContent = lawyerName;
+
+    var amtRaw = tds[4] ? tds[4].getAttribute('data-amount') : null;
+    var amtNum = amtRaw ? parseFloat(amtRaw) : NaN;
+    if (isNaN(amtNum) && tds[4]) {
+      var txt = tds[4].textContent.trim()
+        .replace(/[٠-٩]/g, function(d) { return d.charCodeAt(0) - 0x0660; })
+        .replace(/[^\d.]/g, '');
+      amtNum = parseFloat(txt);
+    }
+    document.getElementById('fvAmount').textContent = !isNaN(amtNum) ? amtNum.toLocaleString('ar-SA') : '—';
+
+    var typeTag = tds[5] && tds[5].querySelector('.type-tag');
+    document.getElementById('fvType').innerHTML = typeTag ? typeTag.outerHTML : (tds[5] ? tds[5].textContent.trim() : '—');
+
+    document.getElementById('fvDate').textContent = tds[6] ? tds[6].textContent.trim() : '—';
+
+    var pill = tds[7] && tds[7].querySelector('.pill');
+    document.getElementById('fvStatus').innerHTML  = pill ? pill.outerHTML : (tds[7] ? tds[7].textContent.trim() : '—');
+    document.getElementById('fvStatusBadge').innerHTML = pill ? pill.outerHTML : '';
+
+    document.getElementById('feeViewModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFeeView() {
+    document.getElementById('feeViewModal').classList.remove('open');
+    document.body.style.overflow = '';
+    _viewRow = null;
+  }
+
+  document.getElementById('fvDeleteBtn').addEventListener('click', function() {
+    if (!_viewRow) return;
+    if (!confirm('هل أنت متأكد من حذف هذا البند؟')) return;
+    _viewRow.parentNode.removeChild(_viewRow);
+    _viewRow = null;
+    var dataRows = document.querySelectorAll('#feesBody tr[data-search]');
+    if (dataRows.length === 0) {
+      var nr = document.getElementById('fNoResults');
+      if (nr) nr.style.display = '';
+    }
+    saveFees();
+    updateFeesKPIs();
+    closeFeeView();
+    if (window.showToast) window.showToast('تم حذف البند بنجاح');
+  });
+
+  document.getElementById('feeViewModal').addEventListener('click', function(e) {
+    if (e.target === this) closeFeeView();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('feeViewModal').classList.contains('open')) closeFeeView();
+  });
+
   window.addEventListener('load', function() {
     loadFees();
     updateFeesKPIs();
+    document.getElementById('feesBody').addEventListener('click', function(e) {
+      var btn = e.target.closest('.row-btn');
+      if (btn) openFeeView(btn);
+    });
   });
   </script>
   <script src="sidebar-badges.js"></script>

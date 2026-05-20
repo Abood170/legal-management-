@@ -151,8 +151,8 @@
       email:      'contact@firm.sa',
       phone:      '0501234567',
       city:       'الرياض',
-      officeType: 'مكتب محاماة',
-      lawyerCount:'4',
+      officeType: 'individual',
+      lawyerCount:'5-10',
       createdAt:  new Date().toISOString()
     }));
 
@@ -198,6 +198,50 @@
       makeInvoiceRow('INV-2026-0004','g3h4i5j6','فيصل الشهري',             'إدارية','#2026-0004',2500,'أتعاب استشارة إدارية',  'overdue', shortDate(addDays(-30)),shortDate(addDays(-5)))
     ]));
     localStorage.setItem('inv_counter', '4');
+
+    /* doc_requests — طلبات مستندات الموكلين */
+    localStorage.setItem('doc_requests', JSON.stringify({
+      '#2026-0001': [
+        {
+          id:          'req-001',
+          title:       'صورة الهوية الوطنية',
+          description: 'نسخة واضحة من الوجهين',
+          requestedAt: new Date(Date.now() - 86400000).toISOString(),
+          requestedBy: 'خالد العتيبي',
+          status:      'pending',
+          uploadedAt:  null,
+          fileName:    null,
+          fileSize:    null,
+          fileType:    null
+        },
+        {
+          id:          'req-002',
+          title:       'عقد الإيجار الأصلي',
+          description: 'يُفضّل بصيغة PDF',
+          requestedAt: new Date(Date.now() - 172800000).toISOString(),
+          requestedBy: 'خالد العتيبي',
+          status:      'uploaded',
+          uploadedAt:  new Date(Date.now() - 3600000).toISOString(),
+          fileName:    'rental-contract.pdf',
+          fileSize:    '1.84 MB',
+          fileType:    'application/pdf'
+        }
+      ],
+      '#2026-0002': [
+        {
+          id:          'req-003',
+          title:       'كشف حساب بنكي — آخر 3 أشهر',
+          description: '',
+          requestedAt: new Date(Date.now() - 259200000).toISOString(),
+          requestedBy: 'سارة القحطاني',
+          status:      'pending',
+          uploadedAt:  null,
+          fileName:    null,
+          fileSize:    null,
+          fileType:    null
+        }
+      ]
+    }));
 
     /* dynamicCases — keyed with '#' prefix to match openClientPortal() */
     var dynCases = {
