@@ -233,6 +233,13 @@
     .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
     @keyframes dotsFade { 0%,100%{opacity:0.3} 50%{opacity:1} }
     .loading-dots { animation: dotsFade 1s ease infinite; }
+
+    /* ── WhatsApp Reminder Button ── */
+    .btn-wa-remind { background: linear-gradient(135deg,#25D366,#128C7E); color: #fff; border: none; border-radius: 6px; padding: 4px 11px; font-size: 0.7rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; box-shadow: 0 1px 4px rgba(37,211,102,0.25); display: inline-flex; align-items: center; gap: 4px; }
+    .btn-wa-remind:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,211,102,0.35); filter: brightness(1.08); }
+    .btn-wa-remind:active { transform: translateY(0); }
+    .btn-wa-panel { width: 100%; padding: 0.65rem; border-radius: 8px; border: none; background: linear-gradient(135deg,#25D366,#128C7E); color: #fff; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(37,211,102,0.25); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .btn-wa-panel:hover { filter: brightness(1.08); box-shadow: 0 4px 16px rgba(37,211,102,0.35); }
   </style>
 <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
 </head>
@@ -553,7 +560,7 @@
           '<td>' + hall + '</td>' +
           '<td><div class="lawyer-chip"><div class="lawyer-av">' + lawyerAv + '</div>' + lawyerName + '</div></td>' +
           '<td><span class="pill pill-upcoming">قادمة</span></td>' +
-          '<td><div class="row-actions" style="display:flex;gap:0.4rem;flex-wrap:wrap;"><button class="row-btn view-session-btn">تفاصيل</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteSession(this)">حذف</button></div></td>';
+          '<td><div class="row-actions" style="display:flex;gap:0.4rem;flex-wrap:wrap;"><button class="row-btn view-session-btn">تفاصيل</button><button class="btn-wa-remind" onclick="sendWhatsAppReminder(this)">📱 واتساب</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteSession(this)">حذف</button></div></td>';
         document.getElementById('sessionsBody').insertBefore(tr, document.getElementById('sessionsBody').firstChild);
         saveSessions();
         updateSessionStats();
@@ -788,6 +795,17 @@
             tr.querySelectorAll('.row-btn').forEach(function(btn) {
               if (btn.textContent.trim() === 'تفاصيل') btn.classList.add('view-session-btn');
             });
+            /* Inject WhatsApp button if not already present */
+            var actionsDiv = tr.querySelector('.row-actions');
+            if (actionsDiv && !actionsDiv.querySelector('.btn-wa-remind')) {
+              var waBtn = document.createElement('button');
+              waBtn.className = 'btn-wa-remind';
+              waBtn.setAttribute('onclick', 'sendWhatsAppReminder(this)');
+              waBtn.innerHTML = '📱 واتساب';
+              var delBtn = actionsDiv.querySelector('.row-btn[style*="DC2626"]');
+              if (delBtn) actionsDiv.insertBefore(waBtn, delBtn);
+              else actionsDiv.appendChild(waBtn);
+            }
             tbody.appendChild(tr);
           });
           var nr = document.getElementById('sNoResults');
@@ -823,6 +841,7 @@
         </div>
       </div>
       <div style="margin-top:auto;display:flex;flex-direction:column;gap:0.5rem;">
+        <button onclick="sendWhatsAppReminderFromPanel()" class="btn-wa-panel">📱 إرسال تذكير واتساب</button>
         <button onclick="closeSessionPanel()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#374151;font-family:'Cairo',sans-serif;font-size:0.85rem;cursor:pointer;">إغلاق</button>
         <button onclick="deleteSessionFromPanel()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid rgba(220,38,38,0.3);background:rgba(220,38,38,0.05);color:#DC2626;font-family:'Cairo',sans-serif;font-size:0.85rem;cursor:pointer;">حذف الجلسة</button>
       </div>
@@ -901,6 +920,45 @@
         window.closeSessionPanel();
         showToast('تم حذف الجلسة');
       }, 260);
+    };
+
+    /* ── WhatsApp Reminder ── */
+    function buildWaMessage(row) {
+      var cells = row ? row.querySelectorAll('td') : [];
+      var caseName = cells[2] ? (cells[2].querySelector('.case-name') ? cells[2].querySelector('.case-name').textContent.trim() : cells[2].textContent.trim()) : '';
+      var caseId   = cells[2] && cells[2].querySelector('.case-id') ? cells[2].querySelector('.case-id').textContent.trim() : '';
+      var date     = cells[0] ? (cells[0].querySelector('.date-cell') ? cells[0].querySelector('.date-cell').textContent.trim() : cells[0].textContent.trim()) : '';
+      var time     = cells[1] ? (cells[1].querySelector('.time-cell') ? cells[1].querySelector('.time-cell').textContent.trim() : cells[1].textContent.trim()) : '';
+      var court    = cells[3] ? cells[3].textContent.trim() : '';
+      var hall     = cells[4] ? cells[4].textContent.trim() : '';
+      var lawyerEl = cells[5] ? cells[5].querySelector('.lawyer-chip') : null;
+      var lawyerName = '';
+      if (lawyerEl) { var cl = lawyerEl.cloneNode(true); var av = cl.querySelector('.lawyer-av'); if (av) av.remove(); lawyerName = cl.textContent.trim(); }
+
+      var msg = '📋 *تذكير بجلسة قادمة*\n\n';
+      msg += '⚖️ *القضية:* ' + caseName + (caseId ? ' (' + caseId + ')' : '') + '\n';
+      msg += '📅 *التاريخ:* ' + date + '\n';
+      msg += '⏰ *الوقت:* ' + time + '\n';
+      if (court) msg += '🏛️ *المحكمة:* ' + court + '\n';
+      if (hall)  msg += '🚪 *القاعة:* ' + hall + '\n';
+      if (lawyerName) msg += '👤 *المحامي:* ' + lawyerName + '\n';
+      msg += '\nيرجى الحضور قبل الموعد بـ 15 دقيقة.\n_نظام إدارة المحاماة_';
+      return msg;
+    }
+
+    window.sendWhatsAppReminder = function(btn) {
+      var row = btn ? btn.closest('tr') : null;
+      if (!row) return;
+      var msg = buildWaMessage(row);
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+      showToast('📱 جاري فتح واتساب...');
+    };
+
+    window.sendWhatsAppReminderFromPanel = function() {
+      if (!activePanelRow) return;
+      var msg = buildWaMessage(activePanelRow);
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+      showToast('📱 جاري فتح واتساب...');
     };
 
     window.deleteSession = function(btn) {
