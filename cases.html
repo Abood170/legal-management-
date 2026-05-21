@@ -789,8 +789,7 @@
 
     function openModal() {
       populateLawyersDropdown();
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      overlay.classList.add('open'); overlay.scrollTop = 0; document.body.style.overflow = 'hidden';
       setTimeout(function() { document.getElementById('cfClient').focus(); }, 50);
     }
     function closeModal() {
@@ -959,8 +958,7 @@
       window.scrollTo(0, 0);
       panel.scrollTop = 0;
       showOverlay(closeCasePanel);
-      panel.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      panel.classList.add('open'); panel.scrollTop = 0; document.body.style.overflow = 'hidden';
       var _cid = document.getElementById('cpCaseId').textContent.trim();
       if (typeof window.buildDocReqSection === 'function') window.buildDocReqSection(_cid);
     };

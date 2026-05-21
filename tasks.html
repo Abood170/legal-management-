@@ -614,8 +614,7 @@
     var toastTimer;
 
     function openModal() {
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
       setTimeout(function() { document.getElementById('tkTitle').focus(); }, 50);
     }
     function closeModal() {

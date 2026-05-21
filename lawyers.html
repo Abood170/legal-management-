@@ -589,8 +589,7 @@
       document.getElementById('lJoin').value = '';
       document.getElementById('lTitle').selectedIndex = 3;
       document.getElementById('lSpec').selectedIndex = 0;
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
       setTimeout(function() { document.getElementById('lName').focus(); }, 50);
     }
     function closeModal() {

@@ -530,7 +530,7 @@
     var toastTimer;
     var rowCounter = 13;
 
-    function openModal() { modal.classList.add('open'); document.body.style.overflow = 'hidden'; setTimeout(function(){ document.getElementById('clName').focus(); }, 50); }
+    function openModal() { modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden'; setTimeout(function(){ document.getElementById('clName').focus(); }, 50); }
     function closeModal() {
       modal.classList.remove('open'); document.body.style.overflow = '';
       document.getElementById('clName').value = ''; document.getElementById('clName').style.borderColor = '';
@@ -689,8 +689,7 @@
         : '<div style="font-size:0.75rem;color:var(--ink-muted);padding:0.6rem 0;">لا توجد قضايا مرتبطة بهذا الموكل بعد</div>';
 
       showOverlay(closePanel);
-      panel.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      panel.classList.add('open'); panel.scrollTop = 0; document.body.style.overflow = 'hidden';
     };
 
     function closePanel() {

@@ -1396,8 +1396,7 @@
       });
       applyRoleDefaults('owner');
       generateTempPw();
-      userModal.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      userModal.classList.add('open'); userModal.scrollTop = 0; document.body.style.overflow = 'hidden';
     }
 
     function closeUserModal() {

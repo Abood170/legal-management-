@@ -954,7 +954,9 @@
       '</div>'
     ].join('');
 
-    document.getElementById('invViewModal').classList.add('open');
+    var _vm = document.getElementById('invViewModal');
+    _vm.classList.add('open');
+    _vm.scrollTop = 0;
     document.body.style.overflow = 'hidden';
   }
 
@@ -993,7 +995,7 @@
       document.getElementById('pvTotal').textContent = base ? fmtNum(tot)  + ' ر.س' : '— ر.س';
     });
 
-    function openModal() { setDefaults(); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function openModal() { setDefaults(); overlay.classList.add('open'); overlay.scrollTop = 0; document.body.style.overflow = 'hidden'; }
     function closeModal() {
       overlay.classList.remove('open');
       document.body.style.overflow = '';

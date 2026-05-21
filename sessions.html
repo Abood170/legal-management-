@@ -671,8 +671,7 @@
     function openModal() {
       populateCasesDropdown();
       populateLawyersDropdown();
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      overlay.classList.add('open'); overlay.scrollTop = 0; document.body.style.overflow = 'hidden';
     }
     function closeModal() {
       overlay.classList.remove('open');
@@ -901,8 +900,7 @@
       window.scrollTo(0, 0);
       panel.scrollTop = 0;
       showOverlay(closeSessionPanel);
-      panel.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      panel.classList.add('open'); panel.scrollTop = 0; document.body.style.overflow = 'hidden';
     };
 
     window.closeSessionPanel = function() {
