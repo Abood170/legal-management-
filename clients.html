@@ -600,7 +600,10 @@
           '<td><span class="cases-count no-cases">0</span></td>' +
           '<td><span style="font-size:0.75rem;color:var(--ink-light)">' + dateStr + '</span></td>' +
           '<td><span class="pill pill-active">نشط</span></td>' +
-          '<td><button class="row-btn" onclick="openPanel(' + idx + ')">عرض</button></td>';
+          '<td><div style="display:flex;gap:.35rem">' +
+            '<button class="row-btn" onclick="openPanel(' + idx + ')">عرض</button>' +
+            '<button class="row-btn" style="color:var(--accent);border-color:var(--accent)" onclick="openClientProfile(this)">👤 ملف</button>' +
+          '</div></td>';
         tbody.insertBefore(tr, tbody.firstChild);
         tr.classList.add('new-row');
         saveClients();
@@ -709,6 +712,16 @@
 
   })();
 
+  window.openClientProfile = function(btn) {
+    /* Walk up to the row and read the client name */
+    var tr = btn.closest('tr');
+    if (!tr) return;
+    var nameEl = tr.querySelector('.client-name-cell');
+    var name = nameEl ? nameEl.textContent.trim() : '';
+    if (!name) return;
+    window.location.href = 'client-profile.html?name=' + encodeURIComponent(name);
+  };
+
   function showOverlay(closeCallback) {
     var existing = document.getElementById('panelOverlay');
     if (existing) existing.remove();
@@ -750,6 +763,26 @@
           rows.forEach(function(html) {
             var tr = document.createElement('tr');
             tr.innerHTML = html;
+            /* inject profile button if missing (migration for old saved rows) */
+            var lastTd = tr.querySelector('td:last-child');
+            if (lastTd && lastTd.querySelector('.row-btn') && !lastTd.querySelector('[onclick*="openClientProfile"]')) {
+              var profileBtn = document.createElement('button');
+              profileBtn.className = 'row-btn';
+              profileBtn.setAttribute('onclick', 'openClientProfile(this)');
+              profileBtn.style.cssText = 'color:var(--accent);border-color:var(--accent)';
+              profileBtn.textContent = '👤 ملف';
+              var wrap = lastTd.querySelector('div[style*="flex"]');
+              if (wrap) {
+                wrap.appendChild(profileBtn);
+              } else {
+                var viewBtn = lastTd.querySelector('.row-btn');
+                var div = document.createElement('div');
+                div.style.cssText = 'display:flex;gap:.35rem';
+                lastTd.insertBefore(div, viewBtn);
+                div.appendChild(viewBtn);
+                div.appendChild(profileBtn);
+              }
+            }
             tbody.appendChild(tr);
           });
           var nr = document.getElementById('clNoResults');

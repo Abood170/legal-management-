@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ملف الموكل — نظام إدارة المحاماة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white:#fff; --off-white:#F7F6F3; --cream:#F0EDE6;
+      --ink:#0F1419; --ink-mid:#2D3748; --ink-light:#64748B; --ink-muted:#94A3B8;
+      --accent:#1C5E3E; --accent-light:#24764E; --accent-dim:rgba(28,94,62,.08); --accent-border:rgba(28,94,62,.15);
+      --gold:#B8952A; --gold-dim:rgba(184,149,42,.1);
+      --border:rgba(15,20,25,.08); --border-mid:rgba(15,20,25,.12);
+      --red:#DC2626; --red-dim:rgba(220,38,38,.07);
+      --green:#16a34a; --green-dim:rgba(22,163,74,.08);
+      --sidebar-w:228px;
+    }
+    body { font-family:'Cairo',sans-serif; background:var(--off-white); color:var(--ink); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+
+    /* sidebar */
+    .sidebar { width:var(--sidebar-w); background:var(--white); border-left:1px solid var(--border); height:100vh; position:sticky; top:0; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+    .sidebar-logo { padding:1.4rem 1.4rem 1.1rem; border-bottom:1px solid var(--border); display:flex; align-items:baseline; gap:.35rem; text-decoration:none; }
+    .sidebar-logo-text { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--ink); }
+    .sidebar-logo-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); margin-bottom:2px; }
+    .sidebar-nav { flex:1; padding:.8rem 0; }
+    .nav-section { padding:.6rem 1.4rem .2rem; font-size:.68rem; font-weight:700; color:var(--ink-muted); letter-spacing:2px; text-transform:uppercase; }
+    .nav-item { display:flex; align-items:center; gap:.6rem; padding:.55rem 1.4rem; font-size:.82rem; color:var(--ink-light); text-decoration:none; transition:all .15s; border-right:2px solid transparent; }
+    .nav-item:hover { background:rgba(28,94,62,.04); color:var(--ink); }
+    .nav-item.active { background:var(--accent-dim); color:var(--accent); border-right-color:var(--accent); font-weight:600; border-radius:0 8px 8px 0; }
+    .nav-icon { font-size:.95rem; width:16px; text-align:center; flex-shrink:0; }
+    .nav-badge { margin-right:auto; background:var(--red); color:#fff; font-size:.56rem; font-weight:700; padding:1px 6px; border-radius:2rem; }
+    .nav-badge-g { margin-right:auto; background:var(--gold-dim); color:var(--gold); border:1px solid rgba(184,149,42,.2); font-size:.56rem; font-weight:700; padding:1px 6px; border-radius:2rem; }
+    .sidebar-bottom { padding:1rem 1.4rem; border-top:1px solid var(--border); }
+    .user-card { display:flex; align-items:center; gap:.65rem; padding:.6rem; border-radius:8px; cursor:pointer; }
+    .user-av { width:30px; height:30px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .user-name { font-size:.76rem; font-weight:600; color:var(--ink); }
+    .user-role { font-size:.6rem; color:var(--ink-muted); margin-top:1px; }
+
+    /* main */
+    .main { flex:1; display:flex; flex-direction:column; min-height:100vh; overflow:hidden; }
+    .topbar { background:var(--white); border-bottom:1px solid var(--border); padding:0 2rem; height:58px; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-shrink:0; position:sticky; top:0; z-index:10; box-shadow:0 1px 0 var(--border); }
+    .topbar-title { font-size:.92rem; font-weight:700; color:var(--ink); }
+    .topbar-sub { font-size:.67rem; color:var(--ink-muted); margin-top:1px; }
+    .topbar-right { display:flex; align-items:center; gap:.7rem; }
+    .topbar-search { display:flex; align-items:center; gap:.5rem; background:var(--off-white); border:1px solid var(--border); border-radius:7px; padding:.42rem .85rem; font-size:.78rem; color:var(--ink-muted); cursor:pointer; min-width:190px; }
+    .topbar-icon { width:32px; height:32px; border-radius:7px; background:var(--off-white); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:.95rem; cursor:pointer; transition:all .15s; position:relative; }
+    .topbar-icon:hover { background:rgba(28,94,62,.04); border-color:var(--accent-border); }
+    .notif-dot { position:absolute; top:4px; left:4px; width:6px; height:6px; background:var(--red); border-radius:50%; border:1.5px solid var(--white); }
+    .btn-new { background:var(--accent); color:#fff; padding:.48rem 1rem; border-radius:7px; font-size:.78rem; font-weight:700; border:none; cursor:pointer; font-family:'Cairo',sans-serif; transition:all .2s; white-space:nowrap; text-decoration:none; display:inline-flex; align-items:center; }
+    .btn-new:hover { background:var(--accent-light); transform:translateY(-1px); }
+    .btn-outline { background:none; border:1px solid var(--border-mid); color:var(--ink-light); padding:.42rem .9rem; border-radius:7px; font-size:.75rem; font-weight:600; cursor:pointer; font-family:'Cairo',sans-serif; transition:all .15s; text-decoration:none; display:inline-flex; align-items:center; gap:.3rem; }
+    .btn-outline:hover { border-color:var(--accent-border); color:var(--accent); }
+
+    /* content */
+    .content { flex:1; padding:1.4rem 2rem; overflow-y:auto; display:flex; flex-direction:column; gap:1rem; }
+    .card { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:0 1px 3px rgba(15,20,25,.06),0 4px 12px rgba(15,20,25,.04); }
+    .card-head { padding:.9rem 1.3rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .card-title { font-size:.83rem; font-weight:700; color:var(--ink); }
+    .card-sub { font-size:.65rem; color:var(--ink-muted); margin-top:1px; }
+    .card-badge { font-size:.62rem; font-weight:700; padding:2px 9px; border-radius:2rem; background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-border); }
+
+    /* client header */
+    .client-header { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:1.6rem 1.8rem; display:flex; align-items:flex-start; gap:1.3rem; box-shadow:0 1px 3px rgba(15,20,25,.06),0 4px 12px rgba(15,20,25,.04); }
+    .client-av-lg { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-light)); display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:900; color:#fff; flex-shrink:0; box-shadow:0 4px 12px rgba(28,94,62,.25); }
+    .client-header-body { flex:1; min-width:0; }
+    .client-header-name { font-size:1.3rem; font-weight:900; color:var(--ink); letter-spacing:-.5px; margin-bottom:.3rem; }
+    .client-header-meta { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-bottom:.7rem; }
+    .client-type-badge { font-size:.62rem; font-weight:700; padding:3px 10px; border-radius:2rem; }
+    .type-person { background:rgba(184,149,42,.09); color:var(--gold); border:1px solid rgba(184,149,42,.18); }
+    .type-company { background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-border); }
+    .client-contact-item { display:inline-flex; align-items:center; gap:.3rem; font-size:.7rem; color:var(--ink-light); }
+    .client-header-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .btn-wa-lg { display:inline-flex; align-items:center; gap:.4rem; padding:.45rem 1rem; border-radius:7px; border:none; background:linear-gradient(135deg,#25D366,#128C7E); color:#fff; font-family:'Cairo',sans-serif; font-size:.75rem; font-weight:700; cursor:pointer; transition:all .2s; }
+    .btn-wa-lg:hover { filter:brightness(1.08); transform:translateY(-1px); }
+
+    /* KPI row */
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:.85rem; }
+    .kpi-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:1rem 1.2rem; box-shadow:0 1px 3px rgba(15,20,25,.05); position:relative; overflow:hidden; }
+    .kpi-card::before { content:''; position:absolute; top:0; right:0; left:0; height:3px; }
+    .kpi-card.kc-green::before { background:var(--green); }
+    .kpi-card.kc-gold::before  { background:var(--gold); }
+    .kpi-card.kc-red::before   { background:var(--red); }
+    .kpi-card.kc-blue::before  { background:#3B82F6; }
+    .kpi-label { font-size:.6rem; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.5rem; }
+    .kpi-val { font-size:1.35rem; font-weight:900; color:var(--ink); letter-spacing:-.5px; line-height:1.1; }
+    .kpi-sub { font-size:.62rem; color:var(--ink-muted); margin-top:.3rem; }
+
+    /* financial summary */
+    .fin-bar { display:flex; align-items:stretch; gap:0; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--white); box-shadow:0 1px 3px rgba(15,20,25,.05); }
+    .fin-item { flex:1; padding:1rem 1.3rem; }
+    .fin-item + .fin-item { border-right:1px solid var(--border); }
+    .fin-lbl { font-size:.58rem; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.35rem; }
+    .fin-val { font-size:1.1rem; font-weight:900; font-variant-numeric:tabular-nums; }
+    .fin-val.green { color:var(--green); }
+    .fin-val.gold  { color:var(--gold); }
+    .fin-val.red   { color:var(--red); }
+    .fin-val.ink   { color:var(--ink); }
+    .fin-sub { font-size:.62rem; color:var(--ink-muted); margin-top:2px; }
+    .fin-progress { height:4px; border-radius:2px; background:var(--off-white); margin-top:.5rem; overflow:hidden; }
+    .fin-progress-bar { height:100%; border-radius:2px; background:var(--green); transition:width .5s ease; }
+
+    /* tables */
+    .mini-table { width:100%; border-collapse:collapse; font-size:.75rem; }
+    .mini-table th { text-align:right; padding:.5rem .9rem; background:var(--off-white); border-bottom:2px solid var(--border); font-size:.58rem; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+    .mini-table td { padding:.62rem .9rem; border-bottom:1px solid var(--border); color:var(--ink-mid); vertical-align:middle; }
+    .mini-table tr:last-child td { border-bottom:none; }
+    .mini-table tbody tr:hover td { background:rgba(28,94,62,.025); }
+    .case-name { font-weight:600; color:var(--ink); font-size:.78rem; }
+    .case-id { font-size:.58rem; color:var(--ink-muted); margin-top:1px; font-family:monospace; }
+    .pill { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:2rem; font-size:.6rem; font-weight:700; white-space:nowrap; }
+    .pill::before { content:''; width:4px; height:4px; border-radius:50%; }
+    .pill-active  { background:var(--green-dim); color:var(--green); border:1px solid rgba(22,163,74,.18); } .pill-active::before  { background:var(--green); }
+    .pill-paid    { background:var(--green-dim); color:var(--green); border:1px solid rgba(22,163,74,.18); } .pill-paid::before    { background:var(--green); }
+    .pill-pending { background:var(--gold-dim);  color:var(--gold);  border:1px solid rgba(184,149,42,.2);} .pill-pending::before { background:var(--gold); }
+    .pill-overdue { background:var(--red-dim);   color:var(--red);   border:1px solid rgba(220,38,38,.18);} .pill-overdue::before { background:var(--red); animation:blink 1.2s infinite; }
+    .pill-urgent  { background:var(--red-dim);   color:var(--red);   border:1px solid rgba(220,38,38,.18);} .pill-urgent::before  { background:var(--red); }
+    .pill-done    { background:rgba(100,116,139,.1); color:var(--ink-muted); border:1px solid rgba(100,116,139,.12); } .pill-done::before { background:var(--ink-muted); }
+    @keyframes blink { 50%{opacity:.25} }
+    .lawyer-chip { display:inline-flex; align-items:center; gap:.35rem; font-size:.72rem; color:var(--ink-light); }
+    .lawyer-av { width:18px; height:18px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:.48rem; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .amount-val { font-variant-numeric:tabular-nums; font-weight:600; }
+
+    /* empty state */
+    .empty-section { text-align:center; padding:2rem; color:var(--ink-muted); font-size:.78rem; }
+    .empty-section-ico { font-size:1.6rem; margin-bottom:.35rem; }
+
+    /* sessions list */
+    .sess-list { display:flex; flex-direction:column; gap:.5rem; padding:1rem 1.3rem; }
+    .sess-item { display:flex; align-items:center; gap:.85rem; padding:.75rem 1rem; border-radius:10px; border:1px solid var(--border); background:var(--off-white); transition:background .15s; }
+    .sess-item:hover { background:rgba(28,94,62,.04); }
+    .sess-date-block { display:flex; flex-direction:column; align-items:center; width:42px; flex-shrink:0; background:var(--white); border:1px solid var(--border); border-radius:8px; padding:.35rem .2rem; }
+    .sess-day-num { font-size:1.1rem; font-weight:900; color:var(--ink); line-height:1; }
+    .sess-month-lbl { font-size:.52rem; font-weight:700; color:var(--ink-muted); text-transform:uppercase; }
+    .sess-body { flex:1; min-width:0; }
+    .sess-case-name { font-size:.78rem; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sess-meta { font-size:.63rem; color:var(--ink-light); margin-top:2px; }
+    .sess-status { flex-shrink:0; }
+
+    /* toast */
+    .toast { position:fixed; top:1.5rem; left:50%; transform:translateX(-50%) translateY(-10px); background:var(--accent); color:#fff; padding:.75rem 1.5rem; border-radius:8px; font-size:.85rem; font-weight:600; font-family:'Cairo',sans-serif; box-shadow:0 4px 20px rgba(28,94,62,.3); z-index:9999; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px}
+    @media(max-width:1024px){.sidebar{display:none}.content{padding:1rem}.topbar{padding:0 1rem}.topbar-search{display:none}}
+    @media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}.client-header{flex-direction:column}}
+    @media(max-width:600px){.kpi-row{grid-template-columns:1fr 1fr}.fin-bar{flex-direction:column}}
+  </style>
+  <style>body{animation:pageIn .2s ease both}@keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+    <div class="sidebar-logo-dot"></div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section">الرئيسية</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+    <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+    <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+    <a class="nav-item" href="calendar.html"><span class="nav-icon">🗓️</span> التقويم</a>
+    <a class="nav-item active" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+    <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+    <div class="nav-section" style="margin-top:.6rem">المالية</div>
+    <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+    <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+    <div class="nav-section" style="margin-top:.6rem">الفريق</div>
+    <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+    <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+    <div class="nav-section" style="margin-top:.6rem">النظام</div>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+    <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av">ع.م</div>
+      <div>
+        <div class="user-name">عبدالعزيز المطيري</div>
+        <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbarTitle">ملف الموكل</div>
+      <div class="topbar-sub"><a href="clients.html" style="color:var(--ink-muted);text-decoration:none">← الموكلون</a> · <span id="topbarName">—</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search" onclick="window.openGlobalSearch&&openGlobalSearch()">🔍 بحث سريع...</div>
+      <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+      <a href="clients.html" class="btn-outline">← الرجوع للموكلين</a>
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <div style="text-align:center;padding:4rem;color:var(--ink-muted);font-size:.9rem">جاري التحميل...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+var MONTHS_MAP = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent='✓ '+msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3000);}
+function parseRows(key){try{return JSON.parse(localStorage.getItem(key)||'[]');}catch(e){return[];}}
+function parseTr(html){return new DOMParser().parseFromString('<table><tbody><tr>'+html+'</tr></tbody></table>','text/html').querySelectorAll('td');}
+function txt(el){return el?el.textContent.replace(/\s+/g,' ').trim():'';}
+function q(el,sel){return el&&el.querySelector?el.querySelector(sel):null;}
+function fmtMoney(n){var x=parseFloat((+n).toFixed(2));return isNaN(x)?'٠':x.toLocaleString('en-US')+' ر.س';}
+
+function parseArabicDate(str){
+  if(!str)return null;
+  var p=String(str).trim().split(/\s+/);
+  if(p.length<3)return null;
+  var d=parseInt(p[0]),m=MONTHS_MAP[p[1]],y=parseInt(p[2]);
+  if(isNaN(d)||m===undefined||isNaN(y))return null;
+  return new Date(y,m,d);
+}
+function daysDiff(date){
+  if(!date)return null;
+  var t=new Date();t.setHours(0,0,0,0);
+  var d=new Date(date);d.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+
+/* ── get client name from URL ── */
+var params = new URLSearchParams(window.location.search);
+var CLIENT_NAME = (params.get('name')||'').trim();
+
+if(!CLIENT_NAME){
+  document.getElementById('mainContent').innerHTML =
+    '<div style="text-align:center;padding:4rem;color:var(--ink-muted)"><div style="font-size:2rem;margin-bottom:.5rem">👤</div><div style="font-size:.9rem;font-weight:700;color:var(--ink-mid)">لم يتم تحديد موكل</div><div style="font-size:.75rem;margin-top:.3rem">ارجع لصفحة الموكلين واختر موكل</div></div>';
+}
+
+/* ── match helper ── */
+function nameMatch(str){
+  return str && str.trim().toLowerCase().indexOf(CLIENT_NAME.toLowerCase()) !== -1;
+}
+
+/* ── collect all data ── */
+function collectData(){
+  /* client base info */
+  var clientInfo = { name: CLIENT_NAME, type:'فرد', phone:'—', email:'—', date:'—' };
+  parseRows('clients_data').forEach(function(html){
+    var c = parseTr(html);
+    var nm = txt(q(c[0],'.client-name-cell')||c[0]);
+    if(nm.trim().toLowerCase() === CLIENT_NAME.toLowerCase()){
+      clientInfo.phone = txt(q(c[2],'.phone-cell')||c[2]);
+      clientInfo.email = txt(q(c[3],'.email-cell')||c[3]);
+      var typEl = q(c[1],'.type-badge');
+      clientInfo.type  = txt(typEl||c[1]);
+      clientInfo.typeCls = typEl&&typEl.classList.contains('type-company')?'type-company':'type-person';
+      clientInfo.date  = txt(c[5]);
+    }
+  });
+
+  /* cases */
+  var cases = [];
+  [].concat(parseRows('cases_data'), parseRows('dynamicCases')).forEach(function(html){
+    var c = parseTr(html);
+    var cli = txt(c[1]);
+    if(!nameMatch(cli)) return;
+    cases.push({
+      num:   txt(q(c[0],'.case-name')||c[0]),
+      id:    txt(q(c[0],'.case-id')),
+      type:  txt(c[2]),
+      court: txt(c[3]),
+      lawyer:chipName(c[4]),
+      date:  txt(q(c[5],'.date-cell')||c[5]),
+      status:txt(q(c[6],'.pill')||c[6]),
+      statusCls: pillCls(c[6])
+    });
+  });
+
+  /* invoices */
+  var invoices = [], invPaid=0, invPending=0, invOverdue=0;
+  parseRows('invoices_data').forEach(function(html){
+    var c = parseTr(html);
+    if(!nameMatch(txt(c[1]))) return;
+    var total = parseFloat((q(c[5],'[data-amount]')||c[5]).getAttribute?
+      (q(c[5],'[data-amount]')||{getAttribute:function(){return'0';}}).getAttribute('data-amount'):'0')||0;
+    var stCls = pillCls(c[8]);
+    if(stCls==='pill-paid') invPaid+=total;
+    else if(stCls==='pill-overdue') invOverdue+=total;
+    else invPending+=total;
+    invoices.push({
+      num:   txt(q(c[0],'.case-name')||c[0]),
+      case_: txt(q(c[2],'.case-name')||c[2]),
+      base:  parseFloat((c[3]&&c[3].getAttribute?c[3].getAttribute('data-amount'):'0')||0),
+      total: total,
+      issue: txt(q(c[6],'.date-cell')||c[6]),
+      due:   txt(q(c[7],'.date-cell')||c[7]),
+      status:txt(q(c[8],'.pill')||c[8]),
+      statusCls: stCls
+    });
+  });
+
+  /* fees */
+  var fees = [], feeCollected=0, feePending=0;
+  parseRows('fees_data').forEach(function(html){
+    var c = parseTr(html);
+    if(!nameMatch(txt(c[1]))) return;
+    var money = parseFloat((c[4]&&c[4].getAttribute?c[4].getAttribute('data-amount'):'0')||0);
+    var stCls = pillCls(c[7]);
+    if(stCls.indexOf('collect')!==-1||txt(c[7]).indexOf('محصّل')!==-1||txt(c[7]).indexOf('مدفو')!==-1) feeCollected+=money;
+    else feePending+=money;
+    fees.push({
+      item:  txt(c[0]),
+      case_: txt(q(c[2],'.case-name')||c[2]),
+      lawyer:chipName(c[3]),
+      amount:money,
+      type:  txt(q(c[5],'.pill')||c[5]),
+      date:  txt(c[6]),
+      status:txt(q(c[7],'.pill')||c[7]),
+      statusCls: stCls
+    });
+  });
+
+  /* sessions — search by case name OR client name in full row text */
+  var clientCaseNames = cases.map(function(c){return c.num.toLowerCase();});
+  var sessions = [];
+  parseRows('sessions_data').forEach(function(html){
+    var c = parseTr(html);
+    var caseName = txt(q(c[2],'.case-name')||c[2]);
+    var fullText = html.toLowerCase();
+    var match = nameMatch(fullText) ||
+      clientCaseNames.some(function(cn){ return cn && fullText.indexOf(cn)!==-1; });
+    if(!match) return;
+    var dateStr = txt(q(c[0],'.date-cell')||c[0]);
+    var date    = parseArabicDate(dateStr);
+    sessions.push({
+      date: date, dateStr: dateStr,
+      time: txt(q(c[1],'.time-cell')||c[1]),
+      caseName: caseName,
+      court: txt(c[3]),
+      hall: txt(c[4]),
+      lawyer: chipName(c[5]),
+      status: txt(q(c[6],'.pill')||c[6]),
+      statusCls: pillCls(c[6]),
+      diff: daysDiff(date)
+    });
+  });
+  sessions.sort(function(a,b){ return (a.diff||999)-(b.diff||999); });
+
+  return { clientInfo, cases, invoices, fees, sessions,
+           invPaid, invPending, invOverdue, feeCollected, feePending };
+}
+
+function chipName(cell){
+  if(!cell)return'';
+  var chip=cell.querySelector?cell.querySelector('.lawyer-chip'):null;
+  if(!chip)return txt(cell);
+  var cl=chip.cloneNode(true);
+  var av=cl.querySelector('[class*="av"]');if(av)av.remove();
+  return cl.textContent?cl.textContent.replace(/\s+/g,' ').trim():'';
+}
+function pillCls(cell){
+  if(!cell)return'pill-done';
+  var p=cell.querySelector?cell.querySelector('.pill'):null;
+  if(!p)return'pill-done';
+  var cn=p.className;
+  if(cn.indexOf('paid')!==-1||cn.indexOf('collect')!==-1)return'pill-paid';
+  if(cn.indexOf('overdue')!==-1)return'pill-overdue';
+  if(cn.indexOf('pending')!==-1)return'pill-pending';
+  if(cn.indexOf('active')!==-1)return'pill-active';
+  if(cn.indexOf('urgent')!==-1)return'pill-urgent';
+  return'pill-done';
+}
+
+/* ── render ── */
+function initials(name){
+  var w=String(name||'').trim().split(/\s+/);
+  return w.length>=2?w[0][0]+w[1][0]:w[0]?w[0].substring(0,2):'؟';
+}
+
+function render(){
+  if(!CLIENT_NAME)return;
+  var d = collectData();
+  var ci = d.clientInfo;
+  var upcomingSessions = d.sessions.filter(function(s){return s.diff!=null&&s.diff>=0;});
+  var totalFees = d.feeCollected + d.feePending;
+  var collectionPct = totalFees > 0 ? Math.round((d.feeCollected/totalFees)*100) : 0;
+  var totalInv = d.invPaid + d.invPending + d.invOverdue;
+
+  /* update topbar */
+  document.getElementById('topbarTitle').textContent = 'ملف الموكل · ' + ci.name;
+  document.getElementById('topbarName').textContent  = ci.name;
+  document.title = 'ملف ' + ci.name + ' — نظام إدارة المحاماة';
+
+  /* ── build HTML ── */
+  var h = '';
+
+  /* client header */
+  h += '<div class="client-header">';
+  h += '<div class="client-av-lg">' + initials(ci.name) + '</div>';
+  h += '<div class="client-header-body">';
+  h += '<div class="client-header-name">' + ci.name + '</div>';
+  h += '<div class="client-header-meta">';
+  h += '<span class="client-type-badge ' + (ci.typeCls||'type-person') + '">' + ci.type + '</span>';
+  if(ci.phone&&ci.phone!=='—') h += '<span class="client-contact-item">📞 ' + ci.phone + '</span>';
+  if(ci.email&&ci.email!=='—') h += '<span class="client-contact-item">📧 ' + ci.email + '</span>';
+  if(ci.date&&ci.date!=='—')   h += '<span class="client-contact-item">📅 منذ ' + ci.date + '</span>';
+  h += '</div>';
+  h += '<div class="client-header-actions">';
+  if(ci.phone&&ci.phone!=='—'){
+    h += '<button class="btn-wa-lg" onclick="sendWA()">📱 تواصل عبر واتساب</button>';
+  }
+  h += '<a href="cases.html" class="btn-outline">⚖️ إضافة قضية</a>';
+  h += '<a href="invoices.html" class="btn-outline">🧾 إصدار فاتورة</a>';
+  h += '</div></div></div>';
+
+  /* KPIs */
+  h += '<div class="kpi-row">';
+  h += '<div class="kpi-card kc-blue"><div class="kpi-label">القضايا</div><div class="kpi-val">'+d.cases.length+'</div><div class="kpi-sub">قضية مسجّلة</div></div>';
+  h += '<div class="kpi-card kc-green"><div class="kpi-label">الفواتير</div><div class="kpi-val">'+d.invoices.length+'</div><div class="kpi-sub">'+fmtMoney(totalInv)+' إجمالي</div></div>';
+  h += '<div class="kpi-card kc-gold"><div class="kpi-label">نسبة التحصيل</div><div class="kpi-val">'+(totalFees>0?collectionPct+'%':'—')+'</div><div class="kpi-sub">من إجمالي الأتعاب</div></div>';
+  h += '<div class="kpi-card kc-red"><div class="kpi-label">الجلسات القادمة</div><div class="kpi-val">'+upcomingSessions.length+'</div><div class="kpi-sub">'+(d.sessions.length)+' جلسة إجمالاً</div></div>';
+  h += '</div>';
+
+  /* financial summary */
+  if(totalFees > 0 || totalInv > 0){
+    h += '<div class="fin-bar">';
+    h += '<div class="fin-item"><div class="fin-lbl">أتعاب محصّلة</div><div class="fin-val green">'+fmtMoney(d.feeCollected)+'</div><div class="fin-sub">'+d.fees.length+' سجل أتعاب</div><div class="fin-progress"><div class="fin-progress-bar" style="width:'+collectionPct+'%;background:var(--green)"></div></div></div>';
+    h += '<div class="fin-item"><div class="fin-lbl">أتعاب معلقة</div><div class="fin-val gold">'+fmtMoney(d.feePending)+'</div><div class="fin-sub">بحاجة لمتابعة</div></div>';
+    h += '<div class="fin-item"><div class="fin-lbl">فواتير مدفوعة</div><div class="fin-val green">'+fmtMoney(d.invPaid)+'</div><div class="fin-sub">محصّلة بالكامل</div></div>';
+    if(d.invOverdue>0)
+      h += '<div class="fin-item"><div class="fin-lbl">فواتير متأخرة</div><div class="fin-val red">'+fmtMoney(d.invOverdue)+'</div><div class="fin-sub">تجاوزت الاستحقاق</div></div>';
+    else
+      h += '<div class="fin-item"><div class="fin-lbl">فواتير معلقة</div><div class="fin-val gold">'+fmtMoney(d.invPending)+'</div><div class="fin-sub">في انتظار السداد</div></div>';
+    h += '</div>';
+  }
+
+  /* ── Cases ── */
+  h += '<div class="card">';
+  h += '<div class="card-head"><div><div class="card-title">⚖️ الدعاوى</div><div class="card-sub">القضايا المرتبطة بهذا الموكل</div></div><span class="card-badge">'+d.cases.length+' قضية</span></div>';
+  if(d.cases.length===0){
+    h += '<div class="empty-section"><div class="empty-section-ico">⚖️</div>لا توجد قضايا مسجّلة لهذا الموكل</div>';
+  } else {
+    h += '<table class="mini-table"><thead><tr><th>رقم القضية</th><th>نوع القضية</th><th>المحكمة</th><th>المحامي</th><th>تاريخ الجلسة</th><th>الحالة</th></tr></thead><tbody>';
+    d.cases.forEach(function(c){
+      h += '<tr><td><div class="case-name">'+c.num+'</div><div class="case-id">'+c.id+'</div></td>';
+      h += '<td>'+c.type+'</td><td>'+c.court+'</td><td><div class="lawyer-chip"><div class="lawyer-av">'+initials(c.lawyer)+'</div>'+c.lawyer+'</div></td>';
+      h += '<td><span style="font-size:.7rem;color:var(--ink-light)">'+c.date+'</span></td>';
+      h += '<td><span class="pill '+c.statusCls+'">'+c.status+'</span></td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+  h += '</div>';
+
+  /* ── Sessions ── */
+  h += '<div class="card">';
+  h += '<div class="card-head"><div><div class="card-title">📅 الجلسات</div><div class="card-sub">كل الجلسات المرتبطة بقضايا هذا الموكل</div></div><span class="card-badge">'+d.sessions.length+' جلسة</span></div>';
+  if(d.sessions.length===0){
+    h += '<div class="empty-section"><div class="empty-section-ico">📅</div>لا توجد جلسات مسجّلة</div>';
+  } else {
+    h += '<div class="sess-list">';
+    d.sessions.slice(0,8).forEach(function(s){
+      var isUpcoming = s.diff!==null && s.diff >= 0;
+      var isToday    = s.diff === 0;
+      var dateLbl='', monthLbl='';
+      if(s.date){var p=s.dateStr.split(/\s+/);dateLbl=p[0]||'';monthLbl=p[1]?p[1].substring(0,3):'';}
+      var bgStyle = isToday?'border-color:var(--red);background:var(--red-dim);' : isUpcoming?'border-color:var(--accent-border);':'';
+      h += '<div class="sess-item" style="'+bgStyle+'">';
+      h += '<div class="sess-date-block"><div class="sess-day-num">'+dateLbl+'</div><div class="sess-month-lbl">'+monthLbl+'</div></div>';
+      h += '<div class="sess-body"><div class="sess-case-name">'+(s.caseName||'جلسة')+'</div>';
+      h += '<div class="sess-meta">'+(s.time?s.time+' · ':'')+s.court+(s.hall?' · '+s.hall:'')+(s.lawyer?' · '+s.lawyer:'')+'</div></div>';
+      h += '<div class="sess-status"><span class="pill '+s.statusCls+'">'+s.status+'</span></div></div>';
+    });
+    if(d.sessions.length>8) h += '<div style="text-align:center;padding:.5rem;font-size:.7rem;color:var(--ink-muted)">+ '+(d.sessions.length-8)+' جلسات أخرى</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+
+  /* ── Invoices ── */
+  h += '<div class="card">';
+  h += '<div class="card-head"><div><div class="card-title">🧾 الفواتير</div><div class="card-sub">فواتير ZATCA الصادرة لهذا الموكل</div></div><span class="card-badge">'+d.invoices.length+' فاتورة</span></div>';
+  if(d.invoices.length===0){
+    h += '<div class="empty-section"><div class="empty-section-ico">🧾</div>لا توجد فواتير مُصدَرة</div>';
+  } else {
+    h += '<table class="mini-table"><thead><tr><th>رقم الفاتورة</th><th>القضية</th><th>الإجمالي</th><th>تاريخ الإصدار</th><th>الاستحقاق</th><th>الحالة</th></tr></thead><tbody>';
+    d.invoices.forEach(function(inv){
+      h += '<tr><td><div class="case-name">'+inv.num+'</div></td>';
+      h += '<td>'+inv.case_+'</td>';
+      h += '<td><span class="amount-val">'+fmtMoney(inv.total)+'</span></td>';
+      h += '<td><span style="font-size:.7rem;color:var(--ink-light)">'+inv.issue+'</span></td>';
+      h += '<td><span style="font-size:.7rem;color:var(--ink-light)">'+inv.due+'</span></td>';
+      h += '<td><span class="pill '+inv.statusCls+'">'+inv.status+'</span></td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+  h += '</div>';
+
+  /* ── Fees ── */
+  h += '<div class="card">';
+  h += '<div class="card-head"><div><div class="card-title">💰 الأتعاب</div><div class="card-sub">سجلات الأتعاب المرتبطة بهذا الموكل</div></div><span class="card-badge">'+d.fees.length+' سجل</span></div>';
+  if(d.fees.length===0){
+    h += '<div class="empty-section"><div class="empty-section-ico">💰</div>لا توجد سجلات أتعاب</div>';
+  } else {
+    h += '<table class="mini-table"><thead><tr><th>البند</th><th>القضية</th><th>المبلغ</th><th>النوع</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>';
+    d.fees.forEach(function(f){
+      h += '<tr><td><div class="case-name">'+f.item+'</div></td>';
+      h += '<td>'+f.case_+'</td>';
+      h += '<td><span class="amount-val">'+fmtMoney(f.amount)+'</span></td>';
+      h += '<td>'+f.type+'</td>';
+      h += '<td><span style="font-size:.7rem;color:var(--ink-light)">'+f.date+'</span></td>';
+      h += '<td><span class="pill '+f.statusCls+'">'+f.status+'</span></td></tr>';
+    });
+    h += '</tbody></table>';
+  }
+  h += '</div>';
+
+  document.getElementById('mainContent').innerHTML = h;
+}
+
+/* ── WhatsApp ── */
+window.sendWA = function(){
+  var d = collectData();
+  var ci = d.clientInfo;
+  var msg = '📋 *رسالة من مكتب المحاماة*\n\n';
+  msg += 'السيد/ة ' + ci.name + '،\n\n';
+  if(d.cases.length>0) msg += '⚖️ لديكم ' + d.cases.length + ' قضية مسجّلة لدينا.\n';
+  if(d.sessions.filter(function(s){return s.diff!=null&&s.diff>=0;}).length>0){
+    var next = d.sessions.filter(function(s){return s.diff!=null&&s.diff>=0;})[0];
+    msg += '📅 الجلسة القادمة: ' + next.caseName + ' بتاريخ ' + next.dateStr + '\n';
+  }
+  if(d.invOverdue>0) msg += '⚠️ يوجد فواتير متأخرة بإجمالي: ' + fmtMoney(d.invOverdue) + '\n';
+  msg += '\nنظام إدارة المحاماة';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  showToast('جاري فتح واتساب...');
+};
+
+/* init */
+if(CLIENT_NAME) render();
+</script>
+
+<script src="sidebar-badges.js"></script>
+<script src="firm-name.js"></script>
+<script src="notifications.js"></script>
+<script src="global-search.js"></script>
+</body>
+</html>
