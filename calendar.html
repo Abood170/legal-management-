@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — تقويم الجلسات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white:#ffffff; --off-white:#F7F6F3; --cream:#F0EDE6;
+      --ink:#0F1419; --ink-mid:#2D3748; --ink-light:#64748B; --ink-muted:#94A3B8;
+      --accent:#1C5E3E; --accent-light:#24764E; --accent-dim:rgba(28,94,62,0.08); --accent-border:rgba(28,94,62,0.15);
+      --gold:#B8952A; --gold-dim:rgba(184,149,42,0.1);
+      --border:rgba(15,20,25,0.08); --border-mid:rgba(15,20,25,0.12);
+      --red:#DC2626; --red-dim:rgba(220,38,38,0.07);
+      --green:#16a34a; --green-dim:rgba(22,163,74,0.08);
+      --sidebar-w:228px;
+    }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Cairo',sans-serif; background:var(--off-white); color:var(--ink); min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+
+    /* ── Sidebar ── */
+    .sidebar { width:var(--sidebar-w); background:var(--white); border-left:1px solid var(--border); height:100vh; position:sticky; top:0; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+    .sidebar-logo { padding:1.4rem 1.4rem 1.1rem; border-bottom:1px solid var(--border); display:flex; align-items:baseline; gap:.35rem; text-decoration:none; }
+    .sidebar-logo-text { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--ink); }
+    .sidebar-logo-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); margin-bottom:2px; }
+    .sidebar-nav { flex:1; padding:.8rem 0; }
+    .nav-section { padding:.6rem 1.4rem .2rem; font-size:.68rem; font-weight:700; color:var(--ink-muted); letter-spacing:2px; text-transform:uppercase; }
+    .nav-item { display:flex; align-items:center; gap:.6rem; padding:.55rem 1.4rem; font-size:.82rem; color:var(--ink-light); text-decoration:none; transition:all .15s cubic-bezier(.4,0,.2,1); border-right:2px solid transparent; cursor:pointer; }
+    .nav-item:hover { background:rgba(28,94,62,.04); color:var(--ink); }
+    .nav-item.active { background:var(--accent-dim); color:var(--accent); border-right-color:var(--accent); font-weight:600; border-radius:0 8px 8px 0; }
+    .nav-icon { font-size:.95rem; width:16px; text-align:center; flex-shrink:0; }
+    .nav-badge { margin-right:auto; background:var(--red); color:white; font-size:.56rem; font-weight:700; padding:1px 6px; border-radius:2rem; }
+    .nav-badge-g { margin-right:auto; background:var(--gold-dim); color:var(--gold); border:1px solid rgba(184,149,42,.2); font-size:.56rem; font-weight:700; padding:1px 6px; border-radius:2rem; }
+    .sidebar-bottom { padding:1rem 1.4rem; border-top:1px solid var(--border); }
+    .user-card { display:flex; align-items:center; gap:.65rem; padding:.6rem; border-radius:8px; cursor:pointer; transition:background .15s; }
+    .user-card:hover { background:rgba(28,94,62,.04); }
+    .user-av { width:30px; height:30px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent-border); display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; color:var(--accent); flex-shrink:0; }
+    .user-name { font-size:.76rem; font-weight:600; color:var(--ink); }
+    .user-role { font-size:.6rem; color:var(--ink-muted); margin-top:1px; }
+
+    /* ── Main / Topbar ── */
+    .main { flex:1; display:flex; flex-direction:column; min-height:100vh; overflow:hidden; }
+    .topbar { background:var(--white); border-bottom:1px solid var(--border); padding:0 2rem; height:58px; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-shrink:0; position:sticky; top:0; z-index:10; box-shadow:0 1px 0 var(--border); }
+    .topbar-title { font-size:.92rem; font-weight:700; color:var(--ink); letter-spacing:-.3px; }
+    .topbar-sub { font-size:.67rem; color:var(--ink-muted); margin-top:1px; }
+    .topbar-right { display:flex; align-items:center; gap:.7rem; }
+    .topbar-search { display:flex; align-items:center; gap:.5rem; background:var(--off-white); border:1px solid var(--border); border-radius:7px; padding:.42rem .85rem; font-size:.78rem; color:var(--ink-muted); cursor:pointer; transition:border-color .15s; min-width:190px; }
+    .topbar-search:hover { border-color:var(--border-mid); }
+    .topbar-icon { width:32px; height:32px; border-radius:7px; background:var(--off-white); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:.95rem; cursor:pointer; transition:all .15s; position:relative; }
+    .topbar-icon:hover { background:rgba(28,94,62,.04); border-color:var(--accent-border); }
+    .notif-dot { position:absolute; top:4px; left:4px; width:6px; height:6px; background:var(--red); border-radius:50%; border:1.5px solid var(--white); }
+    .btn-new { background:var(--accent); color:white; padding:.48rem 1rem; border-radius:7px; font-size:.78rem; font-weight:700; border:none; cursor:pointer; font-family:'Cairo',sans-serif; transition:all .2s cubic-bezier(.4,0,.2,1); white-space:nowrap; box-shadow:0 1px 3px rgba(28,94,62,.2); }
+    .btn-new:hover { background:var(--accent-light); box-shadow:0 4px 12px rgba(28,94,62,.28); transform:translateY(-1px); }
+
+    /* ── Content ── */
+    .content { flex:1; padding:1.4rem 2rem; overflow-y:auto; display:flex; flex-direction:column; gap:1rem; }
+    .card { background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:0 1px 3px rgba(15,20,25,.06),0 4px 12px rgba(15,20,25,.04); }
+
+    /* ── Calendar Nav ── */
+    .cal-nav { display:flex; align-items:center; justify-content:space-between; padding:.9rem 1.3rem; border-bottom:1px solid var(--border); }
+    .cal-nav-month { font-size:1.05rem; font-weight:900; color:var(--ink); letter-spacing:-.4px; }
+    .cal-nav-year { font-size:.75rem; font-weight:600; color:var(--ink-muted); margin-right:.4rem; }
+    .cal-nav-btns { display:flex; align-items:center; gap:.4rem; }
+    .cal-nav-btn { width:30px; height:30px; border-radius:7px; background:var(--off-white); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:.8rem; color:var(--ink-light); transition:all .15s; }
+    .cal-nav-btn:hover { background:rgba(28,94,62,.06); border-color:var(--accent-border); color:var(--accent); }
+    .cal-today-btn { padding:0 .75rem; font-size:.72rem; font-weight:700; color:var(--accent); background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:7px; height:30px; cursor:pointer; font-family:'Cairo',sans-serif; transition:all .15s; white-space:nowrap; }
+    .cal-today-btn:hover { background:rgba(28,94,62,.14); }
+
+    /* ── Calendar Grid ── */
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); }
+    .cal-day-label { text-align:center; padding:.55rem .3rem; font-size:.62rem; font-weight:700; color:var(--ink-muted); letter-spacing:.3px; border-bottom:1px solid var(--border); background:var(--off-white); text-transform:uppercase; }
+    .cal-day-label.weekend { color:var(--accent); }
+    .cal-cell { min-height:100px; padding:.45rem .4rem; border-bottom:1px solid var(--border); border-left:1px solid var(--border); position:relative; transition:background .12s; vertical-align:top; }
+    .cal-cell:nth-child(7n+1) { border-left:none; }
+    .cal-cell.other-month { background:rgba(247,246,243,.5); }
+    .cal-cell.today { background:rgba(28,94,62,.04); }
+    .cal-cell.today .cal-date { background:var(--accent); color:#fff; border-radius:50%; }
+    .cal-cell:hover { background:rgba(28,94,62,.03); cursor:pointer; }
+    .cal-date { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; font-size:.72rem; font-weight:700; color:var(--ink); margin-bottom:.3rem; }
+    .cal-cell.other-month .cal-date { color:var(--ink-muted); }
+    .cal-events { display:flex; flex-direction:column; gap:2px; }
+    .cal-event { border-radius:4px; padding:2px 5px; font-size:.6rem; font-weight:600; cursor:pointer; transition:all .12s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:'Cairo',sans-serif; line-height:1.4; }
+    .cal-event:hover { filter:brightness(.92); transform:translateX(-1px); }
+    .cal-event.ev-today { background:rgba(220,38,38,.12); color:var(--red); border-right:2px solid var(--red); }
+    .cal-event.ev-upcoming { background:rgba(28,94,62,.1); color:var(--accent); border-right:2px solid var(--accent); }
+    .cal-event.ev-past { background:rgba(100,116,139,.1); color:var(--ink-muted); border-right:2px solid var(--ink-muted); }
+    .cal-event.ev-done { background:rgba(22,163,74,.1); color:var(--green); border-right:2px solid var(--green); }
+    .cal-more { font-size:.58rem; color:var(--ink-muted); padding:1px 5px; cursor:pointer; }
+    .cal-more:hover { color:var(--accent); }
+
+    /* ── Legend ── */
+    .cal-legend { display:flex; align-items:center; gap:1rem; padding:.7rem 1.3rem; border-top:1px solid var(--border); flex-wrap:wrap; }
+    .cal-legend-item { display:flex; align-items:center; gap:.35rem; font-size:.62rem; color:var(--ink-light); font-family:'Cairo',sans-serif; }
+    .cal-legend-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+
+    /* ── Stats bar ── */
+    .cal-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.85rem; }
+    .cal-stat-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:.9rem 1.1rem; box-shadow:0 1px 3px rgba(15,20,25,.05); }
+    .cal-stat-lbl { font-size:.6rem; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.4rem; }
+    .cal-stat-val { font-size:1.4rem; font-weight:900; color:var(--ink); letter-spacing:-.5px; line-height:1; }
+    .cal-stat-sub { font-size:.63rem; color:var(--ink-muted); margin-top:.25rem; }
+
+    /* ── Session detail panel ── */
+    .sess-panel { position:fixed; top:0; left:0; width:340px; height:100vh; background:var(--white); box-shadow:-4px 0 24px rgba(15,20,25,.12); z-index:200; display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .22s cubic-bezier(.4,0,.2,1); border-right:1px solid var(--border); }
+    .sess-panel.open { transform:translateX(0); }
+    .sess-panel-head { padding:1.2rem 1.4rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--off-white); }
+    .sess-panel-title { font-size:.88rem; font-weight:700; color:var(--ink); }
+    .sess-panel-close { width:28px; height:28px; border-radius:6px; background:none; border:1px solid var(--border); cursor:pointer; font-family:'Cairo',sans-serif; font-size:.8rem; color:var(--ink-muted); display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .sess-panel-close:hover { border-color:var(--red); color:var(--red); }
+    .sess-panel-body { flex:1; overflow-y:auto; padding:1.2rem 1.4rem; display:flex; flex-direction:column; gap:.8rem; }
+    .sp-field { display:flex; flex-direction:column; gap:.2rem; }
+    .sp-lbl { font-size:.58rem; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.5px; }
+    .sp-val { font-size:.82rem; font-weight:600; color:var(--ink); }
+    .sp-val-sm { font-size:.75rem; color:var(--ink-mid); }
+    .pill { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:.62rem; font-weight:700; white-space:nowrap; }
+    .pill::before { content:''; width:4px; height:4px; border-radius:50%; }
+    .pill-active { background:var(--green-dim); color:var(--green); border:1px solid rgba(22,163,74,.18); } .pill-active::before { background:var(--green); }
+    .pill-urgent { background:var(--red-dim); color:var(--red); border:1px solid rgba(220,38,38,.18); } .pill-urgent::before { background:var(--red); animation:blink 1.2s infinite; }
+    .pill-done { background:rgba(100,116,139,.1); color:var(--ink-muted); border:1px solid rgba(100,116,139,.15); } .pill-done::before { background:var(--ink-muted); }
+    @keyframes blink { 50%{opacity:.25} }
+    .sess-panel-foot { padding:1rem 1.4rem; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:.5rem; }
+    .btn-wa { width:100%; padding:.6rem; border-radius:8px; border:none; background:linear-gradient(135deg,#25D366,#128C7E); color:#fff; font-family:'Cairo',sans-serif; font-size:.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.4rem; transition:all .2s; }
+    .btn-wa:hover { filter:brightness(1.08); transform:translateY(-1px); }
+    .btn-goto { width:100%; padding:.55rem; border-radius:8px; border:1px solid var(--accent-border); background:var(--accent-dim); color:var(--accent); font-family:'Cairo',sans-serif; font-size:.78rem; font-weight:700; cursor:pointer; transition:all .15s; }
+    .btn-goto:hover { background:rgba(28,94,62,.14); }
+
+    /* ── Empty state ── */
+    .cal-empty { text-align:center; padding:3rem 1.5rem; }
+    .cal-empty-ico { font-size:2rem; margin-bottom:.6rem; }
+    .cal-empty-title { font-size:.88rem; font-weight:700; color:var(--ink-mid); margin-bottom:.3rem; }
+    .cal-empty-sub { font-size:.74rem; color:var(--ink-muted); }
+
+    /* ── Toast ── */
+    .toast { position:fixed; top:1.5rem; left:50%; transform:translateX(-50%) translateY(-10px); background:var(--accent); color:white; padding:.75rem 1.5rem; border-radius:8px; font-size:.85rem; font-weight:600; font-family:'Cairo',sans-serif; box-shadow:0 4px 20px rgba(28,94,62,.3); z-index:9999; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; white-space:nowrap; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px}
+    @media(max-width:1024px){.sidebar{display:none}.content{padding:1rem}.topbar{padding:0 1rem}.topbar-search{display:none}}
+    @media(max-width:600px){.cal-stat-card{padding:.7rem .85rem}.cal-stats{grid-template-columns:repeat(2,1fr)}.cal-cell{min-height:70px}.cal-event{font-size:.55rem}}
+  </style>
+  <style>body{animation:pageIn .2s ease both}@keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+    <div class="sidebar-logo-dot"></div>
+  </a>
+  <nav class="sidebar-nav">
+    <div class="nav-section">الرئيسية</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+    <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+    <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+    <a class="nav-item active" href="calendar.html"><span class="nav-icon">🗓️</span> التقويم</a>
+    <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+    <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+    <div class="nav-section" style="margin-top:.6rem">المالية</div>
+    <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+    <a class="nav-item" href="invoices.html"><span class="nav-icon">🧾</span> فوترة ZATCA</a>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+    <div class="nav-section" style="margin-top:.6rem">الفريق</div>
+    <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+    <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+    <div class="nav-section" style="margin-top:.6rem">النظام</div>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+    <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-av">ع.م</div>
+      <div>
+        <div class="user-name">عبدالعزيز المطيري</div>
+        <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">تقويم الجلسات</div>
+      <div class="topbar-sub" id="topbarSub">جاري التحميل...</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-search" onclick="window.openGlobalSearch&&openGlobalSearch()">🔍 بحث سريع...</div>
+      <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+      <a href="sessions.html" class="btn-new">📋 عرض الجدول</a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="cal-stats">
+      <div class="cal-stat-card">
+        <div class="cal-stat-lbl">هذا الشهر</div>
+        <div class="cal-stat-val" id="statThisMonth">0</div>
+        <div class="cal-stat-sub">جلسة مجدولة</div>
+      </div>
+      <div class="cal-stat-card">
+        <div class="cal-stat-lbl">اليوم</div>
+        <div class="cal-stat-val" id="statToday" style="color:var(--red)">0</div>
+        <div class="cal-stat-sub">جلسات اليوم</div>
+      </div>
+      <div class="cal-stat-card">
+        <div class="cal-stat-lbl">هذا الأسبوع</div>
+        <div class="cal-stat-val" id="statThisWeek" style="color:var(--accent)">0</div>
+        <div class="cal-stat-sub">جلسات قادمة</div>
+      </div>
+      <div class="cal-stat-card">
+        <div class="cal-stat-lbl">منتهية الشهر</div>
+        <div class="cal-stat-val" id="statDone" style="color:var(--ink-muted)">0</div>
+        <div class="cal-stat-sub">جلسة سابقة</div>
+      </div>
+    </div>
+
+    <!-- Calendar Card -->
+    <div class="card">
+      <!-- Nav -->
+      <div class="cal-nav">
+        <div>
+          <span class="cal-nav-month" id="calMonthLabel">—</span>
+          <span class="cal-nav-year" id="calYearLabel">—</span>
+        </div>
+        <div class="cal-nav-btns">
+          <button class="cal-today-btn" id="calTodayBtn">اليوم</button>
+          <button class="cal-nav-btn" id="calPrevBtn" title="الشهر السابق">›</button>
+          <button class="cal-nav-btn" id="calNextBtn" title="الشهر التالي">‹</button>
+        </div>
+      </div>
+
+      <!-- Day labels -->
+      <div class="cal-grid" id="calDayLabels"></div>
+
+      <!-- Grid -->
+      <div class="cal-grid" id="calGrid"></div>
+
+      <!-- Legend -->
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red);opacity:.7"></div>اليوم</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--accent);opacity:.7"></div>جلسة قادمة</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--ink-muted);opacity:.5"></div>جلسة سابقة</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--green);opacity:.7"></div>منتهية</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Session Detail Panel -->
+<div class="sess-panel" id="sessPanel">
+  <div class="sess-panel-head">
+    <span class="sess-panel-title">تفاصيل الجلسة</span>
+    <button class="sess-panel-close" id="sessPanelClose">✕</button>
+  </div>
+  <div class="sess-panel-body" id="sessPanelBody"></div>
+  <div class="sess-panel-foot">
+    <button class="btn-wa" id="sessPanelWa">📱 إرسال تذكير واتساب</button>
+    <button class="btn-goto" onclick="window.location.href='sessions.html'">📋 عرض كل الجلسات</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Data ── */
+var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+var DAYS_AR   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+var DAYS_SHORT= ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+var MONTHS_MAP = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
+
+var curYear, curMonth;
+var allSessions = []; /* [{date, caseName, caseId, time, court, hall, lawyer, status, statusCls, html}] */
+var openSession  = null;
+
+function parseArabicDate(str) {
+  if (!str) return null;
+  var p = String(str).trim().split(/\s+/);
+  if (p.length < 3) return null;
+  var d = parseInt(p[0]), m = MONTHS_MAP[p[1]], y = parseInt(p[2]);
+  if (isNaN(d) || m === undefined || isNaN(y)) return null;
+  return new Date(y, m, d);
+}
+
+function parseTr(html) {
+  return new DOMParser()
+    .parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html')
+    .querySelectorAll('td');
+}
+function txt(el) { return el ? el.textContent.replace(/\s+/g,' ').trim() : ''; }
+function q(el, sel) { return el && el.querySelector ? el.querySelector(sel) : null; }
+
+function loadSessions() {
+  allSessions = [];
+  var rows = [];
+  try { rows = JSON.parse(localStorage.getItem('sessions_data') || '[]'); } catch(e) {}
+  rows.forEach(function(html) {
+    var c = parseTr(html);
+    var dateStr  = txt(q(c[0],'.date-cell') || c[0]);
+    var date     = parseArabicDate(dateStr);
+    if (!date) return;
+    var time     = txt(q(c[1],'.time-cell') || c[1]);
+    var caseName = txt(q(c[2],'.case-name') || c[2]);
+    var caseId   = txt(q(c[2],'.case-id'));
+    var court    = txt(c[3]);
+    var hall     = txt(c[4]);
+    var lawyerEl = c[5] ? c[5].querySelector('.lawyer-chip') : null;
+    var lawyer   = '';
+    if (lawyerEl) { var cl = lawyerEl.cloneNode(true); var av = cl.querySelector('[class*="av"]'); if(av) av.remove(); lawyer = cl.textContent.trim(); }
+    else lawyer = txt(c[5]);
+    var statPill = q(c[6],'.pill');
+    var status   = txt(statPill || c[6]);
+    var statusCls = 'pill-done';
+    if (statPill) {
+      if (statPill.className.indexOf('urgent') !== -1) statusCls = 'pill-urgent';
+      else if (statPill.className.indexOf('active') !== -1) statusCls = 'pill-active';
+    }
+    allSessions.push({ date:date, dateStr:dateStr, time:time, caseName:caseName, caseId:caseId, court:court, hall:hall, lawyer:lawyer, status:status, statusCls:statusCls });
+  });
+}
+
+function sessionsForDay(y, m, d) {
+  return allSessions.filter(function(s) {
+    return s.date.getFullYear()===y && s.date.getMonth()===m && s.date.getDate()===d;
+  });
+}
+
+/* ── Topbar date ── */
+function updateTopbar() {
+  var now = new Date();
+  var d = DAYS_AR[now.getDay()];
+  var s = d + '، ' + now.getDate() + ' ' + MONTHS_AR[now.getMonth()] + ' ' + now.getFullYear();
+  document.getElementById('topbarSub').textContent = s + ' · تقويم الجلسات';
+}
+
+/* ── Stats ── */
+function updateStats(year, month) {
+  var now = new Date(); now.setHours(0,0,0,0);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate()+7);
+
+  var thisMonth=0, todayCnt=0, thisWeek=0, doneCnt=0;
+  allSessions.forEach(function(s) {
+    var sd = new Date(s.date); sd.setHours(0,0,0,0);
+    if (sd.getFullYear()===year && sd.getMonth()===month) {
+      thisMonth++;
+      if (sd < today) doneCnt++;
+      if (sd.getTime()===today.getTime()) todayCnt++;
+      if (sd >= today && sd < weekEnd) thisWeek++;
+    }
+  });
+  document.getElementById('statThisMonth').textContent = thisMonth;
+  document.getElementById('statToday').textContent     = todayCnt;
+  document.getElementById('statThisWeek').textContent  = thisWeek;
+  document.getElementById('statDone').textContent      = doneCnt;
+}
+
+/* ── Render Calendar ── */
+function renderCalendar(year, month) {
+  curYear = year; curMonth = month;
+  document.getElementById('calMonthLabel').textContent = MONTHS_AR[month];
+  document.getElementById('calYearLabel').textContent  = year;
+
+  /* day labels */
+  var dlEl = document.getElementById('calDayLabels');
+  dlEl.innerHTML = '';
+  DAYS_SHORT.forEach(function(d, i) {
+    var el = document.createElement('div');
+    el.className = 'cal-day-label' + (i===5||i===6?' weekend':'');
+    el.textContent = d;
+    dlEl.appendChild(el);
+  });
+
+  var grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var firstDay = new Date(year, month, 1);
+  var lastDay  = new Date(year, month+1, 0);
+  var startDow = firstDay.getDay(); /* 0=Sun */
+  var totalDays = lastDay.getDate();
+
+  /* cells: prev month padding */
+  var prevLastDay = new Date(year, month, 0).getDate();
+  for (var i = 0; i < startDow; i++) {
+    var dayNum = prevLastDay - startDow + 1 + i;
+    var pYear = month===0?year-1:year, pMonth = month===0?11:month-1;
+    appendCell(grid, pYear, pMonth, dayNum, true, today);
+  }
+
+  /* current month days */
+  for (var d = 1; d <= totalDays; d++) {
+    appendCell(grid, year, month, d, false, today);
+  }
+
+  /* next month padding to complete last row */
+  var total = startDow + totalDays;
+  var remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  var nYear = month===11?year+1:year, nMonth = month===11?0:month+1;
+  for (var j = 1; j <= remain; j++) {
+    appendCell(grid, nYear, nMonth, j, true, today);
+  }
+
+  updateStats(year, month);
+}
+
+function appendCell(grid, year, month, day, otherMonth, today) {
+  var cellDate = new Date(year, month, day); cellDate.setHours(0,0,0,0);
+  var isToday  = cellDate.getTime() === today.getTime();
+  var isPast   = cellDate < today;
+
+  var cell = document.createElement('div');
+  cell.className = 'cal-cell' + (otherMonth?' other-month':'') + (isToday?' today':'');
+  cell.setAttribute('data-date', year+'-'+month+'-'+day);
+
+  var dateEl = document.createElement('div');
+  dateEl.className = 'cal-date';
+  dateEl.textContent = day;
+  cell.appendChild(dateEl);
+
+  var sessions = sessionsForDay(year, month, day);
+  var evWrap = document.createElement('div');
+  evWrap.className = 'cal-events';
+
+  var MAX_VISIBLE = 3;
+  sessions.slice(0, MAX_VISIBLE).forEach(function(s) {
+    var ev = document.createElement('div');
+    var cls = 'cal-event ';
+    if (isToday) cls += 'ev-today';
+    else if (isPast) cls += (s.statusCls==='pill-active'?'ev-done':'ev-past');
+    else cls += 'ev-upcoming';
+    ev.className = cls;
+    ev.textContent = (s.time ? s.time + ' · ' : '') + (s.caseName || 'جلسة');
+    ev.title = s.caseName + (s.court?' · '+s.court:'');
+    ev.addEventListener('click', function(e) { e.stopPropagation(); openPanel(s); });
+    evWrap.appendChild(ev);
+  });
+  if (sessions.length > MAX_VISIBLE) {
+    var more = document.createElement('div');
+    more.className = 'cal-more';
+    more.textContent = '+ ' + (sessions.length - MAX_VISIBLE) + ' جلسات';
+    more.addEventListener('click', function(e) { e.stopPropagation(); openPanel(sessions[MAX_VISIBLE]); });
+    evWrap.appendChild(more);
+  }
+  cell.appendChild(evWrap);
+
+  /* click on empty cell */
+  cell.addEventListener('click', function() {
+    if (sessions.length === 1) openPanel(sessions[0]);
+    else if (sessions.length > 1) openPanel(sessions[0]);
+  });
+
+  grid.appendChild(cell);
+}
+
+/* ── Session Panel ── */
+function openPanel(s) {
+  openSession = s;
+  var body = document.getElementById('sessPanelBody');
+  var statusColor = s.statusCls === 'pill-urgent' ? 'var(--red)' : s.statusCls === 'pill-active' ? 'var(--accent)' : 'var(--ink-muted)';
+  body.innerHTML = [
+    '<div class="sp-field"><div class="sp-lbl">القضية</div><div class="sp-val">' + (s.caseName||'—') + '</div>' + (s.caseId?'<div class="sp-val-sm">'+s.caseId+'</div>':'') + '</div>',
+    '<div class="sp-field"><div class="sp-lbl">التاريخ والوقت</div><div class="sp-val">' + (s.dateStr||'—') + (s.time?' · '+s.time:'') + '</div></div>',
+    '<div class="sp-field"><div class="sp-lbl">المحكمة</div><div class="sp-val">' + (s.court||'—') + '</div></div>',
+    s.hall ? '<div class="sp-field"><div class="sp-lbl">القاعة</div><div class="sp-val">' + s.hall + '</div></div>' : '',
+    s.lawyer ? '<div class="sp-field"><div class="sp-lbl">المحامي</div><div class="sp-val">' + s.lawyer + '</div></div>' : '',
+    '<div class="sp-field"><div class="sp-lbl">الحالة</div><div class="sp-val"><span class="pill ' + s.statusCls + '">' + (s.status||'—') + '</span></div></div>'
+  ].join('');
+  document.getElementById('sessPanel').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('sessPanel').classList.remove('open');
+  openSession = null;
+}
+
+document.getElementById('sessPanelClose').addEventListener('click', closePanel);
+document.addEventListener('keydown', function(e) { if(e.key==='Escape') closePanel(); });
+
+/* ── WhatsApp from panel ── */
+document.getElementById('sessPanelWa').addEventListener('click', function() {
+  if (!openSession) return;
+  var s = openSession;
+  var msg = '📋 *تذكير بجلسة قادمة*\n\n';
+  msg += '⚖️ *القضية:* ' + (s.caseName||'—') + (s.caseId?' ('+s.caseId+')':'') + '\n';
+  msg += '📅 *التاريخ:* ' + (s.dateStr||'—') + '\n';
+  if (s.time) msg += '⏰ *الوقت:* ' + s.time + '\n';
+  if (s.court) msg += '🏛️ *المحكمة:* ' + s.court + '\n';
+  if (s.hall) msg += '🚪 *القاعة:* ' + s.hall + '\n';
+  if (s.lawyer) msg += '👤 *المحامي:* ' + s.lawyer + '\n';
+  msg += '\nيرجى الحضور قبل الموعد بـ 15 دقيقة.\n_نظام إدارة المحاماة_';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  showToast('جاري فتح واتساب...');
+});
+
+/* ── Navigation ── */
+document.getElementById('calPrevBtn').addEventListener('click', function() {
+  curMonth--;
+  if (curMonth < 0) { curMonth = 11; curYear--; }
+  renderCalendar(curYear, curMonth);
+});
+document.getElementById('calNextBtn').addEventListener('click', function() {
+  curMonth++;
+  if (curMonth > 11) { curMonth = 0; curYear++; }
+  renderCalendar(curYear, curMonth);
+});
+document.getElementById('calTodayBtn').addEventListener('click', function() {
+  var now = new Date();
+  renderCalendar(now.getFullYear(), now.getMonth());
+});
+
+/* ── Toast ── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+/* ── Init ── */
+(function() {
+  var now = new Date();
+  updateTopbar();
+  loadSessions();
+  renderCalendar(now.getFullYear(), now.getMonth());
+})();
+</script>
+
+<script src="sidebar-badges.js"></script>
+<script src="firm-name.js"></script>
+<script src="export-data.js"></script>
+<script src="notifications.js"></script>
+<script src="global-search.js"></script>
+</body>
+</html>
