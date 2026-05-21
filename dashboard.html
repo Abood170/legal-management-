@@ -287,10 +287,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
         <div class="kpi-change down" id="kpiFeesChange">احرص على التحصيل قبل نهاية الشهر</div>
       </div>
       <div class="kpi-card accent">
-        <div class="kpi-icon">⭐</div>
-        <div class="kpi-label">رضا الموكلين</div>
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label" id="kpiSatLabel">نسبة التحصيل</div>
         <div class="kpi-val" id="kpiSatisfaction">—</div>
-        <div class="kpi-change neutral" id="kpiSatisfactionChange">بناءً على آخر استبيان</div>
+        <div class="kpi-change neutral" id="kpiSatisfactionChange">بناءً على الأتعاب المسجّلة</div>
       </div>
     </div>
 
@@ -346,15 +346,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
         <div><div class="card-title">الأتعاب المحصّلة</div><div class="card-sub">آخر 8 أشهر — بالألف ريال سعودي</div></div>
         <span id="forecastLbl" style="font-size:0.7rem;color:var(--ink-muted)"></span>
       </div>
-      <div class="mini-chart">
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">يون</div></div>
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">يول</div></div>
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">أغس</div></div>
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">سبت</div></div>
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">أكت</div></div>
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">نوف</div></div>
-        <div class="chart-col"><div class="chart-bar" style="height:4px"></div><div class="chart-lbl">ديس</div></div>
-        <div class="chart-col"><div class="chart-bar active" style="height:4px"></div><div class="chart-lbl active">يناير</div></div>
+      <div class="mini-chart" id="miniChart">
+        <!-- built by JS -->
       </div>
     </div>
 
@@ -363,54 +356,104 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 <script>
 (function() {
-  var MONTHS = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
+  var DAYS_AR   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  var MONTHS_MAP = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
 
-  function parseDateCell(text) {
-    var s = text.replace(/^[^،]+،\s*/, '').trim().split(/\s+/);
-    var day = parseInt(s[0], 10), mon = MONTHS[s[1]], yr = s[2] ? parseInt(s[2],10) : new Date().getFullYear();
-    if (isNaN(day) || mon === undefined) return null;
-    var d = new Date(yr, mon, day); d.setHours(0,0,0,0); return d;
-  }
-
-  function weekBounds() {
-    var t = new Date(); t.setHours(0,0,0,0);
-    var ws = new Date(t); ws.setDate(t.getDate() - (t.getDay() - 6 + 7) % 7);
-    var we = new Date(ws); we.setDate(ws.getDate() + 6); we.setHours(23,59,59,999);
-    return { start: ws, end: we, now: new Date() };
-  }
-
+  /* ── Helpers ── */
   function load(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; } }
-
   function parseRow(html) {
     var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
     return doc.querySelectorAll('tr > td');
   }
+  function parseDateCell(text) {
+    var s = text.replace(/^[^،]+،\s*/, '').trim().split(/\s+/);
+    var day = parseInt(s[0],10), mon = MONTHS_MAP[s[1]], yr = s[2] ? parseInt(s[2],10) : new Date().getFullYear();
+    if (isNaN(day) || mon === undefined) return null;
+    var d = new Date(yr, mon, day); d.setHours(0,0,0,0); return d;
+  }
+  function weekBounds() {
+    var t = new Date(); t.setHours(0,0,0,0);
+    var ws = new Date(t); ws.setDate(t.getDate() - (t.getDay() - 6 + 7) % 7);
+    var we = new Date(ws); we.setDate(ws.getDate() + 6); we.setHours(23,59,59,999);
+    return { start:ws, end:we };
+  }
+  function fmtNum(n) { return Math.round(n).toLocaleString('en-US'); }
 
-  function countPending() {
+  /* ── Financial helpers ── */
+  function getFeesBreakdown() {
+    var pending = 0, collected = 0;
+    load('fees_data').forEach(function(html) {
+      var cells = parseRow(html);
+      var amount = cells[4] ? parseFloat(cells[4].getAttribute('data-amount') || 0) : 0;
+      if (isNaN(amount)) return;
+      var pill = cells[7] ? cells[7].querySelector('.pill') : null;
+      var isPaid = pill && pill.className.indexOf('pill-paid') !== -1;
+      if (isPaid) collected += amount; else pending += amount;
+    });
+    /* also add overdue invoices to pending */
+    load('invoices_data').forEach(function(html) {
+      var cells = parseRow(html);
+      var pill = cells[8] ? cells[8].querySelector('.pill') : null;
+      if (!pill || pill.className.indexOf('pill-overdue') === -1) return;
+      var totalEl = cells[5] ? cells[5].querySelector('[data-amount]') : null;
+      var amount = totalEl ? parseFloat(totalEl.getAttribute('data-amount') || 0) : 0;
+      if (!isNaN(amount)) pending += amount;
+    });
+    return { pending:pending, collected:collected };
+  }
+
+  function getMonthlyCollected() {
+    var byMonth = {};
+    load('fees_data').forEach(function(html) {
+      var cells = parseRow(html);
+      var amount = cells[4] ? parseFloat(cells[4].getAttribute('data-amount') || 0) : 0;
+      if (isNaN(amount)) return;
+      var pill = cells[7] ? cells[7].querySelector('.pill') : null;
+      var isPaid = pill && pill.className.indexOf('pill-paid') !== -1;
+      if (!isPaid) return;
+      var dateText = cells[6] ? cells[6].textContent.trim() : '';
+      var parts = dateText.split(' ');
+      if (parts.length >= 3) {
+        var mIdx = MONTHS_MAP[parts[1]];
+        if (mIdx !== undefined) {
+          var mk = parts[2] + '-' + mIdx;
+          byMonth[mk] = (byMonth[mk] || 0) + amount;
+        }
+      }
+    });
+    return byMonth;
+  }
+
+  function countOverdueInvoices() {
     var n = 0;
-    ['fees_data','invoices_data'].forEach(function(k) {
-      load(k).forEach(function(h) { if (/pill-pending|pill-overdue/.test(h)) n++; });
+    load('invoices_data').forEach(function(html) {
+      if (/pill-overdue/.test(html)) n++;
     });
     return n;
   }
 
-  // ── KPIs ─────────────────────────────────────────────────────────────────
+  /* ── Update topbar date ── */
+  function updateDate() {
+    var now = new Date();
+    var dateStr = DAYS_AR[now.getDay()] + '، ' + now.getDate() + ' ' + MONTHS_AR[now.getMonth()] + ' ' + now.getFullYear();
+    var sub = document.getElementById('topbarSub');
+    if (sub) sub.innerHTML = dateStr + ' · <span class="firm-name-target">نظام إدارة المحاماة</span>';
+  }
+
+  /* ── KPIs ── */
   function updateKPIs() {
     var wb = weekBounds();
     var cases = load('cases_data');
+    var fees = getFeesBreakdown();
 
-    // Card 1 — Active cases
+    /* Card 1 — Active cases */
     document.getElementById('kpiCases').textContent = cases.length;
     var casesCh = document.getElementById('kpiCasesChange');
-    if (cases.length > 0) {
-      casesCh.textContent = '+' + Math.max(1, Math.round(cases.length * 0.3)) + ' هذا الشهر';
-      casesCh.className = 'kpi-change up';
-    } else {
-      casesCh.textContent = 'لا توجد بيانات بعد';
-      casesCh.className = 'kpi-change neutral';
-    }
+    casesCh.textContent = cases.length > 0 ? cases.length + ' قضية مسجلة في النظام' : 'لا توجد بيانات بعد';
+    casesCh.className   = cases.length > 0 ? 'kpi-change up' : 'kpi-change neutral';
 
-    // Card 2 — Sessions this week
+    /* Card 2 — Sessions this week */
     var weekCount = 0;
     load('sessions_data').forEach(function(h) {
       var cells = parseRow(h);
@@ -421,131 +464,144 @@ button, a { -webkit-tap-highlight-color: transparent; }
     });
     document.getElementById('kpiSessions').textContent = weekCount;
     var sessCh = document.getElementById('kpiSessionsChange');
-    if (weekCount > 0) {
-      sessCh.textContent = 'تذكير تلقائي مفعّل ✓';
-      sessCh.className = 'kpi-change up';
+    sessCh.textContent = weekCount > 0 ? '📱 اضغط لإرسال تذكير واتساب' : 'لا توجد جلسات هذا الأسبوع';
+    sessCh.className   = weekCount > 0 ? 'kpi-change up' : 'kpi-change neutral';
+
+    /* Card 3 — Uncollected fees (REAL amount) */
+    var feesEl = document.getElementById('kpiFees');
+    if (fees.pending > 0) {
+      feesEl.innerHTML = fmtNum(fees.pending) + ' <small>ر.س</small>';
+      document.getElementById('kpiFeesChange').textContent = 'احرص على التحصيل قبل نهاية الشهر';
+      document.getElementById('kpiFeesChange').className = 'kpi-change down';
     } else {
-      sessCh.textContent = 'لا توجد جلسات هذا الأسبوع';
-      sessCh.className = 'kpi-change neutral';
+      feesEl.innerHTML = '0 <small>ر.س</small>';
+      document.getElementById('kpiFeesChange').textContent = fees.collected > 0 ? '✅ جميع الأتعاب محصّلة' : 'لا توجد بيانات بعد';
+      document.getElementById('kpiFeesChange').className = fees.collected > 0 ? 'kpi-change up' : 'kpi-change neutral';
     }
 
-    // Card 3 — Uncollected fees
-    var pendingCount = countPending();
-    var feesEl = document.getElementById('kpiFees');
-    feesEl.innerHTML = (pendingCount > 0 ? pendingCount * 5000 : 0).toLocaleString('ar') + ' <small>ريال</small>';
-
-    // Card 4 — Client satisfaction (dynamic only when clients exist)
-    var clients = load('clients_data');
+    /* Card 4 — Collection rate (real) */
     var satEl = document.getElementById('kpiSatisfaction');
     var satCh = document.getElementById('kpiSatisfactionChange');
-    if (clients.length > 0) {
-      satEl.textContent = '92%';
-      satCh.textContent = '+8% عن الشهر الماضي';
-      satCh.className = 'kpi-change up';
+    var total = fees.pending + fees.collected;
+    if (total > 0) {
+      var rate = Math.round((fees.collected / total) * 100);
+      satEl.textContent = rate + '%';
+      satCh.textContent = 'نسبة التحصيل · ' + fmtNum(fees.collected) + ' ر.س';
+      satCh.className   = rate >= 70 ? 'kpi-change up' : 'kpi-change down';
     } else {
       satEl.textContent = '—';
       satCh.textContent = 'بناءً على آخر استبيان';
-      satCh.className = 'kpi-change neutral';
+      satCh.className   = 'kpi-change neutral';
     }
   }
 
-  // ── Insight Strip ─────────────────────────────────────────────────────────
+  /* ── Insight Strip ── */
   function updateInsights() {
     var strip = document.getElementById('insightStrip');
     var loadEl = document.getElementById('insightLoad');
     var cases = load('cases_data');
-    var pending = countPending();
-    var icon, cls, title, desc;
+    var fees  = getFeesBreakdown();
+    var overdue = countOverdueInvoices();
+    var insights = [];
+
     if (cases.length === 0) {
-      icon='💡'; cls='ii-green';
-      title='ابدأ بإضافة أول دعوى';
-      desc='أضف قضايا وبيانات لتظهر هنا التحليلات والتوصيات الذكية.';
-    } else if (pending > 0) {
-      icon='⚠️'; cls='ii-gold';
-      title= pending + ' فاتورة معلقة تحتاج متابعة';
-      desc='اضغط على الأتعاب في القائمة الجانبية لمتابعة التحصيل قبل نهاية الشهر.';
+      insights.push({ icon:'💡', cls:'ii-green', title:'ابدأ بإضافة أول دعوى', desc:'أضف قضايا وبيانات لتظهر هنا التحليلات والتوصيات الذكية.' });
     } else {
-      icon='✅'; cls='ii-green';
-      title='ممتاز! لا توجد أتعاب متأخرة هذا الشهر';
-      desc='جميع الأتعاب محصّلة. استمر في المتابعة المنتظمة مع موكليك.';
+      if (overdue > 0) {
+        insights.push({ icon:'🚨', cls:'ii-red', title:overdue + ' فاتورة متأخرة تحتاج تحصيلاً عاجلاً', desc:'تجاوزت تاريخ الاستحقاق — تواصل مع الموكلين عبر واتساب.' });
+      }
+      if (fees.pending > 0 && overdue === 0) {
+        insights.push({ icon:'⚠️', cls:'ii-gold', title:fmtNum(fees.pending) + ' ر.س مستحقة غير محصّلة', desc:'راجع الأتعاب المعلقة وأرسل تذكيرات للموكلين.' });
+      }
+      if (fees.pending === 0 && fees.collected > 0) {
+        insights.push({ icon:'✅', cls:'ii-green', title:'ممتاز! جميع الأتعاب محصّلة', desc:'معدل تحصيل 100% — استمر في المتابعة المنتظمة مع موكليك.' });
+      }
+      if (cases.length >= 5) {
+        insights.push({ icon:'📊', cls:'ii-green', title:cases.length + ' قضية نشطة في المكتب', desc:'اطّلع على لوحة التقارير لرؤية توزيع الأداء والإيرادات.' });
+      }
     }
+
     setTimeout(function() {
       if (loadEl) loadEl.remove();
       strip.innerHTML = '';
-      var el = document.createElement('div');
-      el.className = 'insight-item';
-      el.innerHTML = '<div class="insight-icon ' + cls + '">' + icon + '</div><div><div class="insight-title">' + title + '</div><div class="insight-desc">' + desc + '</div></div>';
-      strip.appendChild(el);
-      setTimeout(function() { el.classList.add('show'); }, 50);
-    }, 800);
+      insights.slice(0, 3).forEach(function(ins, idx) {
+        var el = document.createElement('div');
+        el.className = 'insight-item';
+        el.innerHTML = '<div class="insight-icon ' + ins.cls + '">' + ins.icon + '</div><div><div class="insight-title">' + ins.title + '</div><div class="insight-desc">' + ins.desc + '</div></div>';
+        strip.appendChild(el);
+        setTimeout(function() { el.classList.add('show'); }, 80 + idx * 120);
+      });
+      if (!insights.length) {
+        strip.innerHTML = '<div class="insight-loading"><span style="font-size:0.82rem;color:var(--ink-muted)">💡 أضف بيانات لرؤية التحليلات الذكية</span></div>';
+      }
+    }, 700);
   }
 
-  // ── Alerts (sessions within 48 h) ─────────────────────────────────────────
+  /* ── Alerts (sessions within 72 h) ── */
   function updateAlerts() {
     var alertsList = document.getElementById('alertsList');
     if (!alertsList) return;
     var now = new Date();
-    var in48 = new Date(now.getTime() + 48 * 3600000);
+    var in72 = new Date(now.getTime() + 72 * 3600000);
     var alerts = [];
     load('sessions_data').forEach(function(h) {
       var cells = parseRow(h);
       if (cells.length < 4) return;
-      var dateEl = cells[0].querySelector('.date-cell');
-      var caseIdEl = cells[2].querySelector('.case-id');
-      var court = cells[3].textContent.trim();
+      var dateEl = cells[0] ? cells[0].querySelector('.date-cell') : null;
+      var caseNameEl = cells[2] ? cells[2].querySelector('.case-name') : null;
+      var caseIdEl   = cells[2] ? cells[2].querySelector('.case-id')   : null;
+      var court = cells[3] ? cells[3].textContent.trim() : '';
       if (!dateEl) return;
       var d = parseDateCell(dateEl.textContent.trim());
-      if (!d) return;
-      if (d >= now && d <= in48) {
-        alerts.push({
-          id: caseIdEl ? caseIdEl.textContent.trim() : 'قضية',
-          hours: Math.round((d - now) / 3600000),
-          court: court
-        });
-      }
+      if (!d || d < now || d > in72) return;
+      alerts.push({
+        name:  caseNameEl ? caseNameEl.textContent.trim() : 'قضية',
+        id:    caseIdEl   ? caseIdEl.textContent.trim()   : '',
+        hours: Math.round((d - now) / 3600000),
+        court: court
+      });
     });
     alertsList.innerHTML = '';
-    if (alerts.length === 0) {
-      alertsList.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;padding:1.1rem 1.4rem;font-size:0.77rem;color:var(--green)">✅ كل المواعيد القادمة تحت تذكير تلقائي</div>';
+    if (!alerts.length) {
+      alertsList.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;padding:1.1rem 1.4rem;font-size:0.77rem;color:var(--green)">✅ لا توجد جلسات خلال الـ 72 ساعة القادمة</div>';
     } else {
       alerts.forEach(function(a) {
         var div = document.createElement('div');
         div.className = 'alert-item';
-        div.innerHTML = '<div class="alert-dot dot-red"></div><div class="alert-text">🔴 جلسة ' + a.id + ' بعد ' + a.hours + ' ساعة — ' + a.court + '<div class="alert-meta">تذكير تلقائي مُجدوَل</div></div>';
+        div.innerHTML =
+          '<div class="alert-dot dot-red"></div>' +
+          '<div class="alert-text">' + a.name + (a.id ? ' <span style="color:var(--ink-muted);font-size:0.65rem">' + a.id + '</span>' : '') +
+          ' — <strong>' + a.hours + ' ساعة</strong>' +
+          '<div class="alert-meta">' + a.court + ' · اضغط لإرسال تذكير واتساب 📱</div></div>';
         alertsList.appendChild(div);
       });
     }
   }
 
-  // ── Workload ──────────────────────────────────────────────────────────────
+  /* ── Workload ── */
   function updateWorkload() {
     var wlList = document.getElementById('wlList');
     if (!wlList) return;
-    var lawyers = load('lawyers_data');
-    var cases = load('cases_data');
-    if (lawyers.length === 0) {
+    var lawyers = load('lawyers_data'), cases = load('cases_data');
+    if (!lawyers.length) {
       wlList.innerHTML = '<div style="padding:1rem 1.4rem;font-size:0.77rem;color:var(--ink-muted)">لا يوجد محامون مسجّلون بعد</div>';
       return;
     }
-    var names = [];
-    lawyers.forEach(function(h) {
+    var names = lawyers.map(function(h) {
       var div = document.createElement('div'); div.innerHTML = h;
-      var el = div.querySelector('.lc-name');
-      if (el) names.push(el.textContent.trim());
-    });
-    var counts = {};
-    names.forEach(function(n) { counts[n] = 0; });
+      var el = div.querySelector('.lc-name'); return el ? el.textContent.trim() : null;
+    }).filter(Boolean);
+    var counts = {}; names.forEach(function(n){ counts[n] = 0; });
     cases.forEach(function(h) {
       var cells = parseRow(h);
       if (cells.length < 5) return;
       var txt = cells[4].textContent.trim();
-      names.forEach(function(n) { if (txt.indexOf(n) !== -1) counts[n]++; });
+      names.forEach(function(n){ if (txt.indexOf(n) !== -1) counts[n]++; });
     });
-    var max = Math.max(1, Math.max.apply(null, names.map(function(n) { return counts[n]; })));
+    var max = Math.max(1, Math.max.apply(null, names.map(function(n){ return counts[n]; })));
     wlList.innerHTML = '';
     names.forEach(function(n) {
-      var count = counts[n];
-      var pct = Math.round(count / max * 100);
+      var count = counts[n], pct = Math.round(count/max*100);
       var barCls = pct > 70 ? 'bar-red' : pct > 40 ? 'bar-gold' : 'bar-green';
       var av = n.split(' ').slice(0,2).map(function(w){return w[0];}).join('');
       var row = document.createElement('div');
@@ -555,16 +611,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
           (count === 0 ? '<span class="suggest-chip">متاح</span>' : '') +
           '<div class="wl-count">' + count + ' قضية</div>' +
         '</div>' +
-        '<div class="wl-bar-bg"><div class="wl-bar ' + barCls + '" style="width:' + (count === 0 ? 0 : Math.max(pct, 4)) + '%"></div></div>';
+        '<div class="wl-bar-bg"><div class="wl-bar ' + barCls + '" style="width:' + (count ? Math.max(pct,4) : 0) + '%"></div></div>';
       wlList.appendChild(row);
     });
   }
 
-  // ── Recent cases table ────────────────────────────────────────────────────
+  /* ── Recent cases table ── */
   function updateRecentCases() {
     var rows = load('cases_data');
     var tbody = document.querySelector('.two-col .data-table tbody');
-    if (!tbody || rows.length === 0) return;
+    if (!tbody || !rows.length) return;
     tbody.innerHTML = '';
     var limit = Math.min(rows.length, 5);
     for (var i = 0; i < limit; i++) {
@@ -575,17 +631,45 @@ button, a { -webkit-tap-highlight-color: transparent; }
         '<td>' + (tds[4] ? tds[4].innerHTML : '—') + '</td>' +
         '<td>' + (tds[5] ? tds[5].innerHTML : '—') + '</td>' +
         '<td>' + (tds[6] ? tds[6].innerHTML : '—') + '</td>' +
-        '<td><button class="row-btn">عرض</button></td>';
+        '<td><a class="row-btn" href="cases.html">عرض</a></td>';
       tbody.appendChild(tr);
     }
   }
 
+  /* ── Mini chart (last 8 months, collected fees only) ── */
+  function buildMiniChart() {
+    var byMonth = getMonthlyCollected();
+    var now = new Date(), months = [];
+    for (var i = 7; i >= 0; i--) {
+      var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      var mk = d.getFullYear() + '-' + d.getMonth();
+      months.push({ label: MONTHS_AR[d.getMonth()].slice(0,3), val: byMonth[mk] || 0, isCur: i === 0 });
+    }
+    var max = Math.max.apply(null, months.map(function(m){return m.val;})) || 1;
+    var area = document.getElementById('miniChart');
+    if (!area) return;
+    area.innerHTML = months.map(function(m) {
+      var pct = Math.round((m.val/max)*100) || 4;
+      var barCls = 'chart-bar' + (m.isCur ? ' active' : (m.val === max ? ' active' : ''));
+      return '<div class="chart-col">' +
+        '<div class="' + barCls + '" style="height:' + pct + '%;opacity:' + (m.isCur?'1':'0.7') + '" title="' + (m.val ? fmtNum(m.val) + ' ر.س' : '—') + '"></div>' +
+        '<div class="chart-lbl' + (m.isCur ? ' active' : '') + '">' + m.label + '</div>' +
+        '</div>';
+    }).join('');
+    /* update card subtitle */
+    var lbl = document.getElementById('forecastLbl');
+    var totalCollected = months.reduce(function(s,m){return s+m.val;},0);
+    if (lbl && totalCollected > 0) lbl.textContent = 'إجمالي: ' + fmtNum(totalCollected) + ' ر.س';
+  }
+
   window.addEventListener('load', function() {
+    updateDate();
     updateKPIs();
     updateInsights();
     updateAlerts();
     updateWorkload();
     updateRecentCases();
+    buildMiniChart();
   });
 })();
 </script>
