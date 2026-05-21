@@ -413,6 +413,7 @@
           <div class="sm-item" data-section="integrations"><span class="sm-icon">🔗</span> التكاملات</div>
           <div class="sm-item" data-section="appearance"><span class="sm-icon">🎨</span> المظهر واللغة</div>
           <div class="sm-item" data-section="demo"><span class="sm-icon">🗂️</span> البيانات التجريبية</div>
+          <div class="sm-item" data-section="backup"><span class="sm-icon">💾</span> النسخ الاحتياطي</div>
         </div>
 
         <!-- Panels -->
@@ -1031,6 +1032,79 @@
             </div>
           </div>
 
+          <!-- 10. Backup & Restore -->
+          <div class="settings-panel" id="panel-backup">
+
+            <!-- Export Card -->
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">💾 تصدير النسخة الاحتياطية</div>
+                <div class="set-card-sub">حمّل ملف JSON يحتوي على جميع بياناتك — احتفظ به في مكان آمن</div>
+              </div>
+              <div class="set-card-body">
+                <!-- Live stats -->
+                <div id="backupStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem;margin-bottom:1.2rem;"></div>
+
+                <!-- Last backup notice -->
+                <div id="lastBackupRow" style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 1rem;background:var(--off-white);border:1px solid var(--border);border-radius:9px;margin-bottom:1.2rem;font-size:0.77rem;color:var(--ink-muted);">
+                  <span style="font-size:1rem">📅</span>
+                  <span id="lastBackupText">لا توجد نسخة احتياطية محفوظة بعد</span>
+                </div>
+
+                <button class="btn-save" id="btnExportBackup" onclick="exportBackup()">
+                  ⬇️ تنزيل النسخة الاحتياطية (JSON)
+                </button>
+              </div>
+            </div>
+
+            <!-- Import Card -->
+            <div class="set-card">
+              <div class="set-card-head">
+                <div class="set-card-title">📤 استيراد نسخة احتياطية</div>
+                <div class="set-card-sub">استعادة بيانات من ملف نسخة احتياطية سابقة — سيُستبدل المحتوى الحالي</div>
+              </div>
+              <div class="set-card-body">
+                <!-- Drop zone -->
+                <div id="dropZone" style="border:2px dashed var(--border-mid);border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1.2rem;"
+                     onclick="document.getElementById('backupFileInput').click()"
+                     ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='var(--accent-dim)'"
+                     ondragleave="this.style.borderColor='var(--border-mid)';this.style.background=''"
+                     ondrop="handleDrop(event)">
+                  <div style="font-size:2.5rem;margin-bottom:0.6rem">📂</div>
+                  <div style="font-size:0.85rem;font-weight:700;color:var(--ink-mid);margin-bottom:0.3rem">اسحب ملف النسخة الاحتياطية هنا</div>
+                  <div style="font-size:0.72rem;color:var(--ink-muted)">أو انقر لاختيار ملف JSON</div>
+                  <input type="file" id="backupFileInput" accept=".json" style="display:none" onchange="loadBackupFile(this.files[0])">
+                </div>
+
+                <!-- Preview (hidden until file loaded) -->
+                <div id="restorePreview" style="display:none;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
+                  <div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:0.5rem">📋 معلومات الملف</div>
+                  <div id="previewContent" style="font-size:0.78rem;color:var(--ink-mid);line-height:1.9;"></div>
+                </div>
+
+                <button class="btn-save" id="btnRestoreBackup" onclick="restoreBackup()" disabled style="opacity:0.4;cursor:not-allowed;">
+                  ⬆️ استعادة النسخة الاحتياطية
+                </button>
+              </div>
+            </div>
+
+            <!-- Auto-backup tip -->
+            <div class="set-card" style="border-color:rgba(28,94,62,0.2);background:rgba(28,94,62,0.03)">
+              <div class="set-card-head">
+                <div class="set-card-title">💡 نصائح النسخ الاحتياطي</div>
+              </div>
+              <div class="set-card-body" style="padding-top:0.4rem">
+                <ul style="font-size:0.8rem;color:var(--ink-mid);padding-right:1.2rem;line-height:2;margin:0">
+                  <li>احتفظ بنسخة احتياطية أسبوعية على الأقل في مجلد آمن أو خدمة سحابية</li>
+                  <li>ملف النسخة الاحتياطية يحتوي على جميع القضايا، الموكلين، الفواتير، والأتعاب</li>
+                  <li>عند الاستعادة، سيُستبدل المحتوى الحالي — تأكد من تصدير نسخة أولاً</li>
+                  <li>اسم الملف يتضمن التاريخ تلقائياً للتمييز بين النسخ</li>
+                </ul>
+              </div>
+            </div>
+
+          </div><!-- /panel-backup -->
+
         </div><!-- /panelsContainer -->
       </div><!-- /settings-layout -->
     </div><!-- /content -->
@@ -1471,6 +1545,188 @@
   }
 
   document.getElementById('demoModeBtn').addEventListener('click', activateDemoMode);
+
+  /* ═══════════════════════════════════════════
+     النسخ الاحتياطي — Backup & Restore
+  ═══════════════════════════════════════════ */
+
+  var BACKUP_KEYS = [
+    'firm_data','cases_data','sessions_data','invoices_data',
+    'clients_data','lawyers_data','dynamicCases','fees_data',
+    'tasks_data','doc_requests','firm_name_custom','theme_pref'
+  ];
+
+  var BACKUP_LABELS = {
+    cases_data: 'القضايا', clients_data: 'الموكلون',
+    sessions_data: 'الجلسات', invoices_data: 'الفواتير',
+    fees_data: 'الأتعاب', tasks_data: 'المهام',
+    lawyers_data: 'المحامون', doc_requests: 'طلبات المستندات',
+    dynamicCases: 'قضايا ديناميكية', firm_data: 'بيانات المكتب',
+    firm_name_custom: 'اسم المكتب', theme_pref: 'السمة'
+  };
+
+  var _pendingBackup = null; /* الملف المحمّل جاهز للاستعادة */
+
+  function getArabicDate() {
+    var d = new Date();
+    return d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+  }
+
+  function countRows(key) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return 0;
+      var parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.length;
+      if (typeof parsed === 'object') return Object.keys(parsed).length;
+      return 1;
+    } catch(e) { return 0; }
+  }
+
+  function renderBackupStats() {
+    var statsEl = document.getElementById('backupStats');
+    if (!statsEl) return;
+    var items = [
+      { key:'clients_data', icon:'👥', label:'الموكلون' },
+      { key:'cases_data',   icon:'⚖️', label:'القضايا' },
+      { key:'sessions_data',icon:'📅', label:'الجلسات' },
+      { key:'invoices_data',icon:'🧾', label:'الفواتير' },
+      { key:'fees_data',    icon:'💰', label:'الأتعاب' },
+      { key:'tasks_data',   icon:'📋', label:'المهام' }
+    ];
+    statsEl.innerHTML = items.map(function(it) {
+      var cnt = countRows(it.key);
+      return '<div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:0.8rem;text-align:center;">' +
+        '<div style="font-size:1.4rem;margin-bottom:0.2rem">' + it.icon + '</div>' +
+        '<div style="font-size:1.4rem;font-weight:900;color:var(--ink);line-height:1">' + cnt + '</div>' +
+        '<div style="font-size:0.62rem;color:var(--ink-muted);margin-top:3px">' + it.label + '</div>' +
+      '</div>';
+    }).join('');
+
+    /* آخر نسخة احتياطية */
+    var lastBackup = localStorage.getItem('last_backup_date');
+    var lastText = document.getElementById('lastBackupText');
+    if (lastText) {
+      lastText.textContent = lastBackup
+        ? 'آخر نسخة احتياطية: ' + lastBackup
+        : 'لا توجد نسخة احتياطية محفوظة بعد';
+    }
+  }
+
+  function exportBackup() {
+    var firmName = localStorage.getItem('firm_name_custom') || 'مكتب المحاماة';
+    var now = new Date().toISOString();
+    var payload = { version:'1.1', firmName: firmName, exportedAt: now, data: {} };
+
+    BACKUP_KEYS.forEach(function(key) {
+      var raw = localStorage.getItem(key);
+      if (raw) {
+        try { payload.data[key] = JSON.parse(raw); }
+        catch(e) { payload.data[key] = raw; }
+      }
+    });
+
+    var json = JSON.stringify(payload, null, 2);
+    var bom = '﻿'; /* UTF-8 BOM */
+    var blob = new Blob([bom + json], { type: 'application/json;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'نسخة_احتياطية_' + getArabicDate() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+
+    /* حفظ تاريخ آخر نسخة */
+    localStorage.setItem('last_backup_date', getArabicDate());
+    renderBackupStats();
+
+    var t = document.getElementById('toast');
+    if (t) { t.textContent = '✓ تم تنزيل النسخة الاحتياطية بنجاح'; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},3000); }
+  }
+
+  function loadBackupFile(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var text = e.target.result.replace(/^﻿/, ''); /* remove BOM */
+        var payload = JSON.parse(text);
+        if (!payload.data || !payload.exportedAt) throw new Error('ملف غير صالح');
+
+        _pendingBackup = payload;
+
+        /* عرض المعاينة */
+        var lines = [];
+        lines.push('📁 <b>اسم المكتب:</b> ' + (payload.firmName || '—'));
+        lines.push('📅 <b>تاريخ التصدير:</b> ' + payload.exportedAt.replace('T',' ').slice(0,19));
+        lines.push('📦 <b>الإصدار:</b> ' + (payload.version || '1.0'));
+        lines.push('');
+        Object.keys(payload.data).forEach(function(key) {
+          var val = payload.data[key];
+          var cnt = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 1);
+          var label = BACKUP_LABELS[key] || key;
+          if (cnt > 0) lines.push('• ' + label + ': <b>' + cnt + '</b> سجل');
+        });
+
+        var previewEl = document.getElementById('restorePreview');
+        var previewContent = document.getElementById('previewContent');
+        var restoreBtn = document.getElementById('btnRestoreBackup');
+        if (previewContent) previewContent.innerHTML = lines.filter(Boolean).join('<br>');
+        if (previewEl) previewEl.style.display = 'block';
+        if (restoreBtn) { restoreBtn.disabled = false; restoreBtn.style.opacity = '1'; restoreBtn.style.cursor = 'pointer'; }
+
+        /* لون منطقة الإفلات */
+        var dz = document.getElementById('dropZone');
+        if (dz) { dz.style.borderColor = 'var(--accent)'; dz.style.background = 'var(--accent-dim)'; dz.querySelector('div').textContent = '✓ ' + file.name; }
+
+      } catch(err) {
+        alert('⚠️ الملف غير صالح. يرجى اختيار ملف نسخة احتياطية صحيح (.json)');
+        _pendingBackup = null;
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    var dz = document.getElementById('dropZone');
+    if (dz) { dz.style.borderColor = 'var(--border-mid)'; dz.style.background = ''; }
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) loadBackupFile(file);
+  }
+
+  function restoreBackup() {
+    if (!_pendingBackup) return;
+    if (!confirm('⚠️ سيتم استبدال جميع البيانات الحالية بالنسخة الاحتياطية.\nهل أنت متأكد من المتابعة؟')) return;
+
+    var data = _pendingBackup.data;
+    Object.keys(data).forEach(function(key) {
+      try {
+        var val = data[key];
+        localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+      } catch(e) {}
+    });
+
+    localStorage.setItem('last_backup_date', getArabicDate());
+    _pendingBackup = null;
+
+    var t = document.getElementById('toast');
+    if (t) { t.textContent = '✓ تمت استعادة النسخة الاحتياطية — جاري إعادة التحميل'; t.classList.add('show'); }
+    setTimeout(function() { location.reload(); }, 1400);
+  }
+
+  /* تهيئة إحصائيات النسخ الاحتياطي عند الانتقال للقسم */
+  document.querySelectorAll('.sm-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      if (this.dataset.section === 'backup') {
+        setTimeout(renderBackupStats, 80);
+      }
+    });
+  });
+
   </script>
   <script src="dark-mode.js"></script><script src="notifications.js"></script>
   <script src="global-search.js"></script>
