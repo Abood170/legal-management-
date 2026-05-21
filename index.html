@@ -2061,6 +2061,138 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 768px) { .btn-primary, .btn-white, .btn-ghost { min-height: 44px; } }
 </style>
 <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(15,20,25,0.12);border-radius:2px;}</style>
+<link rel="stylesheet" href="dark-mode.css">
+<script>try{if(localStorage.getItem('theme_pref')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<style>
+/* ══ Index-specific dark mode overrides ══ */
+
+/* Nav */
+html[data-theme="dark"] nav {
+  background: rgba(14,22,36,0.78) !important;
+}
+html[data-theme="dark"] nav.scrolled {
+  background: rgba(14,22,36,0.97) !important;
+  border-bottom-color: rgba(226,232,240,0.08) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4) !important;
+}
+html[data-theme="dark"] .mobile-nav {
+  background: rgba(14,22,36,0.99) !important;
+  border-bottom-color: rgba(226,232,240,0.08) !important;
+}
+html[data-theme="dark"] .mobile-nav a:hover {
+  background: rgba(226,232,240,0.05) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .nav-lang {
+  color: var(--ink-muted);
+  border-color: rgba(226,232,240,0.14);
+}
+html[data-theme="dark"] .nav-lang:hover {
+  color: var(--ink);
+  border-color: rgba(226,232,240,0.28);
+}
+html[data-theme="dark"] .hamburger span {
+  background: var(--ink) !important;
+}
+
+/* Hero */
+html[data-theme="dark"] .hero {
+  background:
+    radial-gradient(ellipse 60% 55% at 72% 48%, rgba(28,94,62,0.14) 0%, transparent 100%),
+    radial-gradient(ellipse 40% 50% at 10% 78%, rgba(168,120,32,0.08) 0%, transparent 100%),
+    #141D2B !important;
+}
+html[data-theme="dark"] .hero::before {
+  background: linear-gradient(135deg, #1A2535 0%, #1E2A3B 100%) !important;
+}
+html[data-theme="dark"] .hero-dots {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px) !important;
+}
+
+/* Browser mock / feature cards */
+html[data-theme="dark"] .mock-card,
+html[data-theme="dark"] .feat-tabs,
+html[data-theme="dark"] .feat-visual,
+html[data-theme="dark"] .hiw-tl {
+  background: var(--white) !important;
+  border-color: var(--border-mid) !important;
+}
+html[data-theme="dark"] .mock-stat {
+  background: var(--cream) !important;
+  border-color: rgba(226,232,240,0.07) !important;
+}
+html[data-theme="dark"] .hiw-step-num {
+  background: var(--white) !important;
+}
+html[data-theme="dark"] .hiw-step {
+  background: var(--white) !important;
+  border-color: var(--border-mid) !important;
+}
+html[data-theme="dark"] .hiw-step:hover {
+  border-color: var(--accent-border) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
+}
+html[data-theme="dark"] .hiw-tl {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
+}
+
+/* CTA & Footer — already dark, keep dark (don't inherit --ink as light text color) */
+html[data-theme="dark"] .cta-wrap {
+  background: #0B1627 !important;
+}
+html[data-theme="dark"] .footer {
+  background: #070F1C !important;
+  border-top-color: rgba(255,255,255,0.05) !important;
+}
+
+/* Problems section */
+html[data-theme="dark"] .prob-card:not(.dark) {
+  background: var(--white) !important;
+  border-color: var(--border-mid) !important;
+}
+
+/* Compliance strip */
+html[data-theme="dark"] .compliance-strip {
+  background: var(--off-white) !important;
+  border-color: var(--border-mid) !important;
+}
+
+/* Trust stats row */
+html[data-theme="dark"] .trust-divider {
+  background: var(--border-mid) !important;
+}
+
+/* back-to-top btn */
+html[data-theme="dark"] #back-to-top {
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  border-color: var(--border-mid) !important;
+}
+
+/* scrollbar */
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(226,232,240,0.12) !important;
+}
+
+/* Dark mode toggle button in nav */
+.nav-dm-toggle {
+  width: 32px; height: 32px;
+  border-radius: 7px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--ink-light);
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.nav-dm-toggle:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+}
+</style>
 </head>
 <body id="top">
 
@@ -2080,6 +2212,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
   <div class="nav-right">
     <button class="nav-lang">EN</button>
+    <button class="nav-dm-toggle" id="indexDmToggle" title="تبديل الوضع الليلي" onclick="toggleIndexDark()">🌙</button>
     <a href="client-login.html" style="border:1px solid var(--accent-border);color:var(--accent);background:transparent;padding:0.5rem 1.1rem;border-radius:6px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;font-family:'Cairo',sans-serif;white-space:nowrap;" onmouseover="this.style.background='rgba(28,94,62,0.06)'" onmouseout="this.style.background='transparent'">تتبع قضيتك ←</a>
     <a href="register.html" class="nav-cta">ابدأ مجاناً</a>
     <button class="hamburger" id="hamburger" aria-label="القائمة" aria-expanded="false">
@@ -3438,5 +3571,30 @@ if (countEls.length) {
 <button id="back-to-top" aria-label="العودة إلى الأعلى">↑</button>
 
   <script src="sidebar-badges.js"></script>
+  <script src="dark-mode.js"></script>
+  <script>
+    /* Dark mode toggle — index page */
+    (function () {
+      function syncBtn() {
+        var btn = document.getElementById('indexDmToggle');
+        if (!btn) return;
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        btn.textContent = isDark ? '☀️' : '🌙';
+        btn.title = isDark ? 'التبديل للوضع النهاري' : 'التبديل للوضع الليلي';
+      }
+      window.toggleIndexDark = function () {
+        if (window.toggleDarkMode) window.toggleDarkMode();
+        setTimeout(syncBtn, 30);
+      };
+      /* sync on load */
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncBtn);
+      } else {
+        syncBtn();
+      }
+      /* sync if changed from another tab */
+      window.addEventListener('themechange', syncBtn);
+    })();
+  </script>
 </body>
 </html>
