@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -195,6 +195,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .security-badge { font-size: 0.62rem; background: rgba(34,139,34,0.08); color: var(--green); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(34,139,34,0.2); margin-right: 0.5rem; display: inline-block; }
 </style>
 <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+<link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 </head>
 <body>
 
@@ -697,7 +698,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
     if (banner) { banner.style.opacity = '0'; banner.style.transition = 'opacity 0.3s'; setTimeout(function(){ banner.style.display = 'none'; }, 300); }
   }
   </script>
-  <script src="notifications.js"></script>
+  <script src="dark-mode.js"></script><script src="notifications.js"></script>
   <script src="global-search.js"></script>
 </body>
 </html>

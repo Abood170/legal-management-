@@ -1,0 +1,229 @@
+/* ═══════════════════════════════════════════════════════
+   dark-mode.css — سمة الوضع الليلي
+   يُحمَّل في <head> لتجنب وميض التحميل (FOUC)
+   ═══════════════════════════════════════════════════════ */
+
+html[data-theme="dark"] {
+  --white:         #1E2A3B;
+  --off-white:     #141D2B;
+  --cream:         #1A2535;
+  --ink:           #E2E8F0;
+  --ink-mid:       #CBD5E1;
+  --ink-light:     #94A3B8;
+  --ink-muted:     #64748B;
+  --border:        rgba(226,232,240,0.07);
+  --border-mid:    rgba(226,232,240,0.12);
+  --accent-dim:    rgba(28,94,62,0.22);
+  --accent-border: rgba(28,94,62,0.4);
+  --gold-dim:      rgba(184,149,42,0.18);
+  --red-dim:       rgba(220,38,38,0.15);
+  --green-dim:     rgba(22,163,74,0.15);
+  color-scheme: dark;
+}
+
+/* ── جداول البيانات (th بلون مُشفَّر) ── */
+html[data-theme="dark"] .data-table th {
+  background: #1A2535 !important;
+  color: var(--ink-muted);
+}
+html[data-theme="dark"] .data-table td {
+  border-bottom-color: rgba(226,232,240,0.07);
+}
+html[data-theme="dark"] .data-table tr:hover td {
+  background: rgba(226,232,240,0.03) !important;
+}
+
+/* ── Topbar ── */
+html[data-theme="dark"] .topbar {
+  background: var(--white);
+  border-bottom-color: var(--border);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+}
+html[data-theme="dark"] .topbar-icon:hover {
+  background: rgba(28,94,62,0.15);
+}
+html[data-theme="dark"] .topbar-search {
+  background: var(--off-white);
+  color: var(--ink-muted);
+}
+
+/* ── Sidebar ── */
+html[data-theme="dark"] .sidebar {
+  border-left-color: var(--border);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+}
+html[data-theme="dark"] .nav-item:hover {
+  background: rgba(28,94,62,0.1);
+}
+html[data-theme="dark"] .nav-item.active {
+  background: var(--accent-dim);
+}
+
+/* ── البطاقات ── */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .kpi-card,
+html[data-theme="dark"] .quick-btn,
+html[data-theme="dark"] .insight-strip {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+html[data-theme="dark"] .quick-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+}
+
+/* ── النوافذ المنبثقة ── */
+html[data-theme="dark"] .modal-box,
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .side-panel,
+html[data-theme="dark"] .detail-panel,
+html[data-theme="dark"] .sess-panel {
+  background: var(--white);
+  border-color: var(--border-mid);
+}
+html[data-theme="dark"] .modal-head,
+html[data-theme="dark"] .panel-head {
+  border-bottom-color: var(--border);
+}
+html[data-theme="dark"] .modal-footer,
+html[data-theme="dark"] .panel-footer {
+  border-top-color: var(--border);
+}
+
+/* ── حقول الإدخال ── */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background: var(--off-white) !important;
+  color: var(--ink) !important;
+  border-color: var(--border-mid) !important;
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-dim) !important;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: var(--ink-muted) !important;
+}
+html[data-theme="dark"] option {
+  background: #1E2A3B;
+  color: var(--ink);
+}
+
+/* ── الـ Overlay ── */
+html[data-theme="dark"] #panelOverlay,
+html[data-theme="dark"] #modalOverlay,
+html[data-theme="dark"] .modal-overlay {
+  background: rgba(0,0,0,0.65) !important;
+}
+
+/* ── الـ Toast ── */
+html[data-theme="dark"] #toast {
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--border-mid) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+}
+
+/* ── شريط التمرير ── */
+html[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--off-white); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--border-mid); }
+
+/* ── فلاتر المحتوى ── */
+html[data-theme="dark"] .filter-btn,
+html[data-theme="dark"] .filters-bar button:not(.btn-new):not(.btn-export) {
+  background: var(--white);
+  color: var(--ink-light);
+  border-color: var(--border-mid);
+}
+html[data-theme="dark"] .filter-btn.active,
+html[data-theme="dark"] .filter-btn:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+/* ── مركز الإشعارات (notifications.js) ── */
+html[data-theme="dark"] .nc-panel {
+  background: var(--white) !important;
+  border-color: var(--border-mid) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+html[data-theme="dark"] .nc-head,
+html[data-theme="dark"] .nc-footer {
+  border-color: var(--border) !important;
+  background: var(--white) !important;
+}
+html[data-theme="dark"] .nc-section-lbl {
+  color: var(--ink-muted) !important;
+  background: var(--off-white) !important;
+}
+html[data-theme="dark"] .nc-item:hover {
+  background: rgba(226,232,240,0.04) !important;
+}
+html[data-theme="dark"] .nc-empty {
+  color: var(--ink-muted) !important;
+}
+
+/* ── البحث الشامل (global-search.js) ── */
+html[data-theme="dark"] #gs-overlay {
+  background: rgba(0,0,0,0.75) !important;
+}
+html[data-theme="dark"] #gs-box {
+  background: var(--white) !important;
+  border-color: var(--border-mid) !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6) !important;
+}
+html[data-theme="dark"] #gs-input {
+  background: var(--off-white) !important;
+  color: var(--ink) !important;
+  border-bottom-color: var(--border) !important;
+}
+html[data-theme="dark"] #gs-input::placeholder {
+  color: var(--ink-muted) !important;
+}
+html[data-theme="dark"] .gs-result:hover,
+html[data-theme="dark"] .gs-result.gs-active {
+  background: rgba(226,232,240,0.06) !important;
+}
+html[data-theme="dark"] .gs-section-lbl {
+  background: var(--off-white) !important;
+  color: var(--ink-muted) !important;
+  border-bottom-color: var(--border) !important;
+}
+html[data-theme="dark"] .gs-badge {
+  background: var(--accent-dim) !important;
+  color: var(--accent) !important;
+}
+html[data-theme="dark"] .gs-nav-badge {
+  background: var(--accent) !important;
+}
+html[data-theme="dark"] .gs-footer {
+  border-top-color: var(--border) !important;
+  background: var(--off-white) !important;
+  color: var(--ink-muted) !important;
+}
+
+/* ── زر تبديل الوضع الليلي ── */
+.dm-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  user-select: none;
+  flex-shrink: 0;
+}
+.dm-toggle:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+}

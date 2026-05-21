@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
@@ -261,6 +261,7 @@
     .btn-fatoora:hover { background: #9a7d22 !important; }
   </style>
   <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+<link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 </head>
 <body>
 
@@ -691,7 +692,8 @@
       '.print-btn{padding:0.5rem 1.8rem;background:#fff;color:#1C5E3E;border:none;border-radius:6px;font-family:"Cairo",sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer}',
       '.print-btn:hover{background:#f0fdf4}',
       '.print-hint{color:rgba(255,255,255,0.75);font-family:"Cairo",sans-serif;font-size:0.72rem}',
-      '</style></head><body>',
+      '</style><link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+</head><body>',
       '<div class="no-print print-topbar">',
         '<button class="print-btn" onclick="window.print()">🖨 طباعة / حفظ PDF</button>',
         '<span class="print-hint">للحفظ كـ PDF: اختر «حفظ كـ PDF» من قائمة الطابعة</span>',
@@ -752,7 +754,7 @@
         '</div>',
       '</div>',
       '  <script src="export-data.js"></script>
-  <script src="notifications.js"></script>
+  <script src="dark-mode.js"></script><script src="notifications.js"></script>
   <script src="global-search.js"></script>
 </body></html>'
     ].join('');
@@ -1097,7 +1099,7 @@
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
   <script src="export-data.js"></script>
-  <script src="notifications.js"></script>
+  <script src="dark-mode.js"></script><script src="notifications.js"></script>
   <script src="global-search.js"></script>
 </body>
 </html>
