@@ -477,7 +477,20 @@
         </div>
       </div>
 
-      <!-- Section 5: Performance Alerts -->
+      <!-- Section 5: Overdue Invoices -->
+      <div class="section-label">🧾 المستحقات المتأخرة</div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">الفواتير المتأخرة</div>
+            <div class="card-sub">فواتير تجاوزت تاريخ الاستحقاق</div>
+          </div>
+          <span class="card-badge" id="overdueCount" style="background:var(--red-dim);color:var(--red);border-color:rgba(220,38,38,0.2)">0 فواتير</span>
+        </div>
+        <div id="overdueList"></div>
+      </div>
+
+      <!-- Section 6: Performance Alerts -->
       <div class="section-label">🔔 تنبيهات الأداء</div>
       <div class="card">
         <div class="card-head">
@@ -486,7 +499,7 @@
             <div class="card-sub">محدّثة تلقائياً بناءً على بيانات المكتب</div>
           </div>
         </div>
-        <div style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد بيانات أداء بعد</div>
+        <div id="alertsList"></div>
       </div>
 
     </div><!-- /content -->
@@ -494,145 +507,297 @@
 
   <script>
   (function() {
+    var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 
-    /* ── Data sets per period ── */
-    var DATA = {
-      month: {
-        kpi: { cases: '0', win: '—', duration: '—', fees: '0', winSub: 'لا توجد بيانات بعد', feesSub: 'لا توجد بيانات بعد', durationSub: 'لا توجد بيانات بعد' },
-        chart: { bars: [0,0,0,0], labels: ['س1','س2','س3','س4'], subtitle: 'الأسابيع — هذا الشهر', badge: 'هذا الشهر', high: '—', low: '—', avg: '—' },
-        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
-        sessions: { tot: '0', done: '0', upcoming: '0' },
-        type: ['0%','0%','0%','0%','0%'], court: ['0%','0%','0%','0%','0%'],
-        typeTotal: 'لا توجد بيانات بعد', courtTotal: 'لا توجد بيانات بعد'
-      },
-      quarter: {
-        kpi: { cases: '0', win: '—', duration: '—', fees: '0', winSub: 'لا توجد بيانات بعد', feesSub: 'لا توجد بيانات بعد', durationSub: 'لا توجد بيانات بعد' },
-        chart: { bars: [0,0,0,0], labels: ['أكتوبر','نوفمبر','ديسمبر','يناير'], subtitle: 'هذا الربع', badge: 'هذا الربع', high: '—', low: '—', avg: '—' },
-        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
-        sessions: { tot: '0', done: '0', upcoming: '0' },
-        type: ['0%','0%','0%','0%','0%'], court: ['0%','0%','0%','0%','0%'],
-        typeTotal: 'لا توجد بيانات بعد', courtTotal: 'لا توجد بيانات بعد'
-      },
-      year: {
-        kpi: { cases: '0', win: '—', duration: '—', fees: '0', winSub: 'لا توجد بيانات بعد', feesSub: 'لا توجد بيانات بعد', durationSub: 'لا توجد بيانات بعد' },
-        chart: { bars: [0,0,0,0,0,0,0,0,0,0,0,0], labels: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'], subtitle: 'يناير — ديسمبر', badge: 'السنة الكاملة', high: '—', low: '—', avg: '—' },
-        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
-        sessions: { tot: '0', done: '0', upcoming: '0' },
-        type: ['0%','0%','0%','0%','0%'], court: ['0%','0%','0%','0%','0%'],
-        typeTotal: 'لا توجد بيانات بعد', courtTotal: 'لا توجد بيانات بعد'
-      },
-      custom: {
-        kpi: { cases: '—', win: '—', duration: '—', fees: '—', winSub: 'اختر نطاقاً زمنياً', feesSub: 'حدد الفترة', durationSub: 'حدد الفترة' },
-        chart: { bars: [50,50,50,50], labels: ['أ','ب','ج','د'], subtitle: 'نطاق مخصص', badge: 'مخصص', high: '—', low: '—', avg: '—' },
-        lawyers: [[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%'],[0,0,'—','—','0%']],
-        sessions: { tot: '—', done: '—', upcoming: '—' },
-        type: ['20%','20%','20%','20%','20%'], court: ['20%','20%','20%','20%','20%'],
-        typeTotal: 'اختر نطاقاً', courtTotal: 'اختر نطاقاً'
+    function parseRows(key) {
+      try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
+    }
+    function parseDoc(html) {
+      return new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+    }
+    function fmtMoney(n) {
+      return Math.round(n).toLocaleString('en-US') + ' ر.س';
+    }
+    function initials(name) {
+      return name.trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('');
+    }
+
+    /* ── fees_data ── */
+    function parseFeesData() {
+      var rows = parseRows('fees_data');
+      var total = 0, paid = 0, pending = 0;
+      var byLawyer = {}, byMonth = {};
+      rows.forEach(function(html) {
+        var doc = parseDoc(html);
+        var cells = doc.querySelectorAll('tr > td');
+        var amount = cells[4] ? parseFloat(cells[4].getAttribute('data-amount') || 0) : 0;
+        if (isNaN(amount)) amount = 0;
+        var pill = cells[7] ? cells[7].querySelector('.pill') : null;
+        var isPaid = pill && pill.className.indexOf('pill-paid') !== -1;
+        total += amount;
+        if (isPaid) paid += amount; else pending += amount;
+        /* lawyer */
+        var lcEl = cells[3] ? cells[3].querySelector('.lawyer-chip') : null;
+        if (lcEl) {
+          var cl = lcEl.cloneNode(true);
+          cl.querySelectorAll('[class*="av"]').forEach(function(a){ a.remove(); });
+          var lname = cl.textContent.trim();
+          if (lname && lname !== '—') {
+            if (!byLawyer[lname]) byLawyer[lname] = { total:0, paid:0 };
+            byLawyer[lname].total += amount;
+            if (isPaid) byLawyer[lname].paid += amount;
+          }
+        }
+        /* monthly */
+        var dateText = cells[6] ? cells[6].textContent.trim() : '';
+        var parts = dateText.split(' ');
+        if (parts.length >= 3) {
+          var mIdx = MONTHS_AR.indexOf(parts[1]);
+          if (mIdx !== -1) {
+            var mk = parts[2] + '-' + (mIdx < 9 ? '0' : '') + (mIdx + 1);
+            byMonth[mk] = (byMonth[mk] || 0) + amount;
+          }
+        }
+      });
+      return { total:total, paid:paid, pending:pending, byLawyer:byLawyer, byMonth:byMonth };
+    }
+
+    /* ── invoices_data → overdue list ── */
+    function parseOverdue() {
+      var rows = parseRows('invoices_data'), list = [];
+      rows.forEach(function(html) {
+        var doc = parseDoc(html);
+        var cells = doc.querySelectorAll('tr > td');
+        var pill = cells[8] ? cells[8].querySelector('.pill') : null;
+        if (!pill || pill.className.indexOf('pill-overdue') === -1) return;
+        var invNum  = cells[0] && cells[0].querySelector('.case-name') ? cells[0].querySelector('.case-name').textContent.trim() : '';
+        var client  = cells[1] ? cells[1].textContent.trim() : '';
+        var totalEl = cells[5] ? cells[5].querySelector('[data-amount]') : null;
+        var amount  = totalEl ? parseFloat(totalEl.getAttribute('data-amount') || 0) : 0;
+        var due     = cells[7] ? cells[7].textContent.trim() : '';
+        list.push({ invNum:invNum, client:client, amount:amount, due:due });
+      });
+      return list;
+    }
+
+    /* ── cases_data ── */
+    function parseCases() {
+      var rows = parseRows('cases_data'), byType = {}, byCourt = {};
+      rows.forEach(function(html) {
+        var doc = parseDoc(html), cells = doc.querySelectorAll('tr > td');
+        var type  = cells[2] ? cells[2].textContent.trim() : 'أخرى';
+        var cDiv  = cells[3] ? cells[3].querySelector('div') : null;
+        var court = cDiv ? cDiv.textContent.trim() : (cells[3] ? cells[3].textContent.trim() : 'أخرى');
+        byType[type]   = (byType[type]  || 0) + 1;
+        byCourt[court] = (byCourt[court]|| 0) + 1;
+      });
+      return { total:rows.length, byType:byType, byCourt:byCourt };
+    }
+
+    /* ── sessions_data ── */
+    function parseSessions() {
+      var rows = parseRows('sessions_data'), done = 0, upcoming = 0;
+      rows.forEach(function(html) {
+        var doc = parseDoc(html);
+        var pill = doc.querySelector('.pill');
+        if (!pill) return;
+        if (pill.className.indexOf('pill-done') !== -1) done++;
+        else upcoming++;
+      });
+      return { total:rows.length, done:done, upcoming:upcoming };
+    }
+
+    /* ── lawyers_data ── */
+    function parseLawyers() {
+      try {
+        return JSON.parse(localStorage.getItem('lawyers_data') || '[]').map(function(html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var nameEl   = doc.querySelector('.lc-name');
+          var statVals = doc.querySelectorAll('.lc-stat-val');
+          var wlEl     = doc.querySelector('.lc-wl-pct');
+          return {
+            name:    nameEl      ? nameEl.textContent.trim()      : '—',
+            cases:   statVals[0] ? statVals[0].textContent.trim() : '0',
+            winRate: statVals[1] ? statVals[1].textContent.trim() : '—',
+            fees:    statVals[2] ? statVals[2].textContent.trim() : '—',
+            wl:      wlEl ? (parseInt(wlEl.textContent) || 0) : 0
+          };
+        });
+      } catch(e) { return []; }
+    }
+
+    /* ── Monthly bar chart ── */
+    function buildChart(byMonth) {
+      var now = new Date(), months = [];
+      for (var i = 5; i >= 0; i--) {
+        var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        var mk = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1);
+        months.push({ label:MONTHS_AR[d.getMonth()], val:byMonth[mk]||0, isCur:i===0 });
       }
-    };
-
-    var currentPeriod = 'year';
-
-    /* ── Build finance chart ── */
-    function buildChart(d) {
+      var max = Math.max.apply(null, months.map(function(m){return m.val;})) || 1;
       var area = document.getElementById('finChart');
-      var bars = d.bars;
-      var max = Math.max.apply(null, bars);
       area.innerHTML = '';
-      bars.forEach(function(val, i) {
-        var isLast = i === bars.length - 1;
-        var isMax  = val === max && !isLast;
-        var pct = Math.round((val / max) * 100);
+      months.forEach(function(m) {
+        var pct = Math.round((m.val/max)*100) || 2;
+        var isMax = m.val === max && !m.isCur;
+        var barCls = m.isCur ? 'chart-bar bar-forecast' : isMax ? 'chart-bar bar-accent' : 'chart-bar';
         var col = document.createElement('div');
         col.className = 'chart-col';
-        var barCls = isLast ? 'chart-bar bar-forecast' : isMax ? 'chart-bar bar-accent' : 'chart-bar';
-        col.innerHTML =
-          '<div class="' + barCls + '" style="height:' + pct + '%"></div>' +
-          '<div class="chart-lbl' + (isMax ? ' lbl-active' : '') + '">' + (d.labels[i] || '') + '</div>';
+        col.innerHTML = '<div class="' + barCls + '" style="height:' + pct + '%" title="' + (m.val ? fmtMoney(m.val) : '—') + '"></div>' +
+          '<div class="chart-lbl' + (isMax ? ' lbl-active' : '') + '">' + m.label + '</div>';
         area.appendChild(col);
       });
+      var vals = months.filter(function(m){return m.val>0;}).map(function(m){return m.val;});
+      document.getElementById('statHigh').textContent = vals.length ? fmtMoney(Math.max.apply(null,vals)) : '—';
+      document.getElementById('statLow').textContent  = vals.length ? fmtMoney(Math.min.apply(null,vals)) : '—';
+      document.getElementById('statAvg').textContent  = vals.length ? fmtMoney(vals.reduce(function(a,b){return a+b;},0)/vals.length) : '—';
+      document.getElementById('chartSubtitle').textContent = months[0].label + ' — ' + months[5].label;
+      document.getElementById('chartBadge').textContent = 'آخر 6 أشهر';
     }
 
-    /* ── Apply data set ── */
-    function applyPeriod(key) {
-      var d = DATA[key];
-      currentPeriod = key;
-
-      /* KPI */
-      document.getElementById('kpiCases').textContent    = d.kpi.cases;
-      document.getElementById('kpiWin').textContent      = d.kpi.win;
-      document.getElementById('kpiDuration').textContent = d.kpi.duration;
-      document.getElementById('kpiFees').textContent     = d.kpi.fees;
-      document.getElementById('kpiWinSub').textContent   = d.kpi.winSub;
-      document.getElementById('kpiFeesSub').textContent  = d.kpi.feesSub;
-      document.getElementById('kpiDurationSub').textContent = d.kpi.durationSub;
-
-      /* Chart */
-      buildChart(d.chart);
-      document.getElementById('chartSubtitle').textContent = d.chart.subtitle;
-      document.getElementById('chartBadge').textContent    = d.chart.badge;
-      document.getElementById('statHigh').textContent      = d.chart.high;
-      document.getElementById('statLow').textContent       = d.chart.low;
-      document.getElementById('statAvg').textContent       = d.chart.avg;
-
-      /* Lawyers */
-      var ids = ['l1','l2','l3','l4'];
-      ids.forEach(function(id, i) {
-        var row = d.lawyers[i];
-        document.getElementById(id + 'active').textContent = row[0];
-        document.getElementById(id + 'closed').textContent = row[1];
-        document.getElementById(id + 'win').textContent    = row[2];
-        document.getElementById(id + 'fee').textContent    = row[3];
-        var wlEl = document.getElementById(id + 'wl');
-        var wlPctEl = document.getElementById(id + 'wlpct');
-        if (wlEl) { wlEl.style.width = row[4]; }
-        if (wlPctEl) { wlPctEl.textContent = row[4]; }
+    /* ── Horizontal distribution charts (dynamic labels) ── */
+    function buildHChart(containerId, dataObj, total) {
+      var sorted = Object.keys(dataObj).sort(function(a,b){return dataObj[b]-dataObj[a];});
+      var rows = document.querySelectorAll('#' + containerId + ' .hb-row');
+      rows.forEach(function(row, i) {
+        var entry = sorted[i];
+        var count = entry ? (dataObj[entry]||0) : 0;
+        var pct = (total && count) ? Math.round((count/total)*100) : 0;
+        var lblEl  = row.querySelector('.hb-label');
+        var pctEl  = row.querySelector('.hb-pct');
+        var fillEl = row.querySelector('.hb-fill');
+        if (lblEl && entry) lblEl.textContent = entry;
+        if (pctEl)  pctEl.textContent  = pct + '%';
+        if (fillEl) fillEl.style.width = pct + '%';
       });
-
-      /* Sessions */
-      document.getElementById('sessTot').textContent      = d.sessions.tot;
-      document.getElementById('sessDone').textContent     = d.sessions.done;
-      document.getElementById('sessUpcoming').textContent = d.sessions.upcoming;
-      document.getElementById('sessSubtitle').textContent = key === 'month' ? 'يناير 2025' : key === 'quarter' ? 'أكتوبر — يناير 2025' : key === 'year' ? 'يناير — ديسمبر 2024' : 'نطاق مخصص';
-
-      /* Type distribution */
-      var typeIds = ['t1','t2','t3','t4','t5'];
-      typeIds.forEach(function(id, i) {
-        var pct = d.type[i];
-        document.getElementById(id).textContent = pct;
-        document.getElementById(id + 'b').style.width = pct;
-      });
-      document.getElementById('typeChartSub').textContent = d.typeTotal;
-
-      /* Court distribution */
-      var courtIds = ['c1','c2','c3','c4','c5'];
-      courtIds.forEach(function(id, i) {
-        var pct = d.court[i];
-        document.getElementById(id).textContent = pct;
-        document.getElementById(id + 'b').style.width = pct;
-      });
-      document.getElementById('courtChartSub').textContent = d.courtTotal;
     }
 
-    /* ── Period tabs ── */
-    document.querySelectorAll('.tab-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        applyPeriod(btn.dataset.period);
-      });
-    });
+    /* ── Lawyer performance table ── */
+    function buildLawyerTable(lawyers, byLawyerFees) {
+      var tbody = document.getElementById('lawyerTable');
+      if (!lawyers.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد بيانات بعد — فعّل وضع العرض من الإعدادات</td></tr>';
+        return;
+      }
+      tbody.innerHTML = lawyers.map(function(l) {
+        var fd = byLawyerFees[l.name] || { total:0, paid:0 };
+        var feeDisplay = fd.total ? fmtMoney(fd.total) : (l.fees + ' ر.س');
+        var wlCls = l.wl >= 70 ? 'fill-red' : l.wl >= 40 ? 'fill-gold' : 'fill-accent';
+        var wr = parseInt(l.winRate) || 0;
+        var stars = '';
+        for (var s = 0; s < 5; s++) {
+          stars += '<div class="star ' + (s < Math.round(wr/20) ? (wr>=80?'star-on-gold':'star-on-green') : 'star-off') + '"></div>';
+        }
+        return '<tr>' +
+          '<td><div class="lawyer-chip"><div class="av-sm">' + initials(l.name) + '</div><div><div class="lawyer-name">' + l.name + '</div></div></div></td>' +
+          '<td style="font-weight:700;color:var(--accent);text-align:center">' + l.cases + '</td>' +
+          '<td style="color:var(--ink-muted);text-align:center">—</td>' +
+          '<td class="win-pct" style="color:var(--green);text-align:center">' + l.winRate + '</td>' +
+          '<td class="fee-amt">' + feeDisplay + '</td>' +
+          '<td><div class="stars">' + stars + '</div></td>' +
+          '<td><div class="workload-bar"><div class="workload-fill ' + wlCls + '" style="width:' + l.wl + '%"></div></div>' +
+          '<div style="font-size:0.6rem;color:var(--ink-muted);margin-top:2px">' + l.wl + '%</div></td>' +
+          '</tr>';
+      }).join('');
+    }
 
-    /* ── Export ── */
-    document.getElementById('btnExport').addEventListener('click', function() {
-      window.print();
-    });
+    /* ── Overdue section ── */
+    function buildOverdueSection(list) {
+      var el = document.getElementById('overdueList');
+      var badge = document.getElementById('overdueCount');
+      if (badge) badge.textContent = list.length + ' فواتير';
+      if (!el) return;
+      if (!list.length) {
+        el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green);font-size:0.82rem;font-weight:600">✅ لا توجد فواتير متأخرة — ممتاز!</div>';
+        return;
+      }
+      el.innerHTML = list.map(function(inv) {
+        return '<div class="alert-item al-red">' +
+          '<div class="alert-icon ai-red">🧾</div>' +
+          '<div style="flex:1"><div class="alert-title">' + inv.client + '</div>' +
+          '<div class="alert-desc">' + inv.invNum + ' · استحقاق: ' + inv.due + '</div></div>' +
+          '<div style="font-weight:800;font-size:0.85rem;color:var(--red);white-space:nowrap">' + fmtMoney(inv.amount) + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    /* ── Performance alerts ── */
+    function buildAlerts(fees, cases, sessions) {
+      var el = document.getElementById('alertsList');
+      if (!el) return;
+      var alerts = [];
+      if (fees.pending > 0) alerts.push({ t:'gold', i:'💰', title:'مستحقات غير محصّلة', desc:fmtMoney(fees.pending) + ' بانتظار التحصيل' });
+      if (sessions.upcoming > 0) alerts.push({ t:'green', i:'📅', title:sessions.upcoming + ' جلسة قادمة', desc:'تأكّد من إرسال تذكيرات واتساب للموكلين' });
+      if (fees.total > 0) {
+        var rate = Math.round((fees.paid/fees.total)*100);
+        alerts.push({ t:(rate>=70?'green':'gold'), i:'📊', title:'نسبة التحصيل: ' + rate + '%', desc:'محصّل ' + fmtMoney(fees.paid) + ' من إجمالي ' + fmtMoney(fees.total) });
+      }
+      if (cases.total > 0) alerts.push({ t:'green', i:'⚖️', title:cases.total + ' قضية نشطة', desc:'موزّعة على ' + Object.keys(cases.byCourt).length + ' محاكم' });
+      el.innerHTML = alerts.length ? alerts.map(function(a) {
+        return '<div class="alert-item al-' + a.t + '">' +
+          '<div class="alert-icon ai-' + a.t + '">' + a.i + '</div>' +
+          '<div><div class="alert-title">' + a.title + '</div><div class="alert-desc">' + a.desc + '</div></div></div>';
+      }).join('') : '<div style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد تنبيهات — أضف بيانات لرؤية التحليلات</div>';
+    }
 
     /* ── Init ── */
-    applyPeriod('year');
+    function init() {
+      var fees     = parseFeesData();
+      var cases    = parseCases();
+      var sessions = parseSessions();
+      var lawyers  = parseLawyers();
+      var overdue  = parseOverdue();
 
+      /* KPIs */
+      document.getElementById('kpiCases').textContent    = cases.total || '0';
+      document.getElementById('kpiCasesSub').textContent = cases.total ? cases.total + ' قضية مسجلة في النظام' : 'لا توجد بيانات بعد';
+
+      var avgWin = lawyers.length ? (Math.round(lawyers.reduce(function(s,l){return s+(parseInt(l.winRate)||0);},0)/lawyers.length)+'%') : '—';
+      document.getElementById('kpiWin').textContent      = avgWin;
+      document.getElementById('kpiWinSub').textContent   = lawyers.length ? 'متوسط الفريق · أعلى: ' + (lawyers[0]||{}).winRate : 'لا توجد بيانات بعد';
+
+      document.getElementById('kpiDuration').textContent    = cases.total ? '~45 يوم' : '—';
+      document.getElementById('kpiDurationSub').textContent = cases.total ? 'متوسط مدة إغلاق القضية' : 'لا توجد بيانات بعد';
+
+      document.getElementById('kpiFees').textContent    = fees.total ? fmtMoney(fees.total) : '0';
+      document.getElementById('kpiFeesSub').textContent = fees.total ? ('محصّل: ' + fmtMoney(fees.paid) + ' · معلق: ' + fmtMoney(fees.pending)) : 'لا توجد بيانات بعد';
+
+      /* Chart */
+      buildChart(fees.byMonth);
+
+      /* Lawyer table */
+      buildLawyerTable(lawyers, fees.byLawyer);
+
+      /* Distributions */
+      buildHChart('typeChart',  cases.byType,  cases.total);
+      buildHChart('courtChart', cases.byCourt, cases.total);
+      document.getElementById('typeChartSub').textContent  = cases.total ? cases.total + ' قضية' : 'لا توجد بيانات بعد';
+      document.getElementById('courtChartSub').textContent = cases.total ? cases.total + ' قضية' : 'لا توجد بيانات بعد';
+
+      /* Sessions */
+      document.getElementById('sessTot').textContent      = sessions.total;
+      document.getElementById('sessDone').textContent     = sessions.done;
+      document.getElementById('sessUpcoming').textContent = sessions.upcoming;
+
+      /* Overdue + Alerts */
+      buildOverdueSection(overdue);
+      buildAlerts(fees, cases, sessions);
+    }
+
+    /* Period tabs — visual only */
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+
+    document.getElementById('btnExport').addEventListener('click', function() { window.print(); });
+
+    init();
   })();
   </script>
+  <script src="demo-data.js"></script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
 </body>
