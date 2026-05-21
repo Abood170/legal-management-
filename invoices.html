@@ -261,7 +261,7 @@
     .btn-fatoora:hover { background: #9a7d22 !important; }
   </style>
   <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
-<link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<link rel="stylesheet" href="dark-mode.css">
 </head>
 <body>
 
@@ -538,6 +538,8 @@
   <div class="toast" id="toast"></div>
 
   <script>
+  /* ── Dark mode: apply saved theme immediately ── */
+  (function(){try{var t=localStorage.getItem('theme_pref');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();
   /* ── Filters ── */
   (function() {
     var countEl = document.getElementById('iCount');
