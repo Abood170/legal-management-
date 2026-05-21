@@ -392,6 +392,7 @@
             <div class="card-title">قائمة الفواتير</div>
             <div class="card-sub">جميع الفواتير المُصدَرة في النظام</div>
           </div>
+          <button class="btn-export" onclick="exportInvoices()">📤 تصدير Excel</button>
         </div>
         <table class="data-table">
           <thead>
@@ -749,7 +750,8 @@
           '</div>',
         '</div>',
       '</div>',
-      '  <script src="global-search.js"></script>
+      '  <script src="export-data.js"></script>
+  <script src="global-search.js"></script>
 </body></html>'
     ].join('');
     win.document.write(html);
@@ -1092,7 +1094,9 @@
 
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
+  <script src="export-data.js"></script>
   <script src="global-search.js"></script>
 </body>
 </html>
+
 

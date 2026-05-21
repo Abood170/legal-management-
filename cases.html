@@ -302,7 +302,10 @@
           <div class="ph-title">الدعاوى</div>
           <div class="ph-sub">إجمالي <span id="totalCasesCount">0</span> دعوى نشطة</div>
         </div>
-        <button class="btn-new" id="btnNewCase">+ دعوى جديدة</button>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button class="btn-export" onclick="exportCases()" style="margin-left:0">📤 Excel</button>
+          <button class="btn-new" id="btnNewCase">+ دعوى جديدة</button>
+        </div>
       </div>
 
       <!-- Filters Card -->
@@ -1219,7 +1222,9 @@
     });
   })();
   </script>
+  <script src="export-data.js"></script>
   <script src="global-search.js"></script>
 </body>
 </html>
+
 
