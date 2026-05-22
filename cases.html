@@ -418,21 +418,77 @@
           <div class="form-group">
             <label class="form-label" for="cfType">نوع القضية</label>
             <select class="form-select" id="cfType">
-              <option value="تجارية">تجارية</option>
-              <option value="عمالية">عمالية</option>
-              <option value="عقارية">عقارية</option>
-              <option value="إدارية">إدارية</option>
-              <option value="جزائية">جزائية</option>
+              <optgroup label="── المحاكم التجارية والمالية ──">
+                <option value="تجارية">تجارية</option>
+                <option value="شركات">شركات</option>
+                <option value="إفلاس وتصفية">إفلاس وتصفية</option>
+                <option value="بنوك وتمويل">بنوك وتمويل</option>
+                <option value="ضريبية وزكاة">ضريبية وزكاة</option>
+                <option value="منافسة واحتكار">منافسة واحتكار</option>
+              </optgroup>
+              <optgroup label="── المحاكم المدنية والعقارية ──">
+                <option value="عقارية">عقارية</option>
+                <option value="مقاولات">مقاولات</option>
+                <option value="عقود ومسؤولية مدنية">عقود ومسؤولية مدنية</option>
+              </optgroup>
+              <optgroup label="── الأحوال الشخصية والأسرة ──">
+                <option value="أحوال شخصية">أحوال شخصية</option>
+                <option value="طلاق وخلع">طلاق وخلع</option>
+                <option value="حضانة ونفقة">حضانة ونفقة</option>
+                <option value="ميراث ووصايا">ميراث ووصايا</option>
+              </optgroup>
+              <optgroup label="── المحاكم العامة ──">
+                <option value="عمالية">عمالية</option>
+                <option value="إدارية">إدارية</option>
+                <option value="جزائية">جزائية</option>
+                <option value="جرائم معلوماتية">جرائم معلوماتية</option>
+                <option value="غسيل أموال">غسيل أموال</option>
+              </optgroup>
+              <optgroup label="── التحكيم والتنفيذ ──">
+                <option value="تحكيم تجاري">تحكيم تجاري</option>
+                <option value="تنفيذ أحكام">تنفيذ أحكام</option>
+                <option value="استئناف">استئناف</option>
+              </optgroup>
+              <optgroup label="── أخرى ──">
+                <option value="ملكية فكرية">ملكية فكرية</option>
+                <option value="هجرة وإقامة">هجرة وإقامة</option>
+                <option value="تأمين">تأمين</option>
+                <option value="استشارة قانونية">استشارة قانونية</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label" for="cfCourt">المحكمة</label>
             <select class="form-select" id="cfCourt">
-              <option value="commercial">محكمة التجارة</option>
-              <option value="labor">المحكمة العمالية</option>
-              <option value="appeal">محكمة الاستئناف</option>
-              <option value="dewan">ديوان المظالم</option>
-              <option value="personal">محكمة الأحوال</option>
+              <optgroup label="── الرياض ──">
+                <option value="commercial_r">المحكمة التجارية - الرياض</option>
+                <option value="labor_r">محكمة العمل - الرياض</option>
+                <option value="personal_r">محكمة الأحوال الشخصية - الرياض</option>
+                <option value="general_r">المحكمة العامة - الرياض</option>
+                <option value="appeal_r">محكمة الاستئناف - الرياض</option>
+                <option value="dewan_r">ديوان المظالم - الرياض</option>
+                <option value="exec_r">محكمة التنفيذ - الرياض</option>
+              </optgroup>
+              <optgroup label="── جدة ──">
+                <option value="commercial_j">المحكمة التجارية - جدة</option>
+                <option value="labor_j">محكمة العمل - جدة</option>
+                <option value="personal_j">محكمة الأحوال الشخصية - جدة</option>
+                <option value="general_j">المحكمة العامة - جدة</option>
+                <option value="appeal_j">محكمة الاستئناف - جدة</option>
+              </optgroup>
+              <optgroup label="── الدمام / المنطقة الشرقية ──">
+                <option value="commercial_d">المحكمة التجارية - الدمام</option>
+                <option value="labor_d">محكمة العمل - الدمام</option>
+                <option value="personal_d">محكمة الأحوال الشخصية - الدمام</option>
+                <option value="general_d">المحكمة العامة - الدمام</option>
+              </optgroup>
+              <optgroup label="── محاكم متخصصة ──">
+                <option value="supreme">المحكمة العليا</option>
+                <option value="admin">المحكمة الإدارية العليا</option>
+                <option value="criminal">المحكمة الجزائية المتخصصة</option>
+                <option value="ip">محكمة الملكية الفكرية</option>
+                <option value="arbitration">مركز التحكيم التجاري السعودي</option>
+              </optgroup>
             </select>
           </div>
         </div>
@@ -444,6 +500,14 @@
               <option>جدة</option>
               <option>الدمام</option>
               <option>مكة المكرمة</option>
+              <option>المدينة المنورة</option>
+              <option>أبها</option>
+              <option>تبوك</option>
+              <option>بريدة</option>
+              <option>حائل</option>
+              <option>نجران</option>
+              <option>جازان</option>
+              <option>الطائف</option>
             </select>
           </div>
           <div class="form-group">
