@@ -380,19 +380,28 @@
             <input class="form-input" id="clPhone" type="tel" placeholder="05XXXXXXXX" dir="ltr" style="text-align:right">
           </div>
           <div class="form-group">
+            <label class="form-label" for="clIdNum" id="clIdLabel">رقم الهوية الوطنية</label>
+            <input class="form-input" id="clIdNum" type="text" placeholder="10XXXXXXXX" dir="ltr" style="text-align:right" maxlength="15">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label class="form-label" for="clEmail">البريد الإلكتروني</label>
             <input class="form-input" id="clEmail" type="email" placeholder="name@email.com" dir="ltr" style="text-align:right">
           </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="clCity">المدينة</label>
-          <select class="form-select" id="clCity">
-            <option value="الرياض">الرياض</option>
-            <option value="جدة">جدة</option>
-            <option value="الدمام">الدمام</option>
-            <option value="مكة">مكة المكرمة</option>
-            <option value="أخرى">أخرى</option>
-          </select>
+          <div class="form-group">
+            <label class="form-label" for="clCity">المدينة</label>
+            <select class="form-select" id="clCity">
+              <option value="الرياض">الرياض</option>
+              <option value="جدة">جدة</option>
+              <option value="الدمام">الدمام</option>
+              <option value="مكة">مكة المكرمة</option>
+              <option value="المدينة">المدينة المنورة</option>
+              <option value="أبها">أبها</option>
+              <option value="تبوك">تبوك</option>
+              <option value="أخرى">أخرى</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label" for="clNotes">ملاحظات</label>
@@ -538,8 +547,11 @@
       document.getElementById('clEmail').value = '';
       document.getElementById('clCity').selectedIndex = 0;
       document.getElementById('clNotes').value = '';
+      document.getElementById('clIdNum').value = '';
       document.getElementById('typePerson').checked = true;
       nameLabel.textContent = 'الاسم الكامل *';
+      document.getElementById('clIdLabel').textContent = 'رقم الهوية الوطنية';
+      document.getElementById('clIdNum').placeholder = '10XXXXXXXX';
     }
 
     document.getElementById('btnNewClient').addEventListener('click', openModal);
@@ -549,10 +561,16 @@
     modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
 
-    /* Update label on type change */
+    /* Update labels on type change */
     document.querySelectorAll('input[name="clientType"]').forEach(function(r) {
       r.addEventListener('change', function() {
-        nameLabel.textContent = this.value === 'company' ? 'اسم الشركة *' : 'الاسم الكامل *';
+        var isCompany = this.value === 'company';
+        nameLabel.textContent = isCompany ? 'اسم الشركة *' : 'الاسم الكامل *';
+        document.getElementById('clName').placeholder = isCompany ? 'شركة الفجر للمقاولات' : 'محمد عبدالله الأحمد';
+        var idLabel = document.getElementById('clIdLabel');
+        var idInput = document.getElementById('clIdNum');
+        if (idLabel) idLabel.textContent = isCompany ? 'رقم السجل التجاري' : 'رقم الهوية الوطنية';
+        if (idInput) idInput.placeholder = isCompany ? '1010XXXXXX' : '10XXXXXXXX';
       });
     });
 
@@ -571,6 +589,7 @@
       var type  = document.querySelector('input[name="clientType"]:checked').value;
       var email = document.getElementById('clEmail').value.trim() || '—';
       var city  = document.getElementById('clCity').value;
+      var idNum = document.getElementById('clIdNum').value.trim() || '—';
       var id    = '#CLT-0' + String(Math.floor(Math.random() * 900) + 100);
 
       submitBtn.disabled = true;
@@ -594,7 +613,7 @@
         tr.setAttribute('data-type', type);
         tr.setAttribute('data-status', 'active');
         tr.innerHTML =
-          '<td><div class="client-name-cell">' + name + '</div><div class="client-id-cell">' + id + '</div></td>' +
+          '<td><div class="client-name-cell">' + name + '</div><div class="client-id-cell">' + id + '</div><div class="client-idnum-cell" style="display:none">' + idNum + '</div></td>' +
           '<td><span class="type-badge ' + typeCls + '">' + typeLabel + '</span></td>' +
           '<td><div class="phone-cell">' + phone + '</div></td>' +
           '<td><div class="email-cell">' + email + '</div></td>' +
