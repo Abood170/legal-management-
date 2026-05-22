@@ -374,7 +374,6 @@
     }
 
     (function() {
-      const rows = document.querySelectorAll('#casesBody tr[data-search]');
       const noRes = document.getElementById('cNoResults');
       const si = document.getElementById('cSearch');
       const ss = document.getElementById('cStatus');
@@ -382,10 +381,12 @@
       const sl = document.getElementById('cLawyer');
       const rb = document.getElementById('cReset');
       function filter() {
-        const q = si.value.trim().toLowerCase();
-        let n = 0;
-        rows.forEach(r => {
-          const show = (!q || r.dataset.search.includes(q))
+        /* استعلام ديناميكي في كل مرة لضمان شمول الصفوف المحملة من localStorage */
+        var liveRows = document.querySelectorAll('#casesBody tr[data-search]');
+        var q = si.value.trim().toLowerCase();
+        var n = 0;
+        liveRows.forEach(function(r) {
+          var show = (!q || (r.dataset.search || '').toLowerCase().includes(q))
             && (!ss.value || r.dataset.status === ss.value)
             && (!sc.value || r.dataset.court === sc.value)
             && (!sl.value || r.dataset.lawyer === sl.value);
@@ -398,7 +399,7 @@
       ss.addEventListener('change', filter);
       sc.addEventListener('change', filter);
       sl.addEventListener('change', filter);
-      rb.addEventListener('click', () => { si.value=''; ss.value=''; sc.value=''; sl.value=''; filter(); });
+      rb.addEventListener('click', function() { si.value=''; ss.value=''; sc.value=''; sl.value=''; filter(); });
     })();
   </script>
 
@@ -887,8 +888,9 @@
   function saveCases() {
     var rows = [];
     document.querySelectorAll('#casesBody tr').forEach(function(tr) {
-      if (!tr.classList.contains('no-results') && !tr.querySelector('.empty-state') && tr.id !== 'cNoResults') {
-        rows.push(tr.innerHTML);
+      if (tr.id !== 'cNoResults' && !tr.classList.contains('no-results') && !tr.querySelector('.empty-state')) {
+        /* حفظ outerHTML لاستعادة data-attributes عند التحميل */
+        rows.push(tr.outerHTML);
       }
     });
     localStorage.setItem('cases_data', JSON.stringify(rows));
@@ -896,38 +898,58 @@
 
   function loadCases() {
     var saved = localStorage.getItem('cases_data');
-    if (saved) {
-      try {
-        var rows = JSON.parse(saved);
-        if (rows.length > 0) {
-          var tbody = document.getElementById('casesBody');
-          rows.forEach(function(html) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = html;
-            // ensure "عرض" buttons have the delegation class
-            tr.querySelectorAll('.row-btn').forEach(function(btn) {
-              if (btn.textContent.trim() === 'عرض') btn.classList.add('view-case-btn');
-            });
-            // inject password button if missing (covers seed rows + old saved rows)
-            var ra = tr.querySelector('.row-actions');
-            if (ra && !ra.querySelector('.btn-show-pwd')) {
-              var pwdBtn = document.createElement('button');
-              pwdBtn.className = 'row-btn btn-show-pwd';
-              pwdBtn.setAttribute('onclick', 'showCasePassword(this)');
-              pwdBtn.setAttribute('title', 'عرض كلمة مرور الموكل');
-              pwdBtn.textContent = '🔑 كلمة المرور';
-              var delBtn = Array.from(ra.querySelectorAll('button')).find(function(b) {
-                return b.textContent.trim() === 'حذف';
-              });
-              delBtn ? ra.insertBefore(pwdBtn, delBtn) : ra.appendChild(pwdBtn);
-            }
-            tbody.appendChild(tr);
-          });
-          var nr = document.getElementById('cNoResults');
-          if (nr) nr.style.display = 'none';
+    if (!saved) return;
+    try {
+      var rows = JSON.parse(saved);
+      if (!rows.length) return;
+      var tbody = document.getElementById('casesBody');
+      rows.forEach(function(html) {
+        /* دعم كلا الصيغتين: outerHTML (جديد) و innerHTML (قديم) */
+        var tr;
+        if (html.trimStart().startsWith('<tr')) {
+          /* outerHTML — استخدم template لاستعادة الـ attributes */
+          var tpl = document.createElement('template');
+          tpl.innerHTML = html.trim();
+          tr = tpl.content.firstElementChild;
+          if (!tr) { tr = document.createElement('tr'); tr.innerHTML = html; }
+        } else {
+          /* innerHTML legacy */
+          tr = document.createElement('tr');
+          tr.innerHTML = html;
+          /* استعادة data-attributes من محتوى الصف */
+          var caseIdEl = tr.querySelector('.case-id');
+          var clientTd = tr.querySelectorAll('td')[1];
+          var courtTd  = tr.querySelectorAll('td')[3];
+          var lawyerTd = tr.querySelectorAll('td')[4];
+          var clientTxt = clientTd ? clientTd.textContent.trim() : '';
+          var caseIdTxt = caseIdEl ? caseIdEl.textContent.replace('#','').trim() : '';
+          tr.setAttribute('data-search',  clientTxt + ' ' + caseIdTxt);
+          tr.setAttribute('data-status',  'active');
+          tr.setAttribute('data-court',   courtTd  ? courtTd.textContent.trim()  : '');
+          tr.setAttribute('data-lawyer',  lawyerTd ? lawyerTd.textContent.trim() : '');
         }
-      } catch(e) {}
-    }
+        /* تأكد من وجود زر العرض */
+        tr.querySelectorAll('.row-btn').forEach(function(btn) {
+          if (btn.textContent.trim() === 'عرض') btn.classList.add('view-case-btn');
+        });
+        /* تأكد من وجود زر كلمة المرور */
+        var ra = tr.querySelector('.row-actions');
+        if (ra && !ra.querySelector('.btn-show-pwd')) {
+          var pwdBtn = document.createElement('button');
+          pwdBtn.className = 'row-btn btn-show-pwd';
+          pwdBtn.setAttribute('onclick', 'showCasePassword(this)');
+          pwdBtn.setAttribute('title', 'عرض كلمة مرور الموكل');
+          pwdBtn.textContent = '🔑 كلمة المرور';
+          var delBtn = Array.from(ra.querySelectorAll('button')).find(function(b) {
+            return b.textContent.trim() === 'حذف';
+          });
+          delBtn ? ra.insertBefore(pwdBtn, delBtn) : ra.appendChild(pwdBtn);
+        }
+        tbody.appendChild(tr);
+      });
+      var nr = document.getElementById('cNoResults');
+      if (nr) nr.style.display = 'none';
+    } catch(e) { console.error('loadCases error:', e); }
   }
 
   function updateCasesHeader() {
