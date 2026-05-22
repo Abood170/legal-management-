@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — المصاريف</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --blue: #2563EB; --blue-dim: rgba(37,99,235,0.07);
+      --purple: #7c3aed; --purple-dim: rgba(139,92,246,0.07);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-card:hover { background: rgba(28,94,62,0.04); }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--border); }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
+    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s; white-space: nowrap; }
+    .btn-new:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
+
+    /* Content */
+    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); }
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+
+    /* KPI */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .kpi-card { border-radius: 14px; padding: 1.1rem 1.3rem; box-shadow: 0 1px 3px rgba(15,20,25,0.05); border: 1px solid var(--border); background: var(--white); transition: box-shadow 0.2s; isolation: isolate; }
+    .kpi-card.kpi-gold  { background: rgba(184,149,42,0.07); border-color: rgba(184,149,42,0.2); }
+    .kpi-card.kpi-green { background: var(--green-dim); border-color: rgba(22,163,74,0.18); }
+    .kpi-card.kpi-red   { background: var(--red-dim); border-color: rgba(220,38,38,0.18); }
+    .kpi-card.kpi-blue  { background: var(--blue-dim); border-color: rgba(37,99,235,0.18); }
+    .kpi-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; color: var(--ink-muted); }
+    .kpi-card.kpi-gold  .kpi-label { color: var(--gold); }
+    .kpi-card.kpi-green .kpi-label { color: var(--green); }
+    .kpi-card.kpi-red   .kpi-label { color: var(--red); }
+    .kpi-card.kpi-blue  .kpi-label { color: var(--blue); }
+    .kpi-val { font-size: 1.55rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; line-height: 1; }
+    .kpi-card.kpi-gold  .kpi-val { color: var(--gold); }
+    .kpi-card.kpi-green .kpi-val { color: var(--accent); }
+    .kpi-card.kpi-red   .kpi-val { color: var(--red); }
+    .kpi-card.kpi-blue  .kpi-val { color: var(--blue); }
+    .kpi-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 0.4rem; }
+
+    /* Filters */
+    .filters-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1.2rem; flex-wrap: wrap; }
+    .filter-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; flex: 1; min-width: 220px; max-width: 300px; transition: border-color 0.15s; }
+    .filter-search:focus-within { border-color: var(--accent-border); }
+    .filter-search input { border: none; background: transparent; outline: none; font-family: 'Cairo', sans-serif; font-size: 0.78rem; color: var(--ink); width: 100%; }
+    .filter-search input::placeholder { color: var(--ink-muted); }
+    .filter-select { background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem 0.42rem 1.8rem; font-size: 0.78rem; color: var(--ink-light); font-family: 'Cairo', sans-serif; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.6rem center; transition: border-color 0.15s; }
+    .filter-select:hover { border-color: var(--border-mid); color: var(--ink); }
+    .btn-reset { background: none; border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.75rem; font-size: 0.72rem; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .btn-reset:hover { border-color: rgba(220,38,38,0.35); color: var(--red); }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; }
+    .data-table td { padding: 0.75rem 1.2rem; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background 0.1s; }
+    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
+    .exp-desc { font-weight: 700; color: var(--ink); font-size: 0.82rem; }
+    .exp-receipt { font-size: 0.6rem; color: var(--ink-muted); font-family: monospace; margin-top: 2px; }
+    .case-cell { font-size: 0.78rem; color: var(--ink); font-weight: 600; }
+    .client-cell { font-size: 0.7rem; color: var(--ink-muted); margin-top: 2px; }
+    .amount-cell { font-weight: 900; font-size: 0.88rem; font-variant-numeric: tabular-nums; direction: ltr; text-align: right; color: var(--red); }
+    .amount-cell.reimbursed { color: var(--accent); }
+    .row-btn { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 3px 10px; border-radius: 5px; font-size: 0.63rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; }
+    .row-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .row-btn.danger:hover { border-color: var(--red); color: var(--red); }
+    .no-results { text-align: center; padding: 3rem 1.5rem; color: var(--ink-muted); font-size: 0.82rem; }
+    .no-results-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .no-results-title { font-size: 0.88rem; font-weight: 700; color: var(--ink-mid); margin-bottom: 0.3rem; }
+    .no-results-sub { font-size: 0.74rem; }
+
+    /* Pills / Tags */
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.63rem; font-weight: 700; white-space: nowrap; }
+    .pill::before { content: ''; width: 4px; height: 4px; border-radius: 50%; }
+    .pill-pending    { background: rgba(184,149,42,0.09); color: var(--gold);  border: 1px solid rgba(184,149,42,0.2); } .pill-pending::before { background: var(--gold); }
+    .pill-reimbursed { background: var(--green-dim); color: var(--green); border: 1px solid rgba(22,163,74,0.18); } .pill-reimbursed::before { background: var(--green); }
+    .pill-invoiced   { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(37,99,235,0.18); } .pill-invoiced::before { background: var(--blue); }
+
+    .cat-tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 0.62rem; font-weight: 700; }
+    .cat-gov     { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(37,99,235,0.15); }
+    .cat-trans   { background: rgba(245,158,11,0.09); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+    .cat-docs    { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.15); }
+    .cat-comm    { background: var(--green-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .cat-consult { background: rgba(236,72,153,0.07); color: #db2777; border: 1px solid rgba(236,72,153,0.15); }
+    .cat-expert  { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.15); }
+    .cat-other   { background: var(--off-white); color: var(--ink-muted); border: 1px solid var(--border-mid); }
+
+    .paidby-chip { font-size: 0.68rem; color: var(--ink-light); }
+
+    /* Summary bar */
+    .summary-bar { background: linear-gradient(135deg, rgba(220,38,38,0.05) 0%, rgba(220,38,38,0.02) 100%); border: 1px solid rgba(220,38,38,0.12); border-radius: 10px; padding: 0.85rem 1.4rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .summary-item { display: flex; flex-direction: column; gap: 1px; }
+    .summary-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-muted); }
+    .summary-val { font-size: 0.9rem; font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .summary-val.red { color: var(--red); }
+    .summary-val.green { color: var(--accent); }
+    .summary-val.gold { color: var(--gold); }
+    .summary-divider { width: 1px; height: 28px; background: var(--border-mid); }
+
+    /* Modal */
+    .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15,20,25,0.52); z-index: 9999 !important; display: none; align-items: flex-start !important; justify-content: center !important; padding: 2rem 1rem !important; overflow-y: auto !important; }
+    .modal-overlay.open { display: flex !important; }
+    .modal-card { background: var(--white); border-radius: 14px; width: 100%; max-width: 560px; box-shadow: 0 20px 60px rgba(15,20,25,0.15); position: relative !important; z-index: 10000 !important; margin: auto !important; flex-shrink: 0 !important; transform: translateY(18px); transition: transform 0.2s ease; }
+    .modal-overlay.open .modal-card { transform: translateY(0); }
+    .modal-head { background: linear-gradient(to bottom, var(--off-white), var(--white)); padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .modal-close { width: 28px; height: 28px; border-radius: 6px; background: none; border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--ink-muted); transition: all 0.15s; font-family: 'Cairo', sans-serif; line-height: 1; flex-shrink: 0; }
+    .modal-close:hover { border-color: var(--red); color: var(--red); }
+    .modal-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-label { font-size: 0.72rem; font-weight: 600; color: var(--ink-mid); }
+    .form-input, .form-select, .form-textarea { font-family: 'Cairo', sans-serif; font-size: 0.8rem; color: var(--ink); background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.52rem 0.85rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--ink-muted); }
+    .form-select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%2394A3B8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.7rem center; background-color: var(--off-white); padding-left: 1.8rem; cursor: pointer; }
+    .form-textarea { resize: vertical; min-height: 68px; }
+    .modal-foot { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .btn-cancel { background: none; border: 1px solid var(--border-mid); color: var(--ink-light); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; }
+    .btn-cancel:hover { border-color: var(--ink-mid); color: var(--ink); }
+    .amount-preview { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+    .amount-preview-label { font-size: 0.72rem; color: var(--ink-muted); font-weight: 600; }
+    .amount-preview-val { font-size: 1.4rem; font-weight: 900; color: var(--red); letter-spacing: -1px; font-variant-numeric: tabular-nums; direction: ltr; }
+    .form-hint { font-size: 0.65rem; color: var(--ink-muted); margin-top: 2px; }
+
+    /* Toast */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 99999; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @keyframes highlightRow { 0% { background: rgba(28,94,62,0.08); } 100% { background: transparent; } }
+    .new-row td { animation: highlightRow 2s ease forwards; }
+    @keyframes pageIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    body { animation: pageIn 0.2s ease both; }
+    .btn-loading { animation: loadingPulse 0.9s ease infinite; cursor: not-allowed !important; }
+    @keyframes loadingPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .kpi-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .kpi-row { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .kpi-row { grid-template-columns: 1fr; } }
+  </style>
+<link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text firm-name-target">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge"></span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge"></span></a>
+      <a class="nav-item" href="calendar.html"><span class="nav-icon">🗓️</span> التقويم</a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب</a>
+      <a class="nav-item active" href="expenses.html"><span class="nav-icon">🧾</span> المصاريف <span class="nav-badge" id="expBadge"></span></a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">📄</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av" id="sideUserAv">ع.م</div>
+        <div>
+          <div class="user-name" id="sideUserName">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">المصاريف</div>
+        <div class="topbar-sub" id="topbarDate">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search"><span style="color:var(--ink-muted);font-size:0.82rem;">🔍</span><span>بحث شامل...</span></div>
+        <div class="topbar-icon" id="notifBtn">🔔<span class="notif-dot"></span></div>
+        <button class="btn-new" id="btnNewExp">+ تسجيل مصروف</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">📦 المصاريف والتكاليف</div>
+          <div class="ph-sub">تتبع كل مصروف لكل قضية — لا تضيع ريال واحد</div>
+        </div>
+        <button class="btn-cancel" id="btnExport" style="font-size:0.72rem">⬇️ تصدير Excel</button>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="kpi-row">
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-label">إجمالي المصاريف</div>
+          <div class="kpi-val" id="kpiTotal">0</div>
+          <div class="kpi-sub">ريال سعودي</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">معلقة (غير مُستردة)</div>
+          <div class="kpi-val" id="kpiPending">0</div>
+          <div class="kpi-sub">بانتظار الاسترداد</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">مُستردة من الموكل</div>
+          <div class="kpi-val" id="kpiReimbursed">0</div>
+          <div class="kpi-sub">تم التحصيل</div>
+        </div>
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-label">مُدرجة في فاتورة</div>
+          <div class="kpi-val" id="kpiInvoiced">0</div>
+          <div class="kpi-sub">ريال سعودي</div>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="card">
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="filter-search">
+            <span style="color:var(--ink-muted);font-size:0.82rem;">🔍</span>
+            <input type="text" id="expSearch" placeholder="ابحث بالوصف، القضية، الموكل...">
+          </div>
+          <select class="filter-select" id="fCat">
+            <option value="">النوع (الكل)</option>
+            <option value="رسوم حكومية">🏛️ رسوم حكومية</option>
+            <option value="مواصلات ونقل">🚗 مواصلات ونقل</option>
+            <option value="تصوير ومستندات">📄 تصوير ومستندات</option>
+            <option value="اتصالات">📞 اتصالات</option>
+            <option value="استشارات خارجية">🤝 استشارات خارجية</option>
+            <option value="تكاليف خبير">🔬 تكاليف خبير</option>
+            <option value="أخرى">📦 أخرى</option>
+          </select>
+          <select class="filter-select" id="fStatus">
+            <option value="">الحالة (الكل)</option>
+            <option value="معلق">معلق</option>
+            <option value="مُسترد">مُسترد</option>
+            <option value="مُدرج في فاتورة">مُدرج في فاتورة</option>
+          </select>
+          <select class="filter-select" id="fCase">
+            <option value="">القضية (الكل)</option>
+          </select>
+          <button class="btn-reset" id="btnReset">↺ إعادة تعيين</button>
+        </div>
+
+        <!-- Summary bar -->
+        <div class="summary-bar" id="summaryBar" style="margin: 0 1.2rem 0.8rem; display:none">
+          <div class="summary-item">
+            <span class="summary-label">النتائج المعروضة</span>
+            <span class="summary-val" id="sumCount">0</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item">
+            <span class="summary-label">إجمالي المبالغ</span>
+            <span class="summary-val red" id="sumTotal">0 ر.س</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item">
+            <span class="summary-label">معلق</span>
+            <span class="summary-val gold" id="sumPending">0 ر.س</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item">
+            <span class="summary-label">مُسترد</span>
+            <span class="summary-val green" id="sumReimbursed">0 ر.س</span>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>الوصف</th>
+                <th>النوع</th>
+                <th>القضية / الموكل</th>
+                <th>المبلغ</th>
+                <th>التاريخ</th>
+                <th>مدفوعة بواسطة</th>
+                <th>الحالة</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="expBody">
+              <tr id="expNoResults">
+                <td colspan="8">
+                  <div class="no-results">
+                    <div class="no-results-icon">🧾</div>
+                    <div class="no-results-title">لا توجد مصاريف مسجلة بعد</div>
+                    <div class="no-results-sub">سجّل أول مصروف لقضية وابدأ بتتبع التكاليف</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- Add Expense Modal -->
+  <div class="modal-overlay" id="expModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-title">📦 تسجيل مصروف جديد</span>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Category + Date -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="eCategory">نوع المصروف *</label>
+            <select class="form-select" id="eCategory">
+              <option value="">— اختر النوع —</option>
+              <option value="رسوم حكومية">🏛️ رسوم حكومية</option>
+              <option value="مواصلات ونقل">🚗 مواصلات ونقل</option>
+              <option value="تصوير ومستندات">📄 تصوير ومستندات</option>
+              <option value="اتصالات">📞 اتصالات</option>
+              <option value="استشارات خارجية">🤝 استشارات خارجية</option>
+              <option value="تكاليف خبير">🔬 تكاليف خبير</option>
+              <option value="أخرى">📦 أخرى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="eDate">التاريخ *</label>
+            <input class="form-input" type="date" id="eDate">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label" for="eDesc">الوصف التفصيلي *</label>
+          <input class="form-input" type="text" id="eDesc" placeholder="مثال: رسوم قيد الدعوى لدى المحكمة التجارية">
+        </div>
+
+        <!-- Case + Client -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="eCase">القضية</label>
+            <select class="form-select" id="eCase">
+              <option value="">— اختر القضية —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="eClient">الموكل</label>
+            <input class="form-input" type="text" id="eClient" placeholder="اسم الموكل (تلقائي)" readonly style="cursor:default;opacity:0.8">
+          </div>
+        </div>
+
+        <!-- Amount + Paid By -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="eAmount">المبلغ (ر.س) *</label>
+            <input class="form-input" type="number" id="eAmount" placeholder="0.00" min="0" step="0.01" dir="ltr" style="text-align:right">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ePaidBy">مدفوعة بواسطة</label>
+            <select class="form-select" id="ePaidBy">
+              <option value="المكتب">المكتب</option>
+              <option value="الموكل">الموكل</option>
+              <option value="المحامي المسؤول">المحامي المسؤول</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Amount Preview -->
+        <div class="amount-preview" id="amountPreview" style="display:none">
+          <span class="amount-preview-label">💸 المبلغ المسجل</span>
+          <span class="amount-preview-val" id="amountPreviewVal">0.00 ر.س</span>
+        </div>
+
+        <!-- Receipt + Status -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="eReceipt">رقم الإيصال / المرجع</label>
+            <input class="form-input" type="text" id="eReceipt" placeholder="REC-001 (اختياري)" dir="ltr" style="text-align:right">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="eStatus">الحالة</label>
+            <select class="form-select" id="eStatus">
+              <option value="معلق">⏳ معلق (لم يُسترد)</option>
+              <option value="مُسترد">✅ مُسترد من الموكل</option>
+              <option value="مُدرج في فاتورة">📄 مُدرج في فاتورة</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label class="form-label" for="eNotes">ملاحظات</label>
+          <textarea class="form-textarea" id="eNotes" placeholder="أي تفاصيل إضافية..."></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" id="modalCancel">إلغاء</button>
+        <button class="btn-new" id="modalSave">💾 حفظ المصروف</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function() {
+    var STORAGE_KEY = 'expenses_data';
+    var expenses = [];
+    var toastTimer;
+
+    /* ── Helpers ── */
+    function fmt(n) { return Number(n || 0).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function showToast(msg, color) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = color || 'var(--accent)';
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); }
+    function load() {
+      try { expenses = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { expenses = []; }
+    }
+
+    /* ── Load cases from localStorage ── */
+    function loadCasesIntoSelect(selId) {
+      var sel = document.getElementById(selId);
+      while (sel.options.length > 1) sel.remove(1);
+      var list = [];
+      try {
+        JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
+          var t = document.createElement('table');
+          t.innerHTML = '<tbody><tr>' + html + '</tr></tbody>';
+          var tds = t.querySelectorAll('td');
+          var nameEl = tds[0] ? tds[0].querySelector('.case-name') : null;
+          var idEl   = tds[0] ? tds[0].querySelector('.case-id')   : null;
+          var clientCell = tds[1] ? tds[1].textContent.replace(/\s+/g,' ').trim() : '';
+          var name = nameEl ? nameEl.textContent.trim() : '';
+          var id   = idEl   ? idEl.textContent.trim()   : '';
+          if (name) list.push({ name: name, id: id, client: clientCell });
+        });
+      } catch(e) {}
+      try {
+        var dyn = JSON.parse(localStorage.getItem('dynamicCases') || '{}');
+        if (dyn && typeof dyn === 'object') {
+          Object.keys(dyn).forEach(function(num) {
+            var c = dyn[num];
+            if (c && c.type) list.push({ name: 'قضية ' + c.type, id: num, client: c.client || '' });
+          });
+        }
+      } catch(e) {}
+      list.forEach(function(c) {
+        var o = document.createElement('option');
+        o.value = c.name;
+        o.setAttribute('data-client', c.client);
+        o.setAttribute('data-id', c.id);
+        o.textContent = c.name + (c.id ? ' (' + c.id + ')' : '') + (c.client ? ' — ' + c.client : '');
+        sel.appendChild(o);
+      });
+      // also filter dropdown
+      var fSel = document.getElementById('fCase');
+      while (fSel.options.length > 1) fSel.remove(1);
+      list.forEach(function(c) {
+        var o = document.createElement('option');
+        o.value = c.name;
+        o.textContent = c.name + (c.id ? ' (' + c.id + ')' : '');
+        fSel.appendChild(o);
+      });
+    }
+
+    /* ── Category CSS class ── */
+    function catClass(cat) {
+      if (cat === 'رسوم حكومية')         return 'cat-gov';
+      if (cat === 'مواصلات ونقل')        return 'cat-trans';
+      if (cat === 'تصوير ومستندات')      return 'cat-docs';
+      if (cat === 'اتصالات')             return 'cat-comm';
+      if (cat === 'استشارات خارجية')     return 'cat-consult';
+      if (cat === 'تكاليف خبير')         return 'cat-expert';
+      return 'cat-other';
+    }
+
+    /* ── Status pill ── */
+    function statusPill(status) {
+      if (status === 'مُسترد')            return '<span class="pill pill-reimbursed">مُسترد</span>';
+      if (status === 'مُدرج في فاتورة')  return '<span class="pill pill-invoiced">في فاتورة</span>';
+      return '<span class="pill pill-pending">معلق</span>';
+    }
+
+    /* ── Render ── */
+    function render(list) {
+      var tbody = document.getElementById('expBody');
+      var noRes = document.getElementById('expNoResults');
+      // remove non-static rows
+      Array.from(tbody.querySelectorAll('tr:not(#expNoResults)')).forEach(function(r) { r.remove(); });
+
+      if (!list || !list.length) {
+        noRes.style.display = '';
+        updateSummary(null);
+        return;
+      }
+      noRes.style.display = 'none';
+
+      list.forEach(function(e, idx) {
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-idx', e._idx);
+        var amtCls = e.status === 'مُسترد' ? 'reimbursed' : '';
+        var dateF = e.date ? new Date(e.date).toLocaleDateString('ar-SA', { year:'numeric', month:'short', day:'numeric' }) : '—';
+        tr.innerHTML =
+          '<td><div class="exp-desc">' + (e.desc || '—') + '</div>' +
+            (e.receipt ? '<div class="exp-receipt">' + e.receipt + '</div>' : '') +
+          '</td>' +
+          '<td><span class="cat-tag ' + catClass(e.category) + '">' + (e.category || '—') + '</span></td>' +
+          '<td>' +
+            (e.caseName ? '<div class="case-cell">' + e.caseName + '</div>' : '<div class="case-cell" style="color:var(--ink-muted)">غير محدد</div>') +
+            (e.client   ? '<div class="client-cell">' + e.client + '</div>' : '') +
+          '</td>' +
+          '<td><div class="amount-cell ' + amtCls + '">' + fmt(e.amount) + ' <small style="font-size:0.6rem;font-weight:600">ر.س</small></div></td>' +
+          '<td style="font-size:0.75rem;color:var(--ink-light)">' + dateF + '</td>' +
+          '<td><span class="paidby-chip">' + (e.paidBy || 'المكتب') + '</span></td>' +
+          '<td>' + statusPill(e.status) + '</td>' +
+          '<td><div style="display:flex;gap:.3rem">' +
+            '<button class="row-btn" onclick="editStatus(' + e._idx + ')">تحديث</button>' +
+            '<button class="row-btn danger" onclick="deleteExp(' + e._idx + ')">حذف</button>' +
+          '</div></td>';
+        tbody.appendChild(tr);
+      });
+      updateSummary(list);
+    }
+
+    /* ── KPI & Summary ── */
+    function updateKPI() {
+      var total = 0, pending = 0, reimbursed = 0, invoiced = 0;
+      expenses.forEach(function(e) {
+        var a = parseFloat(e.amount) || 0;
+        total += a;
+        if (e.status === 'معلق')                total_pending = (total_pending || 0) + a, pending += a;
+        if (e.status === 'مُسترد')              reimbursed += a;
+        if (e.status === 'مُدرج في فاتورة')     invoiced += a;
+      });
+      document.getElementById('kpiTotal').textContent      = fmt(total);
+      document.getElementById('kpiPending').textContent    = fmt(pending);
+      document.getElementById('kpiReimbursed').textContent = fmt(reimbursed);
+      document.getElementById('kpiInvoiced').textContent   = fmt(invoiced);
+
+      // badge
+      var pendingCount = expenses.filter(function(e) { return e.status === 'معلق'; }).length;
+      var badge = document.getElementById('expBadge');
+      if (badge) { badge.textContent = pendingCount > 0 ? pendingCount : ''; badge.style.display = pendingCount > 0 ? '' : 'none'; }
+    }
+
+    function updateSummary(list) {
+      var bar = document.getElementById('summaryBar');
+      if (!list || !list.length) { bar.style.display = 'none'; return; }
+      var total = 0, pending = 0, reimbursed = 0;
+      list.forEach(function(e) {
+        var a = parseFloat(e.amount) || 0;
+        total += a;
+        if (e.status === 'معلق')   pending += a;
+        if (e.status === 'مُسترد') reimbursed += a;
+      });
+      document.getElementById('sumCount').textContent       = list.length;
+      document.getElementById('sumTotal').textContent       = fmt(total) + ' ر.س';
+      document.getElementById('sumPending').textContent     = fmt(pending) + ' ر.س';
+      document.getElementById('sumReimbursed').textContent  = fmt(reimbursed) + ' ر.س';
+      bar.style.display = 'flex';
+    }
+
+    /* ── Filter ── */
+    function applyFilters() {
+      var q      = document.getElementById('expSearch').value.trim().toLowerCase();
+      var cat    = document.getElementById('fCat').value;
+      var status = document.getElementById('fStatus').value;
+      var cas    = document.getElementById('fCase').value;
+      var result = expenses.map(function(e, i) { return Object.assign({}, e, { _idx: i }); }).filter(function(e) {
+        if (q && (e.desc || '').toLowerCase().indexOf(q) === -1 &&
+                 (e.caseName || '').toLowerCase().indexOf(q) === -1 &&
+                 (e.client || '').toLowerCase().indexOf(q) === -1) return false;
+        if (cat    && e.category !== cat)     return false;
+        if (status && e.status   !== status)  return false;
+        if (cas    && e.caseName !== cas)     return false;
+        return true;
+      });
+      render(result);
+    }
+
+    ['expSearch','fCat','fStatus','fCase'].forEach(function(id) {
+      document.getElementById(id).addEventListener('input', applyFilters);
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
+    document.getElementById('btnReset').addEventListener('click', function() {
+      document.getElementById('expSearch').value = '';
+      document.getElementById('fCat').value = '';
+      document.getElementById('fStatus').value = '';
+      document.getElementById('fCase').value = '';
+      renderAll();
+    });
+
+    function renderAll() {
+      var indexed = expenses.map(function(e, i) { return Object.assign({}, e, { _idx: i }); });
+      render(indexed);
+      updateKPI();
+    }
+
+    /* ── Modal ── */
+    var modal = document.getElementById('expModal');
+    function openModal() {
+      loadCasesIntoSelect('eCase');
+      document.getElementById('eDate').value    = today();
+      document.getElementById('eCategory').value = '';
+      document.getElementById('eDesc').value    = '';
+      document.getElementById('eCase').value    = '';
+      document.getElementById('eClient').value  = '';
+      document.getElementById('eAmount').value  = '';
+      document.getElementById('eReceipt').value = '';
+      document.getElementById('ePaidBy').value  = 'المكتب';
+      document.getElementById('eStatus').value  = 'معلق';
+      document.getElementById('eNotes').value   = '';
+      document.getElementById('amountPreview').style.display = 'none';
+      document.getElementById('eCategory').style.borderColor = '';
+      document.getElementById('eDesc').style.borderColor = '';
+      document.getElementById('eAmount').style.borderColor = '';
+      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
+    }
+    function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+
+    document.getElementById('btnNewExp').addEventListener('click', openModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+    /* Auto-fill client from case */
+    document.getElementById('eCase').addEventListener('change', function() {
+      var opt = this.options[this.selectedIndex];
+      var client = opt ? (opt.getAttribute('data-client') || '') : '';
+      document.getElementById('eClient').value = client;
+    });
+
+    /* Amount preview */
+    document.getElementById('eAmount').addEventListener('input', function() {
+      var v = parseFloat(this.value);
+      var preview = document.getElementById('amountPreview');
+      if (v > 0) {
+        document.getElementById('amountPreviewVal').textContent = fmt(v) + ' ر.س';
+        preview.style.display = 'flex';
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    /* Save */
+    document.getElementById('modalSave').addEventListener('click', function() {
+      var cat    = document.getElementById('eCategory').value;
+      var desc   = document.getElementById('eDesc').value.trim();
+      var amount = parseFloat(document.getElementById('eAmount').value);
+      var valid  = true;
+      if (!cat)    { document.getElementById('eCategory').style.borderColor = 'var(--red)'; valid = false; } else { document.getElementById('eCategory').style.borderColor = ''; }
+      if (!desc)   { document.getElementById('eDesc').style.borderColor = 'var(--red)'; valid = false; } else { document.getElementById('eDesc').style.borderColor = ''; }
+      if (!amount || amount <= 0) { document.getElementById('eAmount').style.borderColor = 'var(--red)'; valid = false; } else { document.getElementById('eAmount').style.borderColor = ''; }
+      if (!valid) { showToast('⚠️ يرجى تعبئة الحقول المطلوبة', '#DC2626'); return; }
+
+      var btn = this;
+      btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'جاري الحفظ...';
+
+      setTimeout(function() {
+        expenses.push({
+          category : cat,
+          desc     : desc,
+          caseName : document.getElementById('eCase').value,
+          client   : document.getElementById('eClient').value,
+          amount   : amount,
+          date     : document.getElementById('eDate').value,
+          paidBy   : document.getElementById('ePaidBy').value,
+          receipt  : document.getElementById('eReceipt').value.trim(),
+          status   : document.getElementById('eStatus').value,
+          notes    : document.getElementById('eNotes').value.trim(),
+          createdAt: Date.now()
+        });
+        save();
+        renderAll();
+        closeModal();
+        btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = '💾 حفظ المصروف';
+        showToast('✅ تم تسجيل المصروف بنجاح');
+      }, 600);
+    });
+
+    /* ── Edit Status ── */
+    window.editStatus = function(idx) {
+      var e = expenses[idx];
+      if (!e) return;
+      var statuses = ['معلق', 'مُسترد', 'مُدرج في فاتورة'];
+      var cur = statuses.indexOf(e.status);
+      var next = statuses[(cur + 1) % statuses.length];
+      expenses[idx].status = next;
+      save();
+      renderAll();
+      showToast('تم تحديث الحالة إلى: ' + next);
+    };
+
+    /* ── Delete ── */
+    window.deleteExp = function(idx) {
+      if (!confirm('هل تريد حذف هذا المصروف؟')) return;
+      expenses.splice(idx, 1);
+      save();
+      renderAll();
+      showToast('🗑️ تم حذف المصروف', '#DC2626');
+    };
+
+    /* ── Export CSV ── */
+    document.getElementById('btnExport').addEventListener('click', function() {
+      if (!expenses.length) { showToast('لا توجد بيانات للتصدير', '#DC2626'); return; }
+      var rows = [['الوصف','النوع','القضية','الموكل','المبلغ','التاريخ','مدفوعة بواسطة','الحالة','رقم الإيصال','ملاحظات']];
+      expenses.forEach(function(e) {
+        rows.push([e.desc, e.category, e.caseName, e.client, e.amount, e.date, e.paidBy, e.status, e.receipt, e.notes]);
+      });
+      var csv = rows.map(function(r) { return r.map(function(c) { return '"' + (c||'').toString().replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+      var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'expenses.csv'; a.click();
+      showToast('📥 تم تصدير البيانات');
+    });
+
+    /* ── Init ── */
+    load();
+    loadCasesIntoSelect('fCase');
+    renderAll();
+
+    /* ── Date display ── */
+    (function() {
+      var days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      var d = new Date();
+      var el = document.getElementById('topbarDate');
+      if (el) {
+        var firmEl = el.querySelector('.firm-name-target');
+        var firmName = (firmEl && firmEl.textContent) || 'نظام إدارة المحاماة';
+        el.innerHTML = days[d.getDay()] + '، ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · <span class="firm-name-target">' + firmName + '</span>';
+      }
+    })();
+  })();
+  </script>
+
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+  <script src="dark-mode.js"></script>
+  <script src="notifications.js"></script>
+  <script src="global-search.js"></script>
+</body>
+</html>
