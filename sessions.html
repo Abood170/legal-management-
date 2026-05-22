@@ -654,11 +654,26 @@
         var caseName = nameEl ? nameEl.textContent.trim()  : cells[0].textContent.trim();
         var client   = cells[1] ? cells[1].textContent.trim() : '';
 
-        /* استخرج المحامي: من data-lawyer (outerHTML) أو من cells[4] */
+        /* استخرج المحامي: من data-lawyer (outerHTML) أو من cells[4] بدون الأفاتار */
         var lawyerName = tr.getAttribute('data-lawyer') || '';
         if (!lawyerName && cells[4]) {
           var chip = cells[4].querySelector('.lawyer-chip');
-          lawyerName = chip ? chip.textContent.trim() : cells[4].textContent.trim();
+          if (chip) {
+            /* استنسخ واحذف عنصر الأفاتار لتجنب تكرار الأحرف */
+            var chipClone = chip.cloneNode(true);
+            var av = chipClone.querySelector('.lawyer-av');
+            if (av) av.parentNode.removeChild(av);
+            lawyerName = chipClone.textContent.replace(/\s+/g, ' ').trim();
+          } else {
+            lawyerName = cells[4].textContent.replace(/\s+/g, ' ').trim();
+          }
+        }
+
+        /* استخرج المحكمة من cells[3] */
+        var courtName = '';
+        if (cells[3]) {
+          var courtDiv = cells[3].querySelector('div');
+          courtName = courtDiv ? courtDiv.textContent.trim() : cells[3].textContent.trim();
         }
 
         if (!caseId && !client) return;
@@ -667,29 +682,42 @@
         opt.textContent = (caseName || caseId) + (client ? ' — ' + client : '');
         opt.setAttribute('data-id', caseId);
         opt.setAttribute('data-lawyer', lawyerName);
+        opt.setAttribute('data-court', courtName);
         select.appendChild(opt);
       });
 
-      /* عند تغيير القضية → تعبئة المحامي تلقائياً */
+      /* عند تغيير القضية → تعبئة المحامي والمحكمة تلقائياً */
       select.addEventListener('change', function() {
         var opt = this.options[this.selectedIndex];
-        var lawyer = opt ? opt.getAttribute('data-lawyer') : '';
-        if (!lawyer) return;
-        var lawyerSel = document.getElementById('sfLawyer');
-        /* ابحث في قائمة المحامين */
-        var found = false;
-        for (var i = 0; i < lawyerSel.options.length; i++) {
-          if (lawyerSel.options[i].value === lawyer || lawyerSel.options[i].text === lawyer) {
-            lawyerSel.selectedIndex = i;
-            found = true;
-            break;
+        var lawyer    = opt ? (opt.getAttribute('data-lawyer') || '') : '';
+        var courtHint = opt ? (opt.getAttribute('data-court')  || '') : '';
+
+        /* تعبئة المحكمة إذا وُجدت */
+        if (courtHint) {
+          var courtSel = document.getElementById('sfCourt');
+          for (var c = 0; c < courtSel.options.length; c++) {
+            if (courtSel.options[c].text.trim() === courtHint.trim()) {
+              courtSel.selectedIndex = c; break;
+            }
           }
         }
-        /* إن لم يُجَد أضفه مؤقتاً */
+
+        /* تعبئة المحامي */
+        if (!lawyer) return;
+        var lawyerSel = document.getElementById('sfLawyer');
+        var found = false;
+        for (var i = 0; i < lawyerSel.options.length; i++) {
+          var optText = lawyerSel.options[i].text.replace(' ✓','').trim();
+          if (lawyerSel.options[i].value === lawyer || optText === lawyer) {
+            lawyerSel.selectedIndex = i;
+            found = true; break;
+          }
+        }
+        /* إن لم يُجَد أضفه مؤقتاً بدون ✓ */
         if (!found && lawyer) {
           var newOpt = document.createElement('option');
           newOpt.value = lawyer;
-          newOpt.textContent = lawyer + ' ✓';
+          newOpt.textContent = lawyer;
           lawyerSel.appendChild(newOpt);
           lawyerSel.value = lawyer;
         }
