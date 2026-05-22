@@ -457,7 +457,129 @@
       document.getElementById('pvTotal').textContent = base ? fmtNum(tot)  + ' ر.س' : '— ر.س';
     });
 
-    function openModal() { setDefaults(); overlay.classList.add('open'); overlay.scrollTop = 0; document.body.style.overflow = 'hidden'; }
+    /* ── helpers: parse a tr.innerHTML into a DOM row ── */
+    function parseTrCells(html) {
+      var t = document.createElement('table');
+      t.innerHTML = '<tbody><tr>' + html + '</tr></tbody>';
+      return t.querySelectorAll('td');
+    }
+    function txt(el) { return el ? el.textContent.replace(/\s+/g,' ').trim() : ''; }
+
+    /* ── load clients from localStorage into #ifClient ── */
+    function populateClients() {
+      var sel = document.getElementById('ifClient');
+      var prev = sel.value;
+      while (sel.options.length > 1) sel.remove(1);          /* keep placeholder */
+
+      var names = [];
+      try {
+        JSON.parse(localStorage.getItem('clients_data') || '[]').forEach(function(html) {
+          var cells = parseTrCells(html);
+          var nameEl = cells[0] ? cells[0].querySelector('.client-name-cell') : null;
+          var n = nameEl ? nameEl.textContent.trim() : txt(cells[0]);
+          if (n && names.indexOf(n) === -1) names.push(n);
+        });
+      } catch(e) {}
+
+      names.sort(function(a,b){ return a.localeCompare(b,'ar'); });
+      names.forEach(function(n) {
+        var o = document.createElement('option');
+        o.value = o.textContent = n;
+        sel.appendChild(o);
+      });
+      if (prev) sel.value = prev;
+      return names;
+    }
+
+    /* ── load cases from localStorage into #ifCase ── */
+    function populateCases(filterClient) {
+      var sel = document.getElementById('ifCase');
+      var prev = sel.value;
+      sel.options.length = 0;
+
+      var allCases = [];
+
+      /* cases_data: array of tr.innerHTML */
+      try {
+        JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
+          var cells = parseTrCells(html);
+          var nameEl = cells[0] ? cells[0].querySelector('.case-name') : null;
+          var idEl   = cells[0] ? cells[0].querySelector('.case-id')   : null;
+          var caseType   = nameEl ? nameEl.textContent.trim() : '';
+          var caseId     = idEl   ? idEl.textContent.trim()   : '';
+          var clientName = txt(cells[1]);
+          if (caseType) allCases.push({ type: caseType, id: caseId, client: clientName });
+        });
+      } catch(e) {}
+
+      /* dynamicCases: object { caseNum: {client, type, ...} } */
+      try {
+        var dyn = JSON.parse(localStorage.getItem('dynamicCases') || '{}');
+        if (dyn && typeof dyn === 'object' && !Array.isArray(dyn)) {
+          Object.keys(dyn).forEach(function(num) {
+            var c = dyn[num];
+            if (c && c.type) allCases.push({ type: 'قضية ' + c.type, id: num, client: c.client || '' });
+          });
+        }
+      } catch(e) {}
+
+      /* filter by selected client, fall back to all if no matches */
+      var list = filterClient
+        ? allCases.filter(function(c){ return c.client === filterClient; })
+        : allCases;
+      if (filterClient && list.length === 0) list = allCases;   /* fallback */
+
+      /* placeholder */
+      var ph = document.createElement('option');
+      ph.value = '';
+      ph.textContent = list.length ? '— اختر القضية —' : '— لا توجد قضايا مسجلة —';
+      sel.appendChild(ph);
+
+      list.forEach(function(c) {
+        var o = document.createElement('option');
+        o.value = c.type;
+        o.setAttribute('data-id', c.id);
+        o.setAttribute('data-client', c.client);
+        /* show client name only when not filtered */
+        o.textContent = c.type
+          + (c.id     ? ' (' + c.id + ')' : '')
+          + (!filterClient && c.client ? ' — ' + c.client : '');
+        sel.appendChild(o);
+      });
+
+      if (prev) sel.value = prev;
+    }
+
+    /* ── wire client→case filtering ── */
+    document.getElementById('ifClient').addEventListener('change', function() {
+      populateCases(this.value);
+    });
+
+    /* ── auto-select client when case chosen ── */
+    document.getElementById('ifCase').addEventListener('change', function() {
+      var opt = this.options[this.selectedIndex];
+      var clientName = opt ? opt.getAttribute('data-client') : '';
+      if (clientName) {
+        var cs = document.getElementById('ifClient');
+        cs.value = clientName;
+        /* if client wasn't in list (e.g. from dynamicCases), add it */
+        if (!cs.value) {
+          var o = document.createElement('option');
+          o.value = o.textContent = clientName;
+          cs.appendChild(o);
+          cs.value = clientName;
+        }
+      }
+    });
+
+    function openModal() {
+      setDefaults();
+      populateClients();
+      populateCases('');
+      overlay.classList.add('open');
+      overlay.scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+    }
     function closeModal() {
       overlay.classList.remove('open');
       document.body.style.overflow = '';
