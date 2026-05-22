@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سكربت العرض التقديمي — نظام إدارة المحاماة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1C5E3E; --green-l:#24764E; --green-dim:rgba(28,94,62,.08); --green-bd:rgba(28,94,62,.18);
+  --gold:#B8952A; --gold-dim:rgba(184,149,42,.09);
+  --red:#DC2626; --red-dim:rgba(220,38,38,.07);
+  --blue:#3B82F6; --blue-dim:rgba(59,130,246,.08);
+  --ink:#0F1419; --ink-mid:#2D3748; --ink-l:#64748B; --ink-m:#94A3B8;
+  --bg:#F7F6F3; --white:#fff; --border:rgba(15,20,25,.09);
+}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── PRINT ── */
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff}
+  .step-card{break-inside:avoid}
+  .hero{background:#0F1419!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#0F1419 0%,#1a2535 55%,#1C5E3E 100%);padding:3rem 2.5rem 2.5rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+.hero-inner{max-width:960px;margin:0 auto;position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(184,149,42,.18);border:1px solid rgba(184,149,42,.3);color:#F0C040;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:2rem;margin-bottom:1rem;letter-spacing:.5px}
+.hero-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#fff;line-height:1.25;margin-bottom:.6rem}
+.hero-title em{font-style:normal;color:#6EE7B7}
+.hero-sub{font-size:.85rem;color:rgba(255,255,255,.65);max-width:560px;line-height:1.9;margin-bottom:1.5rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:.65rem}
+.hero-chip{display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.8);font-size:.68rem;font-weight:600;padding:4px 12px;border-radius:2rem}
+
+/* ── LAYOUT ── */
+.page{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
+
+/* ── TOC ── */
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;margin-top:1rem}
+.toc-item{display:flex;align-items:center;gap:.5rem;background:var(--white);border:1px solid var(--border);border-radius:9px;padding:.6rem .9rem;font-size:.75rem;color:var(--ink-l);font-weight:600;text-decoration:none;transition:all .15s;cursor:pointer}
+.toc-item:hover{border-color:var(--green-bd);color:var(--green);background:var(--green-dim)}
+.toc-num{font-size:.58rem;font-weight:900;width:18px;height:18px;border-radius:50%;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;align-items:center;gap:.75rem;margin:2.5rem 0 1rem;padding-bottom:.6rem;border-bottom:2px solid var(--border)}
+.sec-hdr-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sec-hdr-ico.green{background:var(--green-dim);border:1px solid var(--green-bd)}
+.sec-hdr-ico.gold{background:var(--gold-dim);border:1px solid rgba(184,149,42,.2)}
+.sec-hdr-ico.red{background:var(--red-dim);border:1px solid rgba(220,38,38,.15)}
+.sec-hdr-ico.blue{background:var(--blue-dim);border:1px solid rgba(59,130,246,.2)}
+.sec-hdr-body{flex:1}
+.sec-hdr-title{font-size:.95rem;font-weight:900;color:var(--ink)}
+.sec-hdr-sub{font-size:.65rem;color:var(--ink-m);margin-top:1px}
+.sec-num{font-size:.62rem;font-weight:700;padding:2px 9px;border-radius:2rem;background:var(--green-dim);color:var(--green);border:1px solid var(--green-bd);margin-right:auto}
+
+/* ── STEP CARD ── */
+.step-card{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:1.2rem 1.4rem;margin-bottom:.75rem;position:relative;overflow:hidden}
+.step-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;border-radius:0 3px 3px 0}
+.step-card.green::before{background:var(--green)}
+.step-card.gold::before{background:var(--gold)}
+.step-card.red::before{background:var(--red)}
+.step-card.blue::before{background:var(--blue)}
+.step-card.gray::before{background:var(--ink-m)}
+.step-header{display:flex;align-items:flex-start;gap:.85rem;margin-bottom:.75rem}
+.step-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+.step-label{font-size:.58rem;font-weight:700;color:var(--ink-m);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.step-title{font-size:.88rem;font-weight:700;color:var(--ink)}
+
+/* ── WHAT TO SAY ── */
+.say-block{background:#FFFDF5;border:1px solid rgba(184,149,42,.2);border-radius:9px;padding:.85rem 1rem;margin-bottom:.7rem}
+.say-label{font-size:.55rem;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:.35rem;display:flex;align-items:center;gap:.3rem}
+.say-text{font-size:.8rem;color:var(--ink-mid);line-height:1.85}
+.say-text strong{color:var(--ink);font-weight:700}
+
+/* ── DEMO STEPS ── */
+.demo-block{background:#F0FDF4;border:1px solid rgba(22,163,74,.15);border-radius:9px;padding:.85rem 1rem;margin-bottom:.7rem}
+.demo-label{font-size:.55rem;font-weight:900;color:#15803d;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem}
+.demo-steps{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+.demo-steps li{display:flex;align-items:flex-start;gap:.55rem;font-size:.77rem;color:var(--ink-mid);line-height:1.6}
+.demo-steps li::before{content:attr(data-n);font-size:.55rem;font-weight:900;color:#fff;background:#15803d;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+
+/* ── KEY POINTS ── */
+.points-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.7rem}
+.point-item{display:flex;align-items:flex-start;gap:.45rem;font-size:.73rem;color:var(--ink-mid);line-height:1.5}
+.point-item::before{content:'✦';color:var(--green);font-size:.5rem;margin-top:4px;flex-shrink:0}
+
+/* ── URL CHIP ── */
+.url-chip{display:inline-flex;align-items:center;gap:.4rem;background:var(--ink);color:#fff;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:5px;font-family:monospace;margin-bottom:.6rem}
+
+/* ── HIGHLIGHT BOX ── */
+.highlight{background:linear-gradient(135deg,var(--green-dim),rgba(28,94,62,.04));border:1px solid var(--green-bd);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.7rem}
+.highlight-title{font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:.35rem}
+.highlight-text{font-size:.75rem;color:var(--ink-mid);line-height:1.8}
+
+/* ── WARNING ── */
+.warn{background:rgba(184,149,42,.06);border:1px solid rgba(184,149,42,.2);border-radius:8px;padding:.7rem 1rem;font-size:.73rem;color:var(--ink-mid);margin-bottom:.65rem;display:flex;gap:.5rem;align-items:flex-start}
+
+/* ── CLOSING ── */
+.closing{background:linear-gradient(135deg,#0F1419,#1C5E3E);border-radius:16px;padding:2rem;margin-top:2.5rem;text-align:center;color:#fff}
+.closing-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;margin-bottom:.5rem}
+.closing-sub{font-size:.8rem;color:rgba(255,255,255,.65);margin-bottom:1.2rem;line-height:1.8}
+.closing-chips{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+.closing-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.85);font-size:.68rem;font-weight:600;padding:5px 14px;border-radius:2rem}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap{position:sticky;top:0;z-index:100;background:rgba(247,246,243,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:.45rem 1.5rem;display:flex;align-items:center;gap:.8rem}
+.progress-bar-bg{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--green);border-radius:2px;width:0%;transition:width .3s ease}
+.progress-text{font-size:.62rem;font-weight:700;color:var(--ink-m);white-space:nowrap}
+
+/* ── SECTION CARD ── */
+.section-box{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+
+@media(max-width:640px){
+  .hero-title{font-size:1.5rem}
+  .points-grid{grid-template-columns:1fr}
+  .toc-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ HERO ══ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🎯 سكربت العرض التقديمي — نسخة العميل</div>
+    <h1 class="hero-title">نظام إدارة المحاماة <em>السعودي</em></h1>
+    <p class="hero-sub">
+      دليل العرض الكامل من الألف إلى الياء — كل صفحة، كل ميزة، كل نقطة بيع.<br>
+      استخدم هذا السكربت لتقديم النظام للعميل خطوة بخطوة مع التطبيق الفعلي على الشاشة.
+    </p>
+    <div class="hero-meta">
+      <span class="hero-chip">⏱ مدة العرض: 30–45 دقيقة</span>
+      <span class="hero-chip">📱 يعمل على الويب بدون تثبيت</span>
+      <span class="hero-chip">🇸🇦 متوافق مع ZATCA فيز 2</span>
+      <span class="hero-chip">🌙 وضع ليلي + وضع نهاري</span>
+      <span class="hero-chip">💾 نسخ احتياطي كامل</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ PROGRESS ══ -->
+<div class="progress-wrap no-print">
+  <span class="progress-text" id="progressText">0 / 14 قسم</span>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <span class="progress-text" id="progressPct">0%</span>
+</div>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════ TOC ══ -->
+<div class="section-box">
+  <div style="font-size:.78rem;font-weight:700;color:var(--ink);margin-bottom:.2rem">📋 فهرس العرض التقديمي</div>
+  <div style="font-size:.65rem;color:var(--ink-m);margin-bottom:.8rem">اضغط على أي قسم للانتقال إليه مباشرة</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#sec-intro"><span class="toc-num">١</span>المقدمة وعرض المشكلة</a>
+    <a class="toc-item" href="#sec-landing"><span class="toc-num">٢</span>الصفحة الرئيسية</a>
+    <a class="toc-item" href="#sec-login"><span class="toc-num">٣</span>تسجيل الدخول</a>
+    <a class="toc-item" href="#sec-dashboard"><span class="toc-num">٤</span>لوحة التحكم</a>
+    <a class="toc-item" href="#sec-cases"><span class="toc-num">٥</span>الدعاوى القضائية</a>
+    <a class="toc-item" href="#sec-sessions"><span class="toc-num">٦</span>الجلسات والتقويم</a>
+    <a class="toc-item" href="#sec-clients"><span class="toc-num">٧</span>الموكلون وبوابتهم</a>
+    <a class="toc-item" href="#sec-tasks"><span class="toc-num">٨</span>المهام</a>
+    <a class="toc-item" href="#sec-fees"><span class="toc-num">٩</span>الأتعاب</a>
+    <a class="toc-item" href="#sec-invoices"><span class="toc-num">١٠</span>فوترة ZATCA</a>
+    <a class="toc-item" href="#sec-reports"><span class="toc-num">١١</span>التقارير</a>
+    <a class="toc-item" href="#sec-lawyers"><span class="toc-num">١٢</span>المحامون</a>
+    <a class="toc-item" href="#sec-settings"><span class="toc-num">١٣</span>الإعدادات</a>
+    <a class="toc-item" href="#sec-closing"><span class="toc-num">١٤</span>الإغلاق وبعدين؟</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 1. INTRO ══ -->
+<div id="sec-intro" class="sec-hdr">
+  <div class="sec-hdr-ico green">🎯</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">المقدمة — عرض المشكلة والحل</div>
+    <div class="sec-hdr-sub">قبل ما تفتح الشاشة — ابدأ بهذا</div>
+  </div>
+  <div class="sec-num">القسم ١</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">🗣️</span>
+    <div><div class="step-label">ما تقوله للعميل</div><div class="step-title">افتح بالمشكلة قبل الحل</div></div>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "اليوم أغلب مكاتب المحاماة تشتغل إما بالأوراق وإما بـ Excel وإما بواتساب ومجموعات.
+      النتيجة: <strong>ضياع مواعيد الجلسات، فقدان ملفات الموكلين، تأخر في إصدار الفواتير، وما في رقابة على الأتعاب.</strong><br><br>
+      اللي راح أعرضه عليك اليوم هو نظام مبني خصيصاً لمكاتب المحاماة السعودية — يحل كل هذه المشاكل من منصة واحدة، ويتوافق مع متطلبات <strong>هيئة الزكاة والضريبة والجمارك ZATCA</strong>."
+    </div>
+  </div>
+  <div class="points-grid">
+    <div class="point-item">إدارة كاملة للقضايا والجلسات</div>
+    <div class="point-item">فواتير إلكترونية متوافقة ZATCA</div>
+    <div class="point-item">بوابة للموكل للمتابعة المباشرة</div>
+    <div class="point-item">تقارير مالية وأداء فورية</div>
+    <div class="point-item">تنبيهات ذكية للمواعيد الحرجة</div>
+    <div class="point-item">لا تثبيت — يعمل من المتصفح</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 2. LANDING ══ -->
+<div id="sec-landing" class="sec-hdr">
+  <div class="sec-hdr-ico green">🌐</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">الصفحة الرئيسية</div>
+    <div class="sec-hdr-sub">أول انطباع للعميل عن النظام</div>
+  </div>
+  <div class="sec-num">القسم ٢</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">🌐</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">index.html — الواجهة الترويجية</div></div>
+  </div>
+  <div class="url-chip">📂 index.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح index.html — أول ما يشوفه العميل</li>
+      <li data-n="٢">اشرح الـ Hero Section: الشعار، الوصف، وزر "ابدأ مجاناً"</li>
+      <li data-n="٣">مرر للأسفل وأظهر قسم الميزات الرئيسية (الأيقونات الست)</li>
+      <li data-n="٤">أظهر قسم "كيف يعمل" — ٣ خطوات بسيطة</li>
+      <li data-n="٥">أضغط زر 🌙 في الـ Navbar لتفعيل الوضع الليلي — "واجهة مريحة للعيون في الليل"</li>
+      <li data-n="٦">اضغط "ابدأ الآن مجاناً" للانتقال للنظام</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">"هذا هو الموقع التسويقي للنظام — العميل يصل من هنا للنظام مباشرة. <strong>يدعم الوضع الليلي والنهاري،</strong> وتصميمه يعكس احترافية مكتبك أمام الموكلين."</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 3. LOGIN ══ -->
+<div id="sec-login" class="sec-hdr">
+  <div class="sec-hdr-ico gold">🔐</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">تسجيل الدخول والتسجيل</div>
+    <div class="sec-hdr-sub">بوابة الدخول الآمنة للنظام</div>
+  </div>
+  <div class="sec-num">القسم ٣</div>
+</div>
+
+<div class="step-card gold">
+  <div class="step-header">
+    <span class="step-icon">🔐</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">login.html / register.html</div></div>
+  </div>
+  <div class="url-chip">📂 login.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح login.html — شاشة تسجيل الدخول</li>
+      <li data-n="٢">أظهر حقلي البريد الإلكتروني وكلمة المرور</li>
+      <li data-n="٣">انتقل لـ register.html — نموذج إنشاء الحساب</li>
+      <li data-n="٤">أظهر الحقول: اسم المكتب، رقم الهاتف، المدينة</li>
+      <li data-n="٥">اضغط "دخول" للذهاب مباشرة للنظام</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">"كل مكتب له حساب مستقل ومحمي. <strong>الوصول يتم بالبريد وكلمة المرور</strong>، وفي النسخة الإنتاجية يمكن ربطها بنظام SSO أو 2FA."</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 4. DASHBOARD ══ -->
+<div id="sec-dashboard" class="sec-hdr">
+  <div class="sec-hdr-ico green">🏠</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">لوحة التحكم الرئيسية</div>
+    <div class="sec-hdr-sub">مركز القيادة — كل شيء في شاشة واحدة</div>
+  </div>
+  <div class="sec-num">القسم ٤</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">🏠</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">dashboard.html — لوحة التحكم</div></div>
+  </div>
+  <div class="url-chip">📂 dashboard.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح dashboard.html — أول ما يرى المحامي كل يوم</li>
+      <li data-n="٢">أشر على بطاقات الـ KPI الأربع: القضايا النشطة / الجلسات / الأتعاب غير المحصّلة / نسبة التحصيل</li>
+      <li data-n="٣">أظهر قسم "آخر الدعاوى النشطة" مع الألوان والأولويات</li>
+      <li data-n="٤">أظهر "التنبيهات الحرجة" — مواعيد وجلسات مهمة</li>
+      <li data-n="٥">أظهر "ضغط عمل المحامين" — توزيع الملفات</li>
+      <li data-n="٦">أظهر مخطط الأتعاب المحصّلة آخر 8 أشهر</li>
+      <li data-n="٧">جرب البحث الشامل بـ Ctrl+K — ابحث عن اسم موكل</li>
+      <li data-n="٨">اضغط 🔔 الجرس — أظهر لوحة الإشعارات الذكية</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "هذه <strong>لوحة القيادة</strong> — كل ما يحتاج المحامي معرفته في 10 ثوانٍ بدون ما يفتح أي صفحة ثانية.
+      القضايا الحرجة حمراء، المواعيد القريبة تظهر تلقائياً، والأتعاب المعلقة واضحة.<br><br>
+      الزر <strong>Ctrl+K</strong> يفتح البحث الشامل — ابحث عن موكل أو قضية أو فاتورة من مكان واحد."
+    </div>
+  </div>
+  <div class="highlight">
+    <div class="highlight-title">⭐ نقطة بيع قوية</div>
+    <div class="highlight-text">الإشعارات الذكية تتحقق تلقائياً من: جلسات اليوم والأسبوع، الفواتير المتأخرة، الأتعاب غير المحصّلة، والمهام المتأخرة — بدون إدخال يدوي.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 5. CASES ══ -->
+<div id="sec-cases" class="sec-hdr">
+  <div class="sec-hdr-ico green">⚖️</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">إدارة الدعاوى القضائية</div>
+    <div class="sec-hdr-sub">قلب النظام — جميع الملفات في مكان واحد</div>
+  </div>
+  <div class="sec-num">القسم ٥</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">⚖️</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">cases.html — الدعاوى</div></div>
+  </div>
+  <div class="url-chip">📂 cases.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح cases.html — جدول الدعاوى الكامل</li>
+      <li data-n="٢">أظهر الـ KPI cards: الإجمالي / نشطة / معلقة / مغلقة</li>
+      <li data-n="٣">جرب الفلاتر: فلتر حسب الحالة "نشطة"، ثم حسب المحامي</li>
+      <li data-n="٤">اضغط "عرض" على قضية — أظهر الـ Side Panel الكامل بالتفاصيل</li>
+      <li data-n="٥">أظهر زر "بوابة الموكل" — انتقل للصفحة</li>
+      <li data-n="٦">اضغط "+ دعوى جديدة" وأضف قضية تجريبية</li>
+      <li data-n="٧">أظهر كيف تظهر القضية الجديدة فوراً في الجدول</li>
+      <li data-n="٨">أظهر زر "تصدير Excel" — يحمّل ملف بكل الدعاوى</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "كل دعوى لها: <strong>رقم فريد، نوع القضية، المحكمة والمدينة، المحامي المسؤول، تاريخ أقرب جلسة، والحالة.</strong>
+      فلاتر متعددة للبحث السريع. تقدر تصدر الكل لـ Excel بضغطة واحدة للمدير أو الشريك."
+    </div>
+  </div>
+  <div class="points-grid">
+    <div class="point-item">رقم قضية تلقائي فريد</div>
+    <div class="point-item">بوابة موكل لكل قضية</div>
+    <div class="point-item">تصدير Excel بضغطة</div>
+    <div class="point-item">فلترة متعددة المستويات</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 6. SESSIONS + CALENDAR ══ -->
+<div id="sec-sessions" class="sec-hdr">
+  <div class="sec-hdr-ico blue">📅</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">الجلسات والتقويم</div>
+    <div class="sec-hdr-sub">ما تفوتك جلسة بعد اليوم</div>
+  </div>
+  <div class="sec-num">القسم ٦</div>
+</div>
+
+<div class="step-card blue">
+  <div class="step-header">
+    <span class="step-icon">📅</span>
+    <div><div class="step-label">افتح الصفحتين</div><div class="step-title">sessions.html + calendar.html</div></div>
+  </div>
+  <div class="url-chip">📂 sessions.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح sessions.html — جدول جميع الجلسات</li>
+      <li data-n="٢">أظهر بطاقات: اليوم / هذا الأسبوع / الشهر / الإجمالي</li>
+      <li data-n="٣">أضف جلسة جديدة: القضية، المحكمة، القاعة، التاريخ والوقت</li>
+      <li data-n="٤">أظهر التنبيه الأحمر للجلسات اليوم والـ badge الذهبي للقريبة</li>
+      <li data-n="٥">انتقل لـ calendar.html — التقويم البصري الشهري</li>
+      <li data-n="٦">أظهر الجلسات مرسومة على التقويم بالأيام</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "كل جلسة تظهر في الجدول <strong>وفي التقويم البصري</strong>.
+      النظام يتعرف تلقائياً على الجلسات اليوم والأسبوع القادم ويرسل تنبيه في لوحة الإشعارات.
+      <strong>ما تحتاج تتذكر — النظام يذكّرك.</strong>"
+    </div>
+  </div>
+  <div class="highlight">
+    <div class="highlight-title">⭐ نقطة بيع قوية</div>
+    <div class="highlight-text">الإشعارات الذكية تُنبّه المحامي قبل 7 أيام من الجلسة — يرى في لوحة التحكم: "جلسة غداً الساعة 10 في محكمة التجارة".</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 7. CLIENTS + PORTAL ══ -->
+<div id="sec-clients" class="sec-hdr">
+  <div class="sec-hdr-ico gold">👥</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">الموكلون وبوابة الموكل</div>
+    <div class="sec-hdr-sub">علاقة مهنية شفافة مع كل موكل</div>
+  </div>
+  <div class="sec-num">القسم ٧</div>
+</div>
+
+<div class="step-card gold">
+  <div class="step-header">
+    <span class="step-icon">👥</span>
+    <div><div class="step-label">افتح الصفحات</div><div class="step-title">clients.html + client-profile.html + client.html</div></div>
+  </div>
+  <div class="url-chip">📂 clients.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق — قسم الموكلين</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح clients.html — قائمة جميع الموكلين</li>
+      <li data-n="٢">أظهر بطاقة موكل: الاسم، النوع (فرد/شركة)، الهاتف، عدد القضايا</li>
+      <li data-n="٣">اضغط "عرض" — أظهر Side Panel بالتفاصيل الكاملة والتواصل عبر واتساب</li>
+      <li data-n="٤">اضغط "👤 ملف" بجانب موكل — انتقل لملف الموكل الشامل</li>
+    </ul>
+  </div>
+  <div class="demo-block" style="margin-top:.5rem">
+    <div class="demo-label">🖥️ خطوات التطبيق — ملف الموكل 360°</div>
+    <ul class="demo-steps">
+      <li data-n="١">ملف الموكل يُظهر: إجمالي القضايا، الفواتير المحصّلة والمعلقة، عدد الجلسات</li>
+      <li data-n="٢">جدول القضايا المرتبطة بالموكل مباشرة</li>
+      <li data-n="٣">جدول الفواتير مع الحالة (مدفوع/معلق/متأخر)</li>
+      <li data-n="٤">جدول الأتعاب وجدول الجلسات</li>
+    </ul>
+  </div>
+  <div class="demo-block" style="margin-top:.5rem">
+    <div class="demo-label">🖥️ خطوات التطبيق — بوابة الموكل</div>
+    <ul class="demo-steps">
+      <li data-n="١">من صفحة الدعاوى اضغط "بوابة الموكل" على قضية</li>
+      <li data-n="٢">أو افتح client.html مباشرة</li>
+      <li data-n="٣">أظهر شاشة الدخول برقم القضية وكلمة المرور</li>
+      <li data-n="٤">بعد الدخول: الموكل يرى حالة قضيته، الجلسات القادمة، المستندات</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "<strong>ملف الموكل 360°</strong> يعطيك صورة كاملة عن العميل: كم دفع، كم قضية عنده، متى آخر جلسة.
+      وبوابة الموكل تسمح له <strong>بمتابعة قضيته بنفسه</strong> بدون ما يتصل بالمكتب كل يوم — وهذا يرفع رضا العميل ويقلل الضغط على السكرتيرة."
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 8. TASKS ══ -->
+<div id="sec-tasks" class="sec-hdr">
+  <div class="sec-hdr-ico blue">📋</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">إدارة المهام</div>
+    <div class="sec-hdr-sub">لا تفوتك مهمة قانونية واحدة</div>
+  </div>
+  <div class="sec-num">القسم ٨</div>
+</div>
+
+<div class="step-card blue">
+  <div class="step-header">
+    <span class="step-icon">📋</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">tasks.html — المهام</div></div>
+  </div>
+  <div class="url-chip">📂 tasks.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح tasks.html — لوحة المهام</li>
+      <li data-n="٢">أظهر: الإجمالي / قيد التنفيذ / منتهية المدة / مكتملة</li>
+      <li data-n="٣">أضف مهمة: اسم المهمة، الأولوية (عاجل/عالي/عادي)، القضية المرتبطة، الموعد، المحامي</li>
+      <li data-n="٤">أظهر التمييز بالألوان: أحمر = عاجل، ذهبي = عالي</li>
+      <li data-n="٥">أظهر كيف المهام المتأخرة تظهر في إشعارات لوحة التحكم</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">"من تجهيز مستند لتقديم طعن لتواصل مع موكل — كل مهمة لها صاحب ومهلة وأولوية. <strong>المهام المتأخرة تظهر تلقائياً في الإشعارات</strong> في كل صفحة."</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 9. FEES ══ -->
+<div id="sec-fees" class="sec-hdr">
+  <div class="sec-hdr-ico gold">💰</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">إدارة الأتعاب</div>
+    <div class="sec-hdr-sub">تحصيل أفضل وشفافية مالية كاملة</div>
+  </div>
+  <div class="sec-num">القسم ٩</div>
+</div>
+
+<div class="step-card gold">
+  <div class="step-header">
+    <span class="step-icon">💰</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">fees.html — الأتعاب</div></div>
+  </div>
+  <div class="url-chip">📂 fees.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح fees.html — سجل الأتعاب الكامل</li>
+      <li data-n="٢">أظهر KPI: الإجمالي / المحصّل / المعلق</li>
+      <li data-n="٣">أضف أتعاب: الموكل، القضية، المبلغ، النوع (أتعاب/مصروفات)، الحالة</li>
+      <li data-n="٤">أظهر زر "تذكير واتساب" 📲 — يفتح واتساب مباشرة برسالة جاهزة</li>
+      <li data-n="٥">أظهر تصدير Excel للأتعاب الكاملة</li>
+      <li data-n="٦">أظهر كيف الأتعاب المعلقة تظهر في إشعارات لوحة التحكم</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "سجل مالي كامل لكل ريال — محصّل ومعلق. وزر <strong>تذكير واتساب يفتح محادثة مباشرة مع الموكل</strong> برسالة جاهزة تطلب السداد.
+      الأتعاب المعلقة تظهر في لوحة التحكم كإشعار للمدير."
+    </div>
+  </div>
+  <div class="highlight">
+    <div class="highlight-title">⭐ نقطة بيع قوية</div>
+    <div class="highlight-text">تذكير الدفع عبر واتساب بضغطة واحدة — يوفر وقت التواصل اليدوي ويرفع معدل التحصيل.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 10. INVOICES ══ -->
+<div id="sec-invoices" class="sec-hdr">
+  <div class="sec-hdr-ico green">🧾</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">فوترة ZATCA الإلكترونية</div>
+    <div class="sec-hdr-sub">متوافق 100% مع هيئة الزكاة والضريبة — المرحلة الثانية</div>
+  </div>
+  <div class="sec-num">القسم ١٠</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">🧾</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">invoices.html — الفواتير</div></div>
+  </div>
+  <div class="url-chip">📂 invoices.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح invoices.html — قائمة الفواتير</li>
+      <li data-n="٢">أظهر KPI: محصّل / معلق / متأخر بالأرقام الفعلية</li>
+      <li data-n="٣">اضغط "+ فاتورة جديدة" — اختر موكلاً من القائمة الحية، اختر القضية</li>
+      <li data-n="٤">أدخل المبلغ وشاهد حساب VAT 15% التلقائي في الوقت الفعلي</li>
+      <li data-n="٥">اضغط "إصدار الفاتورة" — تظهر في الجدول فوراً برقم INV تلقائي</li>
+      <li data-n="٦">اضغط "عرض الفاتورة" — أظهر الفاتورة الكاملة بـ QR Code</li>
+      <li data-n="٧">أشر على: المعرّف الفريد UUID، التوقيع الرقمي، TLV Base64</li>
+      <li data-n="٨">اضغط "🖨 طباعة / PDF" — يفتح نافذة A4 جاهزة للطباعة</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "الفاتورة <strong>متوافقة مع ZATCA المرحلة الثانية</strong>:
+      رقم UUID فريد، توقيع رقمي، QR Code TLV Base64 — كل المتطلبات التقنية جاهزة.
+      الـ VAT 15% يُحسب تلقائياً. ويمكن إرسالها لمنصة Fatoora في النسخة الإنتاجية.
+      <strong>هذا ما يميزنا عن الأنظمة الأخرى — الامتثال الضريبي مُدمج من الأساس.</strong>"
+    </div>
+  </div>
+  <div class="highlight">
+    <div class="highlight-title">🏛️ ميزة تنافسية حاسمة</div>
+    <div class="highlight-text">أغلب أنظمة إدارة المحاماة المتاحة لا تدعم ZATCA فيز 2. هذا النظام يدعمها بشكل كامل مع UUID، TLV، وتنسيق الإرسال لـ Fatoora.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 11. REPORTS ══ -->
+<div id="sec-reports" class="sec-hdr">
+  <div class="sec-hdr-ico blue">📊</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">التقارير والتحليلات</div>
+    <div class="sec-hdr-sub">قرارات مبنية على بيانات حقيقية</div>
+  </div>
+  <div class="sec-num">القسم ١١</div>
+</div>
+
+<div class="step-card blue">
+  <div class="step-header">
+    <span class="step-icon">📊</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">reports.html — التقارير</div></div>
+  </div>
+  <div class="url-chip">📂 reports.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح reports.html</li>
+      <li data-n="٢">أظهر ملخص الأداء المالي: الإيرادات، التحصيل، المعلق</li>
+      <li data-n="٣">أظهر توزيع القضايا حسب النوع والحالة</li>
+      <li data-n="٤">أظهر أداء المحامين ومعدلات الإغلاق</li>
+      <li data-n="٥">أظهر مخطط الجلسات الشهرية</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">"التقارير تعطي الشريك أو المدير رؤية 360° على أداء المكتب: <strong>أي محامٍ أكثر إنتاجية، أي نوع قضايا أكثر إيراداً، وأي شهر كان الأفضل</strong> — بدون Excel يدوي."</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 12. LAWYERS ══ -->
+<div id="sec-lawyers" class="sec-hdr">
+  <div class="sec-hdr-ico green">👨‍💼</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">إدارة فريق المحامين</div>
+    <div class="sec-hdr-sub">رؤية شاملة على كل عضو في الفريق</div>
+  </div>
+  <div class="sec-num">القسم ١٢</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">👨‍💼</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">lawyers.html — المحامون</div></div>
+  </div>
+  <div class="url-chip">📂 lawyers.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح lawyers.html — بطاقات فريق المحامين</li>
+      <li data-n="٢">أظهر بطاقة محامٍ: الصورة، التخصص، عدد القضايا، الحالة (نشط/غائب)</li>
+      <li data-n="٣">اضغط "عرض الملف" — تفاصيل المحامي الكاملة</li>
+      <li data-n="٤">أضف محامياً جديداً للفريق</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">"كل محامٍ له ملف يوضح <strong>كم قضية يتولى، تخصصه، وهل هو متاح أم في إجازة</strong>. المدير يقسّم الملفات بشكل عادل حسب الطاقة الاستيعابية."</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 13. SETTINGS ══ -->
+<div id="sec-settings" class="sec-hdr">
+  <div class="sec-hdr-ico gray">⚙️</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">الإعدادات والميزات المتقدمة</div>
+    <div class="sec-hdr-sub">تخصيص كامل + حماية البيانات</div>
+  </div>
+  <div class="sec-num">القسم ١٣</div>
+</div>
+
+<div class="step-card gray">
+  <div class="step-header">
+    <span class="step-icon">⚙️</span>
+    <div><div class="step-label">افتح الصفحة</div><div class="step-title">settings.html — الإعدادات</div></div>
+  </div>
+  <div class="url-chip">📂 settings.html</div>
+  <div class="demo-block">
+    <div class="demo-label">🖥️ خطوات التطبيق</div>
+    <ul class="demo-steps">
+      <li data-n="١">افتح settings.html</li>
+      <li data-n="٢">قسم "معلومات المكتب": غيّر اسم المكتب — راقب التحديث الفوري في الـ Topbar</li>
+      <li data-n="٣">قسم "المظهر واللغة": فعّل الوضع الليلي من هنا</li>
+      <li data-n="٤">قسم "البيانات التجريبية": أظهر زر تحميل بيانات demo لملء النظام</li>
+      <li data-n="٥">قسم "النسخ الاحتياطي": اضغط "تصدير نسخة احتياطية" — يحمّل JSON بكل البيانات</li>
+      <li data-n="٦">أظهر منطقة الاستيراد — يمكن استعادة كل شيء من ملف واحد</li>
+    </ul>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا</div>
+    <div class="say-text">
+      "اسم المكتب والشعار وبيانات التواصل تتحدث <strong>في كل صفحات النظام فوراً</strong> بمجرد الحفظ.
+      والنسخ الاحتياطي: بضغطة واحدة تُصدر <strong>ملف JSON بكل بيانات مكتبك</strong> — قضايا، موكلين، فواتير، أتعاب — وتستعيدها في أي وقت."
+    </div>
+  </div>
+  <div class="warn">⚠️ <span>قبل demo الـ backup: أضف بيانات حقيقية أو حمّل الـ demo data أولاً حتى يظهر الملف ممتلئاً</span></div>
+</div>
+
+<!-- ══════════════════════════════════ BONUS FEATURES ══ -->
+<div class="sec-hdr">
+  <div class="sec-hdr-ico green">✨</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">ميزات عامة في كل صفحة</div>
+    <div class="sec-hdr-sub">أبرزها في أي وقت خلال العرض</div>
+  </div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">✨</span>
+    <div><div class="step-label">ميزات أفقية</div><div class="step-title">موجودة في كل الصفحات</div></div>
+  </div>
+  <div class="points-grid">
+    <div class="point-item"><strong>🌙 وضع ليلي/نهاري</strong> — يُحفظ تلقائياً</div>
+    <div class="point-item"><strong>🔍 Ctrl+K</strong> — بحث شامل فوري</div>
+    <div class="point-item"><strong>🔔 إشعارات ذكية</strong> — جلسات وأتعاب ومهام</div>
+    <div class="point-item"><strong>📊 تصدير Excel</strong> — بضغطة في كل جدول</div>
+    <div class="point-item"><strong>💾 Backup/Restore</strong> — JSON كامل</div>
+    <div class="point-item"><strong>📱 تصميم Responsive</strong> — يعمل على الجوال</div>
+    <div class="point-item"><strong>⚡ تحديث فوري</strong> — لا صفحات تحميل</div>
+    <div class="point-item"><strong>🗂️ أرشيف</strong> — أرشفة القضايا المغلقة</div>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا عن البحث الشامل</div>
+    <div class="say-text">"<strong>Ctrl+K</strong> في أي صفحة يفتح بحثاً يغطي: الموكلين، الدعاوى، الفواتير، الجلسات، الأتعاب، المهام، والصفحات — كل شيء في ثانية واحدة."</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ 14. CLOSING ══ -->
+<div id="sec-closing" class="sec-hdr">
+  <div class="sec-hdr-ico green">🎯</div>
+  <div class="sec-hdr-body">
+    <div class="sec-hdr-title">الإغلاق — وبعدين؟</div>
+    <div class="sec-hdr-sub">اختم العرض بقوة وافتح نقاش التعاقد</div>
+  </div>
+  <div class="sec-num">القسم ١٤</div>
+</div>
+
+<div class="step-card green">
+  <div class="step-header">
+    <span class="step-icon">🎯</span>
+    <div><div class="step-label">الخطوة الأخيرة</div><div class="step-title">ملخص القيمة + الخطوة التالية</div></div>
+  </div>
+  <div class="say-block">
+    <div class="say-label">💬 قل هذا — الإغلاق القوي</div>
+    <div class="say-text">
+      "اللي شفته اليوم هو نظام بُني خصيصاً لمكاتب المحاماة السعودية، يحل ٥ مشاكل حقيقية في وقت واحد:
+      <br><br>
+      <strong>١. ضياع المواعيد</strong> — الإشعارات التلقائية تحل هذا.<br>
+      <strong>٢. فوضى الملفات</strong> — قضية واحدة = كل شيء في مكان واحد.<br>
+      <strong>٣. تأخر التحصيل</strong> — تذكير واتساب + فواتير ZATCA فورية.<br>
+      <strong>٤. عدم الشفافية مع الموكل</strong> — بوابة الموكل تحل هذا.<br>
+      <strong>٥. غياب التقارير</strong> — لوحة التحكم والتقارير جاهزة كل لحظة.<br><br>
+      <strong>ما تحتاج تثبت شيئاً، ما تحتاج خبرة تقنية، يعمل من المتصفح مباشرة.</strong>"
+    </div>
+  </div>
+  <div class="demo-block">
+    <div class="demo-label">🎯 أسئلة تفتح بها النقاش</div>
+    <ul class="demo-steps">
+      <li data-n="١">"كم محامٍ في مكتبكم؟ نقدر نحسب التوفير في الوقت مقارنة بالطريقة الحالية"</li>
+      <li data-n="٢">"هل تواجهون مشاكل في تتبع الجلسات أو في التحصيل؟"</li>
+      <li data-n="٣">"هل عندكم متطلبات خاصة تبون إضافتها للنظام؟"</li>
+      <li data-n="٤">"متى تبون البدء؟ يمكن نجهز النظام بأسمائكم وبياناتكم خلال أسبوع"</li>
+    </ul>
+  </div>
+  <div class="points-grid">
+    <div class="point-item">نسخة تجريبية 14 يوم مجاناً</div>
+    <div class="point-item">تدريب الفريق مشمول</div>
+    <div class="point-item">نقل البيانات من النظام القديم</div>
+    <div class="point-item">دعم فني مستمر</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ CLOSING BANNER ══ -->
+<div class="closing" id="sec-closing-banner">
+  <div class="closing-title">نظام إدارة المحاماة السعودي</div>
+  <div class="closing-sub">
+    من الدعوى الأولى حتى الفاتورة المحصّلة — كل شيء في منصة واحدة.<br>
+    متوافق مع ZATCA · بوابة الموكل · تقارير فورية · نسخ احتياطي آمن
+  </div>
+  <div class="closing-chips">
+    <span class="closing-chip">⚖️ إدارة الدعاوى</span>
+    <span class="closing-chip">📅 الجلسات</span>
+    <span class="closing-chip">👥 الموكلون</span>
+    <span class="closing-chip">🧾 ZATCA فيز ٢</span>
+    <span class="closing-chip">💰 الأتعاب</span>
+    <span class="closing-chip">📊 التقارير</span>
+    <span class="closing-chip">🌙 وضع ليلي</span>
+    <span class="closing-chip">💾 Backup</span>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+/* ── Progress bar based on scroll ── */
+(function(){
+  var fill  = document.getElementById('progressFill');
+  var pct   = document.getElementById('progressPct');
+  var ptxt  = document.getElementById('progressText');
+  var sections = document.querySelectorAll('[id^="sec-"]');
+  var total = 14;
+
+  function update(){
+    var scrolled = window.scrollY;
+    var height   = document.documentElement.scrollHeight - window.innerHeight;
+    var p = height > 0 ? Math.round((scrolled/height)*100) : 0;
+    p = Math.min(100, p);
+    fill.style.width = p + '%';
+    pct.textContent  = p + '%';
+
+    /* count visible sections */
+    var done = 0;
+    sections.forEach(function(s){
+      if(s.getBoundingClientRect().top < window.innerHeight * 0.5) done++;
+    });
+    ptxt.textContent = done + ' / ' + total + ' قسم';
+  }
+
+  window.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+</script>
+
+</body>
+</html>
