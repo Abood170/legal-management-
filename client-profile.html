@@ -146,6 +146,52 @@
     @media(max-width:1024px){.sidebar{display:none}.content{padding:1rem}.topbar{padding:0 1rem}.topbar-search{display:none}}
     @media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}.client-header{flex-direction:column}}
     @media(max-width:600px){.kpi-row{grid-template-columns:1fr 1fr}.fin-bar{flex-direction:column}}
+
+  /* ── Dark mode overrides – client-profile specific ── */
+  html[data-theme="dark"] .client-header,
+  html[data-theme="dark"] .fin-bar,
+  html[data-theme="dark"] .kpi-card,
+  html[data-theme="dark"] .card { box-shadow:0 2px 8px rgba(0,0,0,.4); }
+
+  html[data-theme="dark"] .mini-table th {
+    background:#1A2535 !important;
+    color:var(--ink-muted);
+  }
+  html[data-theme="dark"] .mini-table td {
+    border-bottom-color:rgba(226,232,240,.07);
+  }
+  html[data-theme="dark"] .mini-table tbody tr:hover td {
+    background:rgba(226,232,240,.03) !important;
+  }
+
+  html[data-theme="dark"] .sess-item {
+    background:var(--off-white);
+    border-color:var(--border);
+  }
+  html[data-theme="dark"] .sess-item:hover {
+    background:rgba(28,94,62,.12);
+  }
+  html[data-theme="dark"] .sess-date-block {
+    background:var(--white);
+    border-color:var(--border-mid);
+  }
+
+  html[data-theme="dark"] .fin-item + .fin-item {
+    border-right-color:var(--border);
+  }
+  html[data-theme="dark"] .fin-progress {
+    background:rgba(226,232,240,.1);
+  }
+
+  html[data-theme="dark"] .topbar {
+    background:var(--white);
+    border-bottom-color:var(--border);
+    box-shadow:0 1px 0 rgba(0,0,0,.3);
+  }
+  html[data-theme="dark"] .sidebar {
+    border-left-color:var(--border);
+    box-shadow:2px 0 8px rgba(0,0,0,.3);
+  }
   </style>
   <style>body{animation:pageIn .2s ease both}@keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}</style>
 <link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
