@@ -630,8 +630,10 @@
           JSON.parse(saved).forEach(function(html){
             var tr=document.createElement('tr');tr.innerHTML=html;
             var tds=tr.querySelectorAll('td');
-            var name=tds[0]?tds[0].textContent.trim():'';
-            if(!name)return;
+            /* استخدم .client-name-cell تحديداً لتجنب رقم CLT ورقم الهوية */
+            var nameEl=tds[0]?tds[0].querySelector('.client-name-cell'):null;
+            var name=nameEl?nameEl.textContent.trim():(tds[0]?tds[0].textContent.trim():'');
+            if(!name||name==='—')return;
             var o=document.createElement('option');o.value=name;o.textContent=name;sel.appendChild(o);
           });
         } catch(e) {}
