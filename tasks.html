@@ -350,10 +350,6 @@
           </select>
           <select class="filter-select" id="tkAssignee">
             <option value="">المسؤول: الكل</option>
-            <option value="خالد العتيبي">خالد العتيبي</option>
-            <option value="سارة المحمد">سارة المحمد</option>
-            <option value="محمد الرشيد">محمد الرشيد</option>
-            <option value="نورة الأحمد">نورة الأحمد</option>
           </select>
           <select class="filter-select" id="tkStatus">
             <option value="">الحالة: الكل</option>
@@ -449,23 +445,12 @@
             <label class="form-label" for="tkCase">القضية المرتبطة</label>
             <select class="form-select" id="tkCase">
               <option value="">— اختر القضية —</option>
-              <option value="#2025-0142">#2025-0142 · المالكي</option>
-              <option value="#2025-0138">#2025-0138 · العامدي</option>
-              <option value="#2025-0135">#2025-0135 · الشهري</option>
-              <option value="#2025-0130">#2025-0130 · العمري</option>
-              <option value="#2025-0128">#2025-0128 · السيساعي</option>
-              <option value="#2025-0131">#2025-0131 · الغامدي</option>
-              <option value="#2025-0136">#2025-0136 · الزهراني</option>
-              <option value="#2025-0140">#2025-0140 · الحربي</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label" for="tkAssigneeModal">المسؤول</label>
             <select class="form-select" id="tkAssigneeModal">
-              <option value="خالد العتيبي">خالد العتيبي</option>
-              <option value="سارة المحمد">سارة المحمد</option>
-              <option value="محمد الرشيد">محمد الرشيد</option>
-              <option value="نورة الأحمد">نورة الأحمد</option>
+              <option value="" disabled selected>اختر المسؤول...</option>
             </select>
           </div>
         </div>
@@ -507,9 +492,405 @@
   <div class="toast" id="toast"></div>
 
   <script>
+  /* ══════════════════════════════════════════════════
+     المهام — نظام إدارة المحاماة
+     يعتمد على: cases_data, lawyers_data في localStorage
+  ══════════════════════════════════════════════════ */
   (function() {
 
-    /* ── View Toggle ── */
+    var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
+                  'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var days   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+    /* ── تحديث التاريخ في التوب‌بار ── */
+    (function() {
+      var d = new Date();
+      var sub = document.querySelector('.topbar-sub');
+      if (sub) {
+        var txt = days[d.getDay()] + '، ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+        sub.innerHTML = txt + ' · <span class="firm-name-target">نظام إدارة المحاماة</span>';
+      }
+    })();
+
+    /* ── تعريف المتغيرات العامة ── */
+    var modal      = document.getElementById('taskModal');
+    var tasksBody  = document.getElementById('tasksBody');
+    var noResults  = document.getElementById('tkNoResults');
+    var toastTimer;
+
+    /* ═══════════════ الدالات المساعدة ═══════════════ */
+
+    function arabicDate(iso) {
+      if (!iso) return 'غير محدد';
+      var p = iso.split('-');
+      return parseInt(p[2]) + ' ' + months[parseInt(p[1])-1] + ' ' + p[0];
+    }
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg;
+      clearTimeout(toastTimer);
+      t.classList.add('show');
+      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+
+    function buildRowHTML(title, caseVal, caseTxt, assignee, priority, dueVal, status) {
+      var dueTxt   = arabicDate(dueVal);
+      var priLabel = priority === 'high' ? 'عالية' : priority === 'mid' ? 'متوسطة' : 'منخفضة';
+      var priCls   = priority === 'high' ? 'pill-high' : priority === 'mid' ? 'pill-mid' : 'pill-low';
+      var avTxt    = assignee.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('');
+      var stLabel  = {new:'جديدة',progress:'قيد التنفيذ',done:'مكتملة',late:'متأخرة'}[status] || 'جديدة';
+      var stCls    = {new:'pill-new',progress:'pill-progress',done:'pill-done',late:'pill-late'}[status] || 'pill-new';
+      var nameDone = status === 'done' ? ' done' : '';
+      return (
+        '<td><div class="task-name' + nameDone + '">' + title + '</div>' +
+          (caseVal ? '<div class="task-case">' + caseVal + '</div>' : '') +
+        '</td>' +
+        '<td style="font-size:0.75rem;color:var(--ink-light)">' + (caseTxt || caseVal || '—') + '</td>' +
+        '<td><div class="assignee-chip"><div class="av-xs">' + avTxt + '</div> ' + assignee + '</div></td>' +
+        '<td><span class="pill ' + priCls + '">' + priLabel + '</span></td>' +
+        '<td><div class="date-cell">' + dueTxt + '</div></td>' +
+        '<td><span class="pill ' + stCls + '">' + stLabel + '</span></td>' +
+        '<td><div class="row-actions">' +
+          (status !== 'done' ? '<button class="row-btn btn-complete">✓ إتمام</button>' : '<button class="row-btn btn-complete" disabled>مكتملة</button>') +
+          '<button class="row-btn" onclick="editTask(this)">✏️ تعديل</button>' +
+          '<button class="row-btn" style="color:var(--red);border-color:rgba(220,38,38,0.2)" onclick="deleteTask(this)">حذف</button>' +
+        '</div></td>'
+      );
+    }
+
+    function buildKCard(title, caseVal, assignee, priority, dueVal, isDone) {
+      var dueTxt   = arabicDate(dueVal);
+      var priLabel = priority === 'high' ? 'عالية' : priority === 'mid' ? 'متوسطة' : 'منخفضة';
+      var priCls   = priority === 'high' ? 'pill-high' : priority === 'mid' ? 'pill-mid' : 'pill-low';
+      var avTxt    = assignee.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('');
+      return (
+        '<div class="k-title' + (isDone ? ' done' : '') + '">' + title + '</div>' +
+        (caseVal ? '<div class="k-case">' + caseVal + '</div>' : '') +
+        '<div class="k-meta">' +
+          '<div class="k-assignee"><div class="av-xs">' + avTxt + '</div> ' + assignee + '</div>' +
+          '<span class="pill ' + priCls + '" style="font-size:0.58rem;padding:2px 7px">' + priLabel + '</span>' +
+        '</div>' +
+        '<div class="k-date">' + dueTxt + '</div>'
+      );
+    }
+
+    /* ═══════════════ localStorage ═══════════════ */
+
+    function saveTasks() {
+      var tasks = [];
+      document.querySelectorAll('#tasksBody tr[data-search]').forEach(function(tr) {
+        tasks.push({
+          html:      tr.innerHTML,
+          search:    tr.dataset.search    || '',
+          priority:  tr.dataset.priority  || '',
+          assignee:  tr.dataset.assignee  || '',
+          status:    tr.dataset.status    || 'new',
+          due:       tr.dataset.due       || '',
+          caseVal:   tr.dataset.caseVal   || '',
+          caseTxt:   tr.dataset.caseTxt   || ''
+        });
+      });
+      localStorage.setItem('tasks_data', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      var saved = localStorage.getItem('tasks_data');
+      if (!saved) return;
+      try {
+        var tasks = JSON.parse(saved);
+        if (!tasks.length) return;
+        tasks.forEach(function(t) {
+          var tr = document.createElement('tr');
+          if (typeof t === 'string') {
+            /* صيغة قديمة */
+            tr.innerHTML = t;
+          } else {
+            tr.innerHTML          = t.html;
+            tr.dataset.search     = t.search   || '';
+            tr.dataset.priority   = t.priority || '';
+            tr.dataset.assignee   = t.assignee || '';
+            tr.dataset.status     = t.status   || 'new';
+            tr.dataset.due        = t.due      || '';
+            tr.dataset.caseVal    = t.caseVal  || '';
+            tr.dataset.caseTxt    = t.caseTxt  || '';
+          }
+          tasksBody.appendChild(tr);
+        });
+        if (noResults) noResults.style.display = 'none';
+      } catch(e) {}
+    }
+
+    /* ═══════════════ KPIs ═══════════════ */
+
+    function updateTaskKPIs() {
+      var counts = {new:0, progress:0, late:0, done:0};
+      document.querySelectorAll('#tasksBody tr[data-search]').forEach(function(tr) {
+        var s = tr.dataset.status || 'new';
+        if (counts[s] !== undefined) counts[s]++;
+        else counts['new']++;
+      });
+      var active = counts.new + counts.progress + counts.late;
+      var set = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+      set('taskTodayCount',      counts.new);
+      set('taskInProgressCount', counts.progress);
+      set('taskOverdueCount',    counts.late);
+      set('taskDoneCount',       counts.done);
+      var sub = document.getElementById('taskActiveCount');
+      if (sub) sub.textContent = active + ' مهام نشطة';
+    }
+
+    /* ═══════════════ Board ═══════════════ */
+
+    function updateBoardCounts() {
+      document.getElementById('boardCount1').textContent = document.querySelectorAll('#boardCol1 .k-card').length;
+      document.getElementById('boardCount2').textContent = document.querySelectorAll('#boardCol2 .k-card').length;
+      document.getElementById('boardCount3').textContent = document.querySelectorAll('#boardCol3 .k-card').length;
+    }
+
+    function rebuildBoard() {
+      var col1 = document.getElementById('boardCol1');
+      var col2 = document.getElementById('boardCol2');
+      var col3 = document.getElementById('boardCol3');
+      col1.innerHTML = ''; col2.innerHTML = ''; col3.innerHTML = '';
+      var today = new Date(); today.setHours(0,0,0,0);
+
+      document.querySelectorAll('#tasksBody tr[data-search]').forEach(function(tr) {
+        var title    = (tr.querySelector('.task-name') || {}).textContent || tr.dataset.search;
+        var caseVal  = tr.dataset.caseVal  || '';
+        var assignee = tr.dataset.assignee || '';
+        var priority = tr.dataset.priority || 'mid';
+        var dueVal   = tr.dataset.due      || '';
+        var status   = tr.dataset.status   || 'new';
+
+        var card = document.createElement('div');
+        card.className = 'k-card' + (status === 'done' ? ' k-done' : '');
+        card.innerHTML = buildKCard(title, caseVal, assignee, priority, dueVal, status === 'done');
+
+        if (status === 'done') {
+          col3.appendChild(card);
+        } else {
+          /* تحقق من التأخر */
+          var isLate = false, isToday = false;
+          if (dueVal) {
+            var due = new Date(dueVal); due.setHours(0,0,0,0);
+            isLate  = due < today;
+            isToday = due.getTime() === today.getTime();
+          }
+          if (isLate || isToday) col2.appendChild(card);
+          else col1.appendChild(card);
+        }
+      });
+
+      /* رسالة "لا توجد" في الأعمدة الفارغة */
+      [col1,col2,col3].forEach(function(col){
+        if (!col.querySelector('.k-card')) {
+          col.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--ink-muted);font-size:0.8rem">لا توجد مهام</div>';
+        }
+      });
+      updateBoardCounts();
+    }
+
+    /* ═══════════════ ملء القوائم المنسدلة ═══════════════ */
+
+    function populateCasesDropdown() {
+      var sel = document.getElementById('tkCase');
+      sel.innerHTML = '<option value="">— اختر القضية —</option>';
+      var saved = localStorage.getItem('cases_data');
+      if (!saved) return;
+      try {
+        var cases = JSON.parse(saved);
+        cases.forEach(function(html) {
+          var trHtml = html.trimStart().startsWith('<tr') ? html : '<tr>' + html + '</tr>';
+          var doc = new DOMParser().parseFromString('<table><tbody>' + trHtml + '</tbody></table>', 'text/html');
+          var tr  = doc.querySelector('tr'); if (!tr) return;
+          var cells = tr.querySelectorAll('td'); if (cells.length < 2) return;
+          var idEl   = cells[0].querySelector('.case-id');
+          var nameEl = cells[0].querySelector('.case-name');
+          var caseId = idEl   ? idEl.textContent.trim()  : '';
+          var cname  = nameEl ? nameEl.textContent.trim() : cells[0].textContent.trim();
+          var client = cells[1] ? cells[1].textContent.trim() : '';
+          if (!caseId && !client) return;
+          var opt = document.createElement('option');
+          opt.value = caseId;
+          opt.textContent = (cname || caseId) + (client ? ' — ' + client : '');
+          sel.appendChild(opt);
+        });
+      } catch(e) {}
+    }
+
+    function populateLawyersDropdown() {
+      var sel   = document.getElementById('tkAssigneeModal');
+      var fSel  = document.getElementById('tkAssignee');
+      sel.innerHTML  = '<option value="" disabled selected>اختر المسؤول...</option>';
+      fSel.innerHTML = '<option value="">المسؤول: الكل</option>';
+
+      var saved = localStorage.getItem('lawyers_data');
+      var names = [];
+      if (saved) {
+        try {
+          var lawyers = JSON.parse(saved);
+          lawyers.forEach(function(html) {
+            var div = document.createElement('div'); div.innerHTML = html;
+            var nameEl = div.querySelector('.lc-name');
+            var name   = nameEl ? nameEl.textContent.trim() : null;
+            if (name) names.push(name);
+          });
+        } catch(e) {}
+      }
+      if (!names.length) names = ['خالد بن عبدالعزيز العتيبي','سارة بنت محمد القحطاني','محمد بن سالم الزهراني','نورة بنت أحمد الشمري'];
+      names.forEach(function(name) {
+        var o1 = document.createElement('option'); o1.value = name; o1.textContent = name; sel.appendChild(o1);
+        var o2 = document.createElement('option'); o2.value = name; o2.textContent = name; fSel.appendChild(o2);
+      });
+    }
+
+    /* ═══════════════ Modal ═══════════════ */
+
+    function openModal(isNew) {
+      if (isNew) window._editTask = null;
+      populateCasesDropdown();
+      populateLawyersDropdown();
+      var titleEl = document.getElementById('modal-title-task') || document.querySelector('#taskModal .modal-title');
+      var subBtn  = document.getElementById('tkSubmit');
+      if (!window._editTask) {
+        if (titleEl) titleEl.textContent = '+ مهمة جديدة';
+        if (subBtn)  subBtn.textContent  = 'إضافة المهمة';
+      }
+      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
+      setTimeout(function() { document.getElementById('tkTitle').focus(); }, 50);
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('tkTitle').value = '';
+      document.getElementById('tkTitle').style.borderColor = '';
+      document.getElementById('tkCase').selectedIndex = 0;
+      document.getElementById('tkAssigneeModal').selectedIndex = 0;
+      document.getElementById('tkPriorityModal').selectedIndex = 1;
+      document.getElementById('tkDue').value = '';
+      document.getElementById('tkDesc').value = '';
+      window._editTask = null;
+      var titleEl = document.querySelector('#taskModal .modal-title');
+      var subBtn  = document.getElementById('tkSubmit');
+      if (titleEl) titleEl.textContent = '+ مهمة جديدة';
+      if (subBtn)  subBtn.textContent  = 'إضافة المهمة';
+    }
+
+    document.getElementById('btnNewTask').addEventListener('click',    function() { openModal(true); });
+    document.getElementById('btnNewTaskTop').addEventListener('click', function() { openModal(true); });
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+
+    /* Date chips */
+    function setDate(offsetDays) {
+      var d = new Date(); d.setDate(d.getDate() + offsetDays);
+      document.getElementById('tkDue').value =
+        d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    document.getElementById('chipToday').addEventListener('click',    function() { setDate(0); });
+    document.getElementById('chipTomorrow').addEventListener('click', function() { setDate(1); });
+    document.getElementById('chipWeek').addEventListener('click',     function() { setDate(7); });
+
+    /* ═══════════════ Submit ═══════════════ */
+
+    var submitBtn = document.getElementById('tkSubmit');
+    submitBtn.addEventListener('click', function() {
+      var titleEl  = document.getElementById('tkTitle');
+      var title    = titleEl.value.trim();
+      if (!title) { titleEl.style.borderColor = 'var(--red)'; titleEl.focus(); return; }
+      titleEl.style.borderColor = '';
+
+      var caseOpt  = document.getElementById('tkCase');
+      var caseVal  = caseOpt.value;
+      var caseTxt  = caseOpt.options[caseOpt.selectedIndex] ? caseOpt.options[caseOpt.selectedIndex].text : '';
+      var assignee = document.getElementById('tkAssigneeModal').value;
+      var priority = document.getElementById('tkPriorityModal').value;
+      var dueVal   = document.getElementById('tkDue').value;
+      var isEdit   = !!window._editTask;
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
+      submitBtn.classList.add('btn-loading');
+
+      setTimeout(function() {
+        if (isEdit) {
+          /* ── تعديل مهمة موجودة ── */
+          var et = window._editTask;
+          var oldStatus = et.dataset.status || 'new';
+          et.dataset.search   = title;
+          et.dataset.priority = priority;
+          et.dataset.assignee = assignee;
+          et.dataset.due      = dueVal;
+          et.dataset.caseVal  = caseVal;
+          et.dataset.caseTxt  = caseTxt;
+          et.innerHTML = buildRowHTML(title, caseVal, caseTxt, assignee, priority, dueVal, oldStatus);
+          showToast('تم تعديل المهمة بنجاح');
+        } else {
+          /* ── مهمة جديدة ── */
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-search',   title);
+          tr.setAttribute('data-priority', priority);
+          tr.setAttribute('data-assignee', assignee);
+          tr.setAttribute('data-status',   'new');
+          tr.setAttribute('data-due',      dueVal);
+          tr.setAttribute('data-caseVal',  caseVal);
+          tr.setAttribute('data-caseTxt',  caseTxt);
+          tr.innerHTML = buildRowHTML(title, caseVal, caseTxt, assignee, priority, dueVal, 'new');
+          tasksBody.insertBefore(tr, tasksBody.firstChild);
+          tr.classList.add('new-row');
+          showToast('تمت إضافة المهمة بنجاح');
+        }
+
+        if (noResults) noResults.style.display = 'none';
+        saveTasks();
+        updateTaskKPIs();
+        rebuildBoard();
+        runFilter();
+
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = isEdit ? 'حفظ التعديلات' : 'إضافة المهمة';
+        submitBtn.classList.remove('btn-loading');
+        closeModal();
+      }, 600);
+    });
+
+    /* ═══════════════ Complete / Edit / Delete (event delegation) ═══════════════ */
+
+    tasksBody.addEventListener('click', function(e) {
+      /* ── إتمام ── */
+      var complBtn = e.target.closest('.btn-complete');
+      if (complBtn && !complBtn.disabled) {
+        var tr = complBtn.closest('tr');
+        tr.dataset.status = 'done';
+        var nameEl = tr.querySelector('.task-name');
+        if (nameEl) nameEl.classList.add('done');
+        tr.classList.remove('task-late');
+        complBtn.disabled = true;
+        complBtn.textContent = 'مكتملة';
+        var pillEl = tr.querySelector('td:nth-child(6) .pill');
+        if (pillEl) { pillEl.className = 'pill pill-done'; pillEl.textContent = 'مكتملة'; }
+        saveTasks(); updateTaskKPIs(); rebuildBoard();
+        showToast('تم إتمام المهمة بنجاح');
+      }
+
+      /* ── حذف ── */
+      var delBtn = e.target.closest('[onclick="deleteTask(this)"]');
+      if (delBtn) {
+        var tr = delBtn.closest('tr');
+        if (confirm('هل تريد حذف هذه المهمة؟')) {
+          tr.parentNode.removeChild(tr);
+          saveTasks(); updateTaskKPIs(); rebuildBoard(); runFilter();
+          showToast('تم حذف المهمة');
+        }
+      }
+    });
+
+    /* ═══════════════ View Toggle ═══════════════ */
+
     var listView  = document.getElementById('listView');
     var boardView = document.getElementById('boardView');
     var btnList   = document.getElementById('btnListView');
@@ -526,14 +907,15 @@
       boardView.style.display = '';
       btnBoard.classList.add('active');
       btnList.classList.remove('active');
+      rebuildBoard();
     });
 
-    /* ── Filters ── */
+    /* ═══════════════ Filters ═══════════════ */
+
     var tkSearch   = document.getElementById('tkSearch');
     var tkPriority = document.getElementById('tkPriority');
     var tkAssignee = document.getElementById('tkAssignee');
     var tkStatus   = document.getElementById('tkStatus');
-    var noResults  = document.getElementById('tkNoResults');
 
     function runFilter() {
       var q   = tkSearch.value.trim().toLowerCase();
@@ -541,256 +923,118 @@
       var asg = tkAssignee.value;
       var sts = tkStatus.value;
       var rows = document.querySelectorAll('#tasksBody tr[data-search]');
-      var vis = 0;
+      var vis  = 0;
       rows.forEach(function(tr) {
-        var matchQ   = !q   || tr.dataset.search.toLowerCase().indexOf(q) > -1;
-        var matchP   = !pri || tr.dataset.priority === pri;
-        var matchA   = !asg || tr.dataset.assignee === asg;
-        var matchS   = !sts || tr.dataset.status === sts;
-        var show = matchQ && matchP && matchA && matchS;
+        var show = (!q   || tr.dataset.search.toLowerCase().indexOf(q) > -1) &&
+                   (!pri || tr.dataset.priority === pri) &&
+                   (!asg || tr.dataset.assignee === asg) &&
+                   (!sts || tr.dataset.status   === sts);
         tr.style.display = show ? '' : 'none';
         if (show) vis++;
       });
-      noResults.style.display = vis === 0 ? '' : 'none';
+      if (noResults) noResults.style.display = vis === 0 ? '' : 'none';
     }
 
-    tkSearch.addEventListener('input', runFilter);
+    tkSearch.addEventListener('input',   runFilter);
     tkPriority.addEventListener('change', runFilter);
     tkAssignee.addEventListener('change', runFilter);
-    tkStatus.addEventListener('change', runFilter);
+    tkStatus.addEventListener('change',   runFilter);
     document.getElementById('tkReset').addEventListener('click', function() {
       tkSearch.value = ''; tkPriority.value = ''; tkAssignee.value = ''; tkStatus.value = '';
       runFilter();
     });
 
-    /* ── Complete button ── */
-    var tasksBody = document.getElementById('tasksBody');
-    tasksBody.addEventListener('click', function(e) {
-      var btn = e.target.closest('.btn-complete');
-      if (!btn || btn.disabled) return;
-      var tr = btn.closest('tr');
-      var nameEl = tr.querySelector('.task-name');
+    /* ═══════════════ تحميل عند الفتح ═══════════════ */
 
-      nameEl.classList.add('done');
-      tr.classList.remove('task-late');
-      btn.disabled = true;
-      btn.textContent = 'مكتملة';
-
-      var pillEl = tr.querySelector('td:nth-child(6) .pill');
-      if (pillEl) {
-        pillEl.className = 'pill pill-done';
-        pillEl.innerHTML = '<span></span>مكتملة';
-      }
-
-      tr.dataset.status = 'done';
+    window.addEventListener('load', function() {
+      loadTasks();
       updateTaskKPIs();
-
-      // Mirror in board: move matching card to done column
-      var taskText = nameEl.textContent.trim();
-      var allBoardCards = document.querySelectorAll('#boardCol1 .k-card, #boardCol2 .k-card');
-      allBoardCards.forEach(function(card) {
-        var cardTitle = card.querySelector('.k-title');
-        if (cardTitle && cardTitle.textContent.trim() === taskText) {
-          var clone = card.cloneNode(true);
-          clone.classList.add('k-done');
-          clone.querySelector('.k-title').classList.add('done');
-          card.parentNode.removeChild(card);
-          var col3 = document.getElementById('boardCol3');
-          col3.insertBefore(clone, col3.firstChild);
-          updateBoardCounts();
-        }
-      });
-
-      showToast('تم إتمام المهمة بنجاح');
+      /* ملء فلتر المسؤول من lawyers_data */
+      populateLawyersDropdown();
     });
 
-    function updateBoardCounts() {
-      document.getElementById('boardCount1').textContent = document.querySelectorAll('#boardCol1 .k-card').length;
-      document.getElementById('boardCount2').textContent = document.querySelectorAll('#boardCol2 .k-card').length;
-      document.getElementById('boardCount3').textContent = document.querySelectorAll('#boardCol3 .k-card').length;
-    }
+  })(); /* نهاية IIFE */
 
-    /* ── Modal ── */
-    var modal     = document.getElementById('taskModal');
-    var toastTimer;
+  /* ═══════════════ الدالات العامة (onclick) ═══════════════ */
 
-    function openModal() {
-      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
-      setTimeout(function() { document.getElementById('tkTitle').focus(); }, 50);
-    }
-    function closeModal() {
-      modal.classList.remove('open');
-      document.body.style.overflow = '';
-      document.getElementById('tkTitle').value = '';
-      document.getElementById('tkTitle').style.borderColor = '';
-      document.getElementById('tkCase').selectedIndex = 0;
-      document.getElementById('tkAssigneeModal').selectedIndex = 0;
-      document.getElementById('tkPriorityModal').selectedIndex = 1;
-      document.getElementById('tkDue').value = '';
-      document.getElementById('tkDesc').value = '';
-    }
-    function showToast(msg) {
-      var t = document.getElementById('toast');
-      t.textContent = '✓ ' + msg;
-      clearTimeout(toastTimer);
-      t.classList.add('show');
-      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
-    }
+  window.editTask = function(btn) {
+    var tr = btn.closest('tr');
+    window._editTask = tr;
+    /* ملء الحقول */
+    document.getElementById('tkTitle').value = tr.dataset.search || '';
+    document.getElementById('tkDue').value   = tr.dataset.due    || '';
 
-    document.getElementById('btnNewTask').addEventListener('click', openModal);
-    document.getElementById('btnNewTaskTop').addEventListener('click', openModal);
-    document.getElementById('modalClose').addEventListener('click', closeModal);
-    document.getElementById('modalCancel').addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    /* فتح الـ Modal ثم انتظار ملء القوائم */
+    var titleEl = document.querySelector('#taskModal .modal-title');
+    var subBtn  = document.getElementById('tkSubmit');
+    if (titleEl) titleEl.textContent = 'تعديل المهمة';
+    if (subBtn)  subBtn.textContent  = 'حفظ التعديلات';
 
-    /* Date chips */
-    function setDate(offsetDays) {
-      var d = new Date();
-      d.setDate(d.getDate() + offsetDays);
-      var y = d.getFullYear();
-      var m = String(d.getMonth() + 1).padStart(2, '0');
-      var day = String(d.getDate()).padStart(2, '0');
-      document.getElementById('tkDue').value = y + '-' + m + '-' + day;
-    }
-    document.getElementById('chipToday').addEventListener('click', function() { setDate(0); });
-    document.getElementById('chipTomorrow').addEventListener('click', function() { setDate(1); });
-    document.getElementById('chipWeek').addEventListener('click', function() { setDate(7); });
+    /* populate dropdowns then set values */
+    (function tryFill() {
+      var cSel = document.getElementById('tkCase');
+      var aSel = document.getElementById('tkAssigneeModal');
+      var pSel = document.getElementById('tkPriorityModal');
+      cSel.innerHTML = '<option value="">— اختر القضية —</option>';
+      aSel.innerHTML = '<option value="" disabled>اختر المسؤول...</option>';
 
-    /* ── Submit ── */
-    var submitBtn = document.getElementById('tkSubmit');
-    submitBtn.addEventListener('click', function() {
-      var titleEl = document.getElementById('tkTitle');
-      var title = titleEl.value.trim();
-      if (!title) { titleEl.style.borderColor = 'var(--red)'; return; }
-      titleEl.style.borderColor = '';
-
-      var caseVal    = document.getElementById('tkCase').value;
-      var assignee   = document.getElementById('tkAssigneeModal').value;
-      var priority   = document.getElementById('tkPriorityModal').value;
-      var dueVal     = document.getElementById('tkDue').value;
-      var months     = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-
-      var dueTxt = 'غير محدد';
-      if (dueVal) {
-        var parts = dueVal.split('-');
-        dueTxt = parseInt(parts[2]) + ' ' + months[parseInt(parts[1]) - 1] + ' ' + parts[0];
-      }
-
-      var priLabel = priority === 'high' ? 'عالية' : priority === 'mid' ? 'متوسطة' : 'منخفضة';
-      var priCls   = priority === 'high' ? 'pill-high' : priority === 'mid' ? 'pill-mid' : 'pill-low';
-      var avTxt    = assignee.split(' ').slice(0,2).map(function(w){return w[0];}).join('');
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
-      submitBtn.classList.add('btn-loading');
-
-      setTimeout(function() {
-        // Add to list view
-        var tbody = document.getElementById('tasksBody');
-        var noRow = document.getElementById('tkNoResults');
-        var tr = document.createElement('tr');
-        tr.setAttribute('data-search', title);
-        tr.setAttribute('data-priority', priority);
-        tr.setAttribute('data-assignee', assignee);
-        tr.setAttribute('data-status', 'new');
-        tr.innerHTML =
-          '<td><div class="task-name">' + title + '</div>' +
-            (caseVal ? '<div class="task-case">' + caseVal + '</div>' : '') +
-          '</td>' +
-          '<td style="font-size:0.75rem;color:var(--ink-light)">' + (caseVal || '—') + '</td>' +
-          '<td><div class="assignee-chip"><div class="av-xs">' + avTxt + '</div> ' + assignee + '</div></td>' +
-          '<td><span class="pill ' + priCls + '">' + priLabel + '</span></td>' +
-          '<td><div class="date-cell">' + dueTxt + '</div></td>' +
-          '<td><span class="pill pill-new">جديدة</span></td>' +
-          '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>';
-        tbody.insertBefore(tr, tbody.firstChild);
-        tr.classList.add('new-row');
-        saveTasks();
-        updateTaskKPIs();
-
-        // Add to board column 1
-        var col1 = document.getElementById('boardCol1');
-        var kCard = document.createElement('div');
-        kCard.className = 'k-card';
-        kCard.innerHTML =
-          '<div class="k-title">' + title + '</div>' +
-          (caseVal ? '<div class="k-case">' + caseVal + '</div>' : '') +
-          '<div class="k-meta">' +
-            '<div class="k-assignee"><div class="av-xs">' + avTxt + '</div> ' + assignee + '</div>' +
-            '<span class="pill ' + priCls + '" style="font-size:0.58rem;padding:2px 7px">' + priLabel + '</span>' +
-          '</div>' +
-          '<div class="k-date">' + dueTxt + '</div>';
-        col1.insertBefore(kCard, col1.firstChild);
-        updateBoardCounts();
-
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'إضافة المهمة';
-        submitBtn.classList.remove('btn-loading');
-        closeModal();
-        showToast('تمت إضافة المهمة بنجاح');
-      }, 800);
-    });
-
-  })();
-
-  function saveTasks() {
-    var rows = [];
-    document.querySelectorAll('#tasksBody tr').forEach(function(tr) {
-      if (!tr.classList.contains('no-results') && !tr.querySelector('.empty-state') && tr.id !== 'tkNoResults') {
-        rows.push(tr.innerHTML);
-      }
-    });
-    localStorage.setItem('tasks_data', JSON.stringify(rows));
-  }
-
-  function loadTasks() {
-    var saved = localStorage.getItem('tasks_data');
-    if (saved) {
-      try {
-        var rows = JSON.parse(saved);
-        if (rows.length > 0) {
-          var tbody = document.getElementById('tasksBody');
-          rows.forEach(function(html) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
+      var savedC = localStorage.getItem('cases_data');
+      if (savedC) {
+        try {
+          JSON.parse(savedC).forEach(function(html) {
+            var trHtml = html.trimStart().startsWith('<tr') ? html : '<tr>' + html + '</tr>';
+            var doc    = new DOMParser().parseFromString('<table><tbody>' + trHtml + '</tbody></table>', 'text/html');
+            var r      = doc.querySelector('tr'); if (!r) return;
+            var cells  = r.querySelectorAll('td'); if (cells.length < 2) return;
+            var idEl   = cells[0].querySelector('.case-id');
+            var nmEl   = cells[0].querySelector('.case-name');
+            var cid    = idEl ? idEl.textContent.trim() : '';
+            var cnm    = nmEl ? nmEl.textContent.trim() : cells[0].textContent.trim();
+            var cli    = cells[1] ? cells[1].textContent.trim() : '';
+            if (!cid && !cli) return;
+            var o = document.createElement('option'); o.value = cid;
+            o.textContent = (cnm||cid) + (cli ? ' — '+cli : ''); cSel.appendChild(o);
           });
-          var nr = document.getElementById('tkNoResults');
-          if (nr) nr.style.display = 'none';
-        }
-      } catch(e) {}
+        } catch(e) {}
+      }
+      var savedL = localStorage.getItem('lawyers_data');
+      var names  = [];
+      if (savedL) {
+        try {
+          JSON.parse(savedL).forEach(function(html) {
+            var d = document.createElement('div'); d.innerHTML = html;
+            var n = d.querySelector('.lc-name'); if (n) names.push(n.textContent.trim());
+          });
+        } catch(e) {}
+      }
+      if (!names.length) names = ['خالد بن عبدالعزيز العتيبي','سارة بنت محمد القحطاني','محمد بن سالم الزهراني','نورة بنت أحمد الشمري'];
+      names.forEach(function(n) { var o = document.createElement('option'); o.value = n; o.textContent = n; aSel.appendChild(o); });
+
+      /* ضبط القيم */
+      cSel.value = tr.dataset.caseVal || '';
+      aSel.value = tr.dataset.assignee || '';
+      pSel.value = tr.dataset.priority || 'mid';
+    })();
+
+    var modal = document.getElementById('taskModal');
+    modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
+    setTimeout(function() { document.getElementById('tkTitle').focus(); }, 50);
+  };
+
+  window.deleteTask = function(btn) {
+    var tr = btn.closest('tr');
+    if (confirm('هل تريد حذف هذه المهمة؟')) {
+      tr.parentNode.removeChild(tr);
+      /* إعادة استخدام saveTasks/KPIs من IIFE عبر localStorage */
+      var tasks = [];
+      document.querySelectorAll('#tasksBody tr[data-search]').forEach(function(r) {
+        tasks.push({ html: r.innerHTML, search: r.dataset.search||'', priority: r.dataset.priority||'',
+          assignee: r.dataset.assignee||'', status: r.dataset.status||'new', due: r.dataset.due||'',
+          caseVal: r.dataset.caseVal||'', caseTxt: r.dataset.caseTxt||'' });
+      });
+      localStorage.setItem('tasks_data', JSON.stringify(tasks));
     }
-  }
-
-  function updateTaskKPIs() {
-    var today = 0, inProgress = 0, overdue = 0, done = 0;
-    document.querySelectorAll('#tasksBody tr').forEach(function(tr) {
-      if (tr.id === 'tkNoResults') return;
-      var statusTd = tr.querySelector('td:nth-child(6)');
-      if (!statusTd) return;
-      var pill = statusTd.querySelector('.pill');
-      if (!pill) return;
-      var cls = pill.className;
-      if (cls.indexOf('pill-new') > -1)           today++;
-      else if (cls.indexOf('pill-progress') > -1) inProgress++;
-      else if (cls.indexOf('pill-late') > -1)     overdue++;
-      else if (cls.indexOf('pill-done') > -1)     done++;
-    });
-    var active = today + inProgress + overdue;
-    var set = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
-    set('taskTodayCount',      today);
-    set('taskInProgressCount', inProgress);
-    set('taskOverdueCount',    overdue);
-    set('taskDoneCount',       done);
-    var subEl = document.getElementById('taskActiveCount');
-    if (subEl) subEl.textContent = active + ' مهام نشطة';
-  }
-
-  window.addEventListener('load', function() {
-    loadTasks();
-    updateTaskKPIs();
-  });
+  };
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
