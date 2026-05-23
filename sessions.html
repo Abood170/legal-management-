@@ -746,11 +746,9 @@
           }
         }
 
-        /* تعبئة تاريخ الجلسة من تاريخ القضية الأولى (إذا لم يُحدَّد بعد) */
-        if (caseDate) {
-          var sfDate = document.getElementById('sfDate');
-          if (sfDate && !sfDate.value) sfDate.value = caseDate;
-        }
+        /* تعبئة تاريخ الجلسة من تاريخ القضية الأولى (يُحدَّث دائماً عند تغيير القضية) */
+        var sfDateEl = document.getElementById('sfDate');
+        if (sfDateEl) sfDateEl.value = caseDate || '';
 
         /* تعبئة المحامي — مطابقة مرنة (تطبيع الفراغات + غير حساس لحالة الأحرف) */
         if (!lawyer) return;
