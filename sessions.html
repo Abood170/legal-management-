@@ -459,33 +459,32 @@
             <label class="form-label" for="sfCourt">المحكمة</label>
             <select class="form-select" id="sfCourt">
               <optgroup label="── الرياض ──">
-                <option>محكمة التجارة بالرياض</option>
-                <option>المحكمة العمالية بالرياض</option>
-                <option>محكمة الأحوال الشخصية بالرياض</option>
-                <option>المحكمة العامة بالرياض</option>
-                <option>محكمة الاستئناف بالرياض</option>
-                <option>ديوان المظالم بالرياض</option>
-                <option>محكمة التنفيذ بالرياض</option>
-                <option>المحكمة الجزائية بالرياض</option>
+                <option>المحكمة التجارية - الرياض</option>
+                <option>محكمة العمل - الرياض</option>
+                <option>محكمة الأحوال الشخصية - الرياض</option>
+                <option>المحكمة العامة - الرياض</option>
+                <option>محكمة الاستئناف - الرياض</option>
+                <option>ديوان المظالم - الرياض</option>
+                <option>محكمة التنفيذ - الرياض</option>
               </optgroup>
               <optgroup label="── جدة ──">
-                <option>محكمة التجارة بجدة</option>
-                <option>المحكمة العمالية بجدة</option>
-                <option>محكمة الأحوال الشخصية بجدة</option>
-                <option>المحكمة العامة بجدة</option>
-                <option>محكمة الاستئناف بجدة</option>
-                <option>ديوان المظالم بجدة</option>
+                <option>المحكمة التجارية - جدة</option>
+                <option>محكمة العمل - جدة</option>
+                <option>محكمة الأحوال الشخصية - جدة</option>
+                <option>المحكمة العامة - جدة</option>
+                <option>محكمة الاستئناف - جدة</option>
               </optgroup>
               <optgroup label="── الدمام / المنطقة الشرقية ──">
-                <option>محكمة التجارة بالدمام</option>
-                <option>المحكمة العمالية بالدمام</option>
-                <option>محكمة الأحوال الشخصية بالدمام</option>
-                <option>محكمة الاستئناف بالدمام</option>
+                <option>المحكمة التجارية - الدمام</option>
+                <option>محكمة العمل - الدمام</option>
+                <option>محكمة الأحوال الشخصية - الدمام</option>
+                <option>المحكمة العامة - الدمام</option>
               </optgroup>
               <optgroup label="── متخصصة ──">
                 <option>المحكمة العليا</option>
                 <option>المحكمة الإدارية العليا</option>
                 <option>المحكمة الجزائية المتخصصة</option>
+                <option>محكمة الملكية الفكرية</option>
                 <option>مركز التحكيم التجاري السعودي</option>
               </optgroup>
             </select>
@@ -583,6 +582,7 @@
           er.setAttribute('data-date', date);
           er.setAttribute('data-time', time);
           er.setAttribute('data-case', caseName);
+          er.setAttribute('data-court', court);
           if (ec[0]) ec[0].innerHTML = '<div class="date-cell">' + arabicDate(date) + '</div>';
           if (ec[1]) ec[1].innerHTML = '<div class="time-cell">' + arabicTime(time) + '</div>';
           if (ec[2]) ec[2].innerHTML = '<div class="case-name">' + caseName + '</div>' + (caseId ? '<div class="case-id">' + caseId + '</div>' : '');
@@ -600,6 +600,7 @@
           tr.setAttribute('data-date',   date);
           tr.setAttribute('data-time',   time);
           tr.setAttribute('data-case',   caseName);
+          tr.setAttribute('data-court',  court);
           tr.innerHTML =
             '<td><div class="date-cell">' + arabicDate(date) + '</div></td>' +
             '<td><div class="time-cell">' + arabicTime(time) + '</div></td>' +
@@ -716,12 +717,24 @@
         var lawyer    = opt ? (opt.getAttribute('data-lawyer') || '') : '';
         var courtHint = opt ? (opt.getAttribute('data-court')  || '') : '';
 
-        /* تعبئة المحكمة إذا وُجدت */
+        /* تعبئة المحكمة إذا وُجدت (مطابقة بالنص أو جزء منه) */
         if (courtHint) {
           var courtSel = document.getElementById('sfCourt');
+          var ch = courtHint.trim().toLowerCase();
+          var matched = false;
+          /* أولاً: تطابق كامل */
           for (var c = 0; c < courtSel.options.length; c++) {
-            if (courtSel.options[c].text.trim() === courtHint.trim()) {
-              courtSel.selectedIndex = c; break;
+            if (courtSel.options[c].text.trim().toLowerCase() === ch) {
+              courtSel.selectedIndex = c; matched = true; break;
+            }
+          }
+          /* ثانياً: تطابق جزئي */
+          if (!matched) {
+            for (var c2 = 0; c2 < courtSel.options.length; c2++) {
+              var opt = courtSel.options[c2].text.trim().toLowerCase();
+              if (opt.includes(ch) || ch.includes(opt)) {
+                courtSel.selectedIndex = c2; break;
+              }
             }
           }
         }
@@ -1135,8 +1148,9 @@
     var timeVal   = row.getAttribute('data-time')   || '';
     var caseVal   = row.getAttribute('data-case')   || '';
     var lawyerVal = row.getAttribute('data-lawyer') || '';
-    var court     = cells[3] ? cells[3].textContent.trim() : '';
-    var hall      = cells[4] ? cells[4].textContent.trim() : '';
+    /* data-court أو نص الخلية كاحتياط */
+    var court = row.getAttribute('data-court') || (cells[3] ? cells[3].textContent.trim() : '');
+    var hall  = cells[4] ? cells[4].textContent.trim() : '';
     if (hall === '—') hall = '';
     window._editSession = row;
     if (typeof window.populateCasesDropdownS  === 'function') window.populateCasesDropdownS();
