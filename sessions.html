@@ -703,6 +703,9 @@
           courtName = courtDiv ? courtDiv.textContent.trim() : cells[3].textContent.trim();
         }
 
+        /* استخرج تاريخ الجلسة الأولى من data-date */
+        var caseDate = tr.getAttribute('data-date') || '';
+
         if (!caseId && !client) return;
         var opt = document.createElement('option');
         opt.value = caseId;
@@ -710,14 +713,16 @@
         opt.setAttribute('data-id', caseId);
         opt.setAttribute('data-lawyer', lawyerName);
         opt.setAttribute('data-court', courtName);
+        opt.setAttribute('data-date', caseDate);
         select.appendChild(opt);
       });
 
-      /* عند تغيير القضية → تعبئة المحامي والمحكمة تلقائياً */
+      /* عند تغيير القضية → تعبئة المحامي والمحكمة والتاريخ تلقائياً */
       select.onchange = function() {
         var opt = this.options[this.selectedIndex];
         var lawyer    = opt ? (opt.getAttribute('data-lawyer') || '') : '';
         var courtHint = opt ? (opt.getAttribute('data-court')  || '') : '';
+        var caseDate  = opt ? (opt.getAttribute('data-date')   || '') : '';
 
         /* تعبئة المحكمة إذا وُجدت (مطابقة بالنص أو جزء منه) */
         if (courtHint) {
@@ -739,6 +744,12 @@
               }
             }
           }
+        }
+
+        /* تعبئة تاريخ الجلسة من تاريخ القضية الأولى (إذا لم يُحدَّد بعد) */
+        if (caseDate) {
+          var sfDate = document.getElementById('sfDate');
+          if (sfDate && !sfDate.value) sfDate.value = caseDate;
         }
 
         /* تعبئة المحامي — مطابقة مرنة (تطبيع الفراغات + غير حساس لحالة الأحرف) */
