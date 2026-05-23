@@ -693,6 +693,8 @@
             lawyerName = cells[4].textContent.replace(/\s+/g, ' ').trim();
           }
         }
+        /* تجاهل نصوص التلميح (القضية بلا محامٍ معيَّن) */
+        if (/اختر|^\.\.\.|^—$/.test(lawyerName)) lawyerName = '';
 
         /* استخرج المحكمة من cells[3] */
         var courtName = '';
@@ -739,13 +741,26 @@
           }
         }
 
-        /* تعبئة المحامي */
+        /* تعبئة المحامي — مطابقة مرنة (تطبيع الفراغات + غير حساس لحالة الأحرف) */
         if (!lawyer) return;
         var lawyerSel = document.getElementById('sfLawyer');
+        var normL = lawyer.replace(/\s+/g, ' ').trim().toLowerCase();
+        var found = false;
+        /* أولاً: تطابق تام بعد التطبيع */
         for (var i = 0; i < lawyerSel.options.length; i++) {
-          var optText = lawyerSel.options[i].text.replace(' ✓','').trim();
-          if (lawyerSel.options[i].value === lawyer || optText === lawyer) {
-            lawyerSel.selectedIndex = i; break;
+          var optVal  = lawyerSel.options[i].value.replace(/\s+/g, ' ').trim().toLowerCase();
+          var optTxt  = lawyerSel.options[i].text.replace(' ✓','').replace(/\s+/g, ' ').trim().toLowerCase();
+          if (optVal === normL || optTxt === normL) {
+            lawyerSel.selectedIndex = i; found = true; break;
+          }
+        }
+        /* ثانياً: تطابق جزئي (يحتوي) كاحتياطي */
+        if (!found) {
+          for (var j = 0; j < lawyerSel.options.length; j++) {
+            var jTxt = lawyerSel.options[j].text.replace(' ✓','').replace(/\s+/g, ' ').trim().toLowerCase();
+            if (jTxt.includes(normL) || normL.includes(jTxt)) {
+              lawyerSel.selectedIndex = j; break;
+            }
           }
         }
       };

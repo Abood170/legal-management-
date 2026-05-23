@@ -748,6 +748,12 @@
       var courtLabel = courtSel.options[courtSel.selectedIndex].text;
       var city       = document.getElementById('cfCity').value;
       var lawyerSel  = document.getElementById('cfLawyer');
+      if (!lawyerSel.value) {
+        lawyerSel.style.borderColor = 'var(--red)';
+        lawyerSel.focus();
+        return;
+      }
+      lawyerSel.style.borderColor = '';
       var lawyerVal  = lawyerSel.value;
       var lawyerName = lawyerSel.options[lawyerSel.selectedIndex].text;
       var lawyerAv   = lawyerSel.options[lawyerSel.selectedIndex].getAttribute('data-av') ||
