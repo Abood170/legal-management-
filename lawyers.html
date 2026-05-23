@@ -638,6 +638,9 @@
       document.getElementById('lJoin').value = '';
       document.getElementById('lTitle').selectedIndex = 3;
       document.getElementById('lSpec').selectedIndex = 0;
+      window._editLawyerCard = null;
+      document.querySelector('#lawyerModal .modal-title').textContent = '+ إضافة محامي جديد';
+      var sb = document.getElementById('lSubmit'); if (sb) sb.textContent = 'إضافة المحامي';
     }
     function showToast(msg) {
       var t = document.getElementById('toast');
@@ -676,68 +679,91 @@
       var spec  = document.getElementById('lSpec').value;
       var initials = name.split(' ').slice(0, 2).map(function(w) { return w[0]; }).join('');
 
+      var isEdit = !!window._editLawyerCard;
       submitBtn.disabled = true;
       submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
       submitBtn.classList.add('btn-loading');
 
       setTimeout(function() {
-        /* Push to LAWYERS data */
-        var newIdx = LAWYERS.length;
-        LAWYERS.push({
-          name: name, initials: initials, title: title, spec: spec,
-          cases: 0, win: '—', fee: '—', phone: phone, email: email,
-          chartBars: [10, 10, 10, 10, 10, 10],
-          casesList: []
-        });
-
-        /* Update KPI */
-        document.getElementById('kpiCount').textContent = LAWYERS.length;
-
-        /* Build new card */
-        var grid = document.getElementById('lawyersGrid');
-        var card = document.createElement('div');
-        card.className = 'lawyer-card new-card';
-        card.setAttribute('data-idx', newIdx);
-        card.innerHTML =
-          '<button class="delete-lawyer-btn" onclick="deleteLawyer(this)" title="حذف المحامي">✕</button>' +
-          '<div class="lc-top">' +
-            '<div class="lc-avatar">' + initials + '</div>' +
-            '<div class="lc-info">' +
-              '<div class="lc-name">' + name + '</div>' +
-              '<div class="lc-title">' + title + '</div>' +
-              '<div class="lc-spec">⚖️ ' + spec + '</div>' +
+        if (isEdit) {
+          /* ── تعديل محامٍ موجود ── */
+          var ec = window._editLawyerCard;
+          var av = ec.querySelector('.lc-avatar'); if (av) av.textContent = initials;
+          var nm = ec.querySelector('.lc-name');   if (nm) nm.textContent = name;
+          var ti = ec.querySelector('.lc-title');  if (ti) ti.textContent = title;
+          var sp = ec.querySelector('.lc-spec');   if (sp) sp.textContent = '⚖️ ' + spec;
+          var rows = ec.querySelectorAll('.lc-contact-row');
+          rows.forEach(function(r) {
+            var ico = r.querySelector('.lc-contact-icon');
+            if (!ico) return;
+            if (ico.textContent.trim() === '📞') r.innerHTML = '<span class="lc-contact-icon">📞</span>' + phone;
+            if (ico.textContent.trim() === '✉️') r.innerHTML = '<span class="lc-contact-icon">✉️</span>' + email;
+          });
+          /* Update LAWYERS array */
+          var idx = parseInt(ec.getAttribute('data-idx'));
+          if (!isNaN(idx) && LAWYERS[idx]) {
+            LAWYERS[idx].name = name; LAWYERS[idx].initials = initials;
+            LAWYERS[idx].title = title; LAWYERS[idx].spec = spec;
+            LAWYERS[idx].phone = phone; LAWYERS[idx].email = email;
+          }
+          window._editLawyerCard = null;
+          saveLawyers();
+          showToast('تم تعديل بيانات المحامي بنجاح');
+        } else {
+          /* ── محامٍ جديد ── */
+          var newIdx = LAWYERS.length;
+          LAWYERS.push({
+            name: name, initials: initials, title: title, spec: spec,
+            cases: 0, win: '—', fee: '—', phone: phone, email: email,
+            chartBars: [10, 10, 10, 10, 10, 10],
+            casesList: []
+          });
+          document.getElementById('kpiCount').textContent = LAWYERS.length;
+          var grid = document.getElementById('lawyersGrid');
+          var card = document.createElement('div');
+          card.className = 'lawyer-card new-card';
+          card.setAttribute('data-idx', newIdx);
+          card.innerHTML =
+            '<button class="delete-lawyer-btn" onclick="deleteLawyer(this)" title="حذف المحامي">✕</button>' +
+            '<div class="lc-top">' +
+              '<div class="lc-avatar">' + initials + '</div>' +
+              '<div class="lc-info">' +
+                '<div class="lc-name">' + name + '</div>' +
+                '<div class="lc-title">' + title + '</div>' +
+                '<div class="lc-spec">⚖️ ' + spec + '</div>' +
+              '</div>' +
+              '<div class="lc-status"><span class="pill-active">نشط</span></div>' +
             '</div>' +
-            '<div class="lc-status"><span class="pill-active">نشط</span></div>' +
-          '</div>' +
-          '<div class="lc-stats">' +
-            '<div class="lc-stat"><div class="lc-stat-val green">0</div><div class="lc-stat-lbl">قضية نشطة</div></div>' +
-            '<div class="lc-stat"><div class="lc-stat-val">—</div><div class="lc-stat-lbl">نسبة الفوز</div></div>' +
-            '<div class="lc-stat"><div class="lc-stat-val gold">—</div><div class="lc-stat-lbl">أتعاب ر.س</div></div>' +
-          '</div>' +
-          '<div class="lc-workload">' +
-            '<div class="lc-wl-top"><span class="lc-wl-label">عبء العمل</span><span class="lc-wl-pct">0%</span></div>' +
-            '<div class="lc-wl-track"><div class="lc-wl-fill wl-low" style="width:0%"></div></div>' +
-          '</div>' +
-          '<div class="lc-contact">' +
-            '<div class="lc-contact-row"><span class="lc-contact-icon">📞</span>' + phone + '</div>' +
-            '<div class="lc-contact-row"><span class="lc-contact-icon">✉️</span>' + email + '</div>' +
-          '</div>' +
-          '<div class="lc-actions">' +
-            '<button class="btn-view">عرض الملف</button>' +
-            '<button class="btn-assign">تعيين قضية</button>' +
-          '</div>';
-        grid.appendChild(card);
-        var es = document.getElementById('emptyState');
-        if (es) es.style.display = 'none';
-        saveLawyers();
+            '<div class="lc-stats">' +
+              '<div class="lc-stat"><div class="lc-stat-val green">0</div><div class="lc-stat-lbl">قضية نشطة</div></div>' +
+              '<div class="lc-stat"><div class="lc-stat-val">—</div><div class="lc-stat-lbl">نسبة الفوز</div></div>' +
+              '<div class="lc-stat"><div class="lc-stat-val gold">—</div><div class="lc-stat-lbl">أتعاب ر.س</div></div>' +
+            '</div>' +
+            '<div class="lc-workload">' +
+              '<div class="lc-wl-top"><span class="lc-wl-label">عبء العمل</span><span class="lc-wl-pct">0%</span></div>' +
+              '<div class="lc-wl-track"><div class="lc-wl-fill wl-low" style="width:0%"></div></div>' +
+            '</div>' +
+            '<div class="lc-contact">' +
+              '<div class="lc-contact-row"><span class="lc-contact-icon">📞</span>' + phone + '</div>' +
+              '<div class="lc-contact-row"><span class="lc-contact-icon">✉️</span>' + email + '</div>' +
+            '</div>' +
+            '<div class="lc-actions">' +
+              '<button class="btn-view">عرض الملف</button>' +
+              '<button class="btn-edit-lawyer" onclick="editLawyer(this)" style="background:rgba(28,94,62,0.08);color:var(--accent);border:1px solid var(--accent-border);border-radius:7px;padding:0.45rem 0.9rem;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:\'Cairo\',sans-serif;">✏️ تعديل</button>' +
+              '<button class="btn-assign">تعيين قضية</button>' +
+            '</div>';
+          grid.appendChild(card);
+          var es = document.getElementById('emptyState');
+          if (es) es.style.display = 'none';
+          saveLawyers();
+          showToast('تمت إضافة المحامي بنجاح');
+        }
         refreshLawyerCaseCounts();
         updateLawyerKPIs();
-
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'إضافة المحامي';
         submitBtn.classList.remove('btn-loading');
         closeModal();
-        showToast('تمت إضافة المحامي بنجاح');
       }, 900);
     });
 
@@ -778,7 +804,20 @@
             var div = document.createElement('div');
             div.innerHTML = html;
             var card = div.firstElementChild;
-            if (card) grid.appendChild(card);
+            if (card) {
+              /* Inject edit button if missing */
+              var lcAct = card.querySelector('.lc-actions');
+              if (lcAct && !lcAct.querySelector('.btn-edit-lawyer')) {
+                var editBtnL = document.createElement('button');
+                editBtnL.className = 'btn-edit-lawyer';
+                editBtnL.setAttribute('onclick', 'editLawyer(this)');
+                editBtnL.style.cssText = "background:rgba(28,94,62,0.08);color:var(--accent);border:1px solid rgba(28,94,62,0.15);border-radius:7px;padding:0.45rem 0.9rem;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;";
+                editBtnL.textContent = '✏️ تعديل';
+                var btnAssign = lcAct.querySelector('.btn-assign');
+                btnAssign ? lcAct.insertBefore(editBtnL, btnAssign) : lcAct.appendChild(editBtnL);
+              }
+              grid.appendChild(card);
+            }
           });
           updateLawyerCount();
         }
@@ -967,6 +1006,50 @@
     syncEmptyState();
     window.showToast('تم حذف المحامي بنجاح');
   }
+  </script>
+  <script>
+  /* ══ Edit Lawyer ════════════════════════════════════════════════ */
+  window.editLawyer = function(btn) {
+    var card = btn.closest('.lawyer-card');
+    if (!card) return;
+    function txt(sel) { var el = card.querySelector(sel); return el ? el.textContent.trim() : ''; }
+    function contactTxt(icon) {
+      var rows = card.querySelectorAll('.lc-contact-row');
+      for (var i = 0; i < rows.length; i++) {
+        var ic = rows[i].querySelector('.lc-contact-icon');
+        if (ic && ic.textContent.trim() === icon)
+          return rows[i].textContent.replace(icon, '').trim();
+      }
+      return '';
+    }
+    function setSelByTextL(selId, val) {
+      var sel = document.getElementById(selId);
+      if (!sel || !val) return;
+      var vl = val.trim().toLowerCase();
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value.trim().toLowerCase() === vl ||
+            sel.options[i].text.trim().toLowerCase()  === vl) {
+          sel.selectedIndex = i; return;
+        }
+      }
+    }
+    var name  = txt('.lc-name');
+    var title = txt('.lc-title');
+    var spec  = txt('.lc-spec').replace('⚖️', '').trim();
+    var phone = contactTxt('📞');
+    var email = contactTxt('✉️');
+    window._editLawyerCard = card;
+    document.getElementById('lName').value  = name;
+    document.getElementById('lPhone').value = phone;
+    document.getElementById('lEmail').value = email;
+    setSelByTextL('lTitle', title);
+    setSelByTextL('lSpec',  spec);
+    document.querySelector('#lawyerModal .modal-title').textContent = '✏️ تعديل بيانات المحامي';
+    var sb = document.getElementById('lSubmit'); if (sb) sb.textContent = 'حفظ التعديلات';
+    var modal = document.getElementById('lawyerModal');
+    modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
+    setTimeout(function() { document.getElementById('lName').focus(); }, 50);
+  };
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>

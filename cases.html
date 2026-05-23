@@ -754,31 +754,54 @@
                        lawyerName.split(' ').slice(0, 2).map(function(w) { return w[0]; }).join('');
       var date       = document.getElementById('cfDate').value;
       var dateDisplay = date ? arabicDate(date) : '—';
-      var caseId     = '#2025-' + String(counter++).padStart(4, '0');
-
-      var newPwd = generateCasePassword();
+      var isEdit = !!window._editRow;
+      var caseId = isEdit
+        ? (window._editRow.querySelector('.case-id') ? window._editRow.querySelector('.case-id').textContent.trim() : '')
+        : '#2025-' + String(counter++).padStart(4, '0');
+      var newPwd = isEdit ? null : generateCasePassword();
 
       btn.disabled = true;
       btn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
       btn.classList.add('btn-loading');
 
       setTimeout(function() {
-        var tbody = document.getElementById('casesBody');
-        var tr = document.createElement('tr');
-        tr.setAttribute('data-search', client + ' ' + caseId.replace('#',''));
-        tr.setAttribute('data-status', 'active');
-        tr.setAttribute('data-court',  courtVal);
-        tr.setAttribute('data-lawyer', lawyerVal);
-        tr.innerHTML =
-          '<td><div class="case-name">قضية ' + type + '</div><div class="case-id">' + caseId + '</div></td>' +
-          '<td>' + client + '</td>' +
-          '<td>' + type + '</td>' +
-          '<td><div>' + courtLabel + '</div><div class="case-id">' + city + '</div></td>' +
-          '<td><div class="lawyer-chip"><div class="lawyer-av">' + lawyerAv + '</div>' + lawyerName + '</div></td>' +
-          '<td><div class="date-cell">' + dateDisplay + '</div></td>' +
-          '<td><span class="pill pill-active">نشطة</span></td>' +
-          '<td><div class="row-actions"><button class="row-btn view-case-btn">عرض</button><button class="btn-portal" onclick="openClientPortal(\'' + caseId + '\')">بوابة الموكل</button><button class="row-btn btn-show-pwd" onclick="showCasePassword(this)" title="عرض كلمة مرور الموكل">🔑 كلمة المرور</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteCase(this)">حذف</button></div></td>';
-        tbody.insertBefore(tr, tbody.firstChild);
+        if (isEdit) {
+          /* ── تعديل دعوى موجودة ── */
+          var er = window._editRow;
+          var ec = er.querySelectorAll('td');
+          er.setAttribute('data-court',  courtVal);
+          er.setAttribute('data-lawyer', lawyerVal);
+          if (date) er.setAttribute('data-date', date);
+          er.setAttribute('data-search', client + ' ' + caseId.replace('#','').trim());
+          if (ec[1]) ec[1].textContent = client;
+          if (ec[2]) ec[2].textContent = type;
+          if (ec[3]) ec[3].innerHTML = '<div>' + courtLabel + '</div><div class="case-id">' + city + '</div>';
+          if (ec[4]) ec[4].innerHTML = '<div class="lawyer-chip"><div class="lawyer-av">' + lawyerAv + '</div>' + lawyerName + '</div>';
+          if (ec[5]) ec[5].innerHTML = '<div class="date-cell">' + dateDisplay + '</div>';
+          window._editRow = null;
+          showToast('تم تعديل الدعوى بنجاح');
+        } else {
+          /* ── دعوى جديدة ── */
+          var tbody = document.getElementById('casesBody');
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-search', client + ' ' + caseId.replace('#',''));
+          tr.setAttribute('data-status', 'active');
+          tr.setAttribute('data-court',  courtVal);
+          tr.setAttribute('data-lawyer', lawyerVal);
+          tr.setAttribute('data-date',   date);
+          tr.innerHTML =
+            '<td><div class="case-name">قضية ' + type + '</div><div class="case-id">' + caseId + '</div></td>' +
+            '<td>' + client + '</td>' +
+            '<td>' + type + '</td>' +
+            '<td><div>' + courtLabel + '</div><div class="case-id">' + city + '</div></td>' +
+            '<td><div class="lawyer-chip"><div class="lawyer-av">' + lawyerAv + '</div>' + lawyerName + '</div></td>' +
+            '<td><div class="date-cell">' + dateDisplay + '</div></td>' +
+            '<td><span class="pill pill-active">نشطة</span></td>' +
+            '<td><div class="row-actions"><button class="row-btn view-case-btn">عرض</button><button class="btn-portal" onclick="openClientPortal(\'' + caseId + '\')">بوابة الموكل</button><button class="row-btn btn-show-pwd" onclick="showCasePassword(this)" title="عرض كلمة مرور الموكل">🔑 كلمة المرور</button><button class="row-btn btn-edit-case" onclick="editCase(this)">✏️ تعديل</button><button class="row-btn" style="color:#DC2626;border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)" onclick="deleteCase(this)">حذف</button></div></td>';
+          tbody.insertBefore(tr, tbody.firstChild);
+          window._pendingCaseData = { type: type, court: courtLabel, lawyer: lawyerName };
+          showCredentials(caseId, client, newPwd);
+        }
         saveCases();
         updateSidebarBadges();
         updateCasesHeader();
@@ -798,12 +821,8 @@
         document.getElementById('cfCity').selectedIndex   = 0;
         document.getElementById('cfLawyer').selectedIndex = 0;
         document.querySelectorAll('.js-date-chip-c').forEach(function(c){c.classList.remove('active');});
-
-        // Capture selected values before reset for sessionStorage (selects are now at index 0)
-        window._pendingCaseData = { type: type, court: courtLabel, lawyer: lawyerName };
-
-        showCredentials(caseId, client, newPwd);
-      }, 1200);
+        document.querySelector('#cModal .modal-title').textContent = 'دعوى جديدة';
+      }, isEdit ? 600 : 1200);
     });
 
     function arabicDate(val) {
@@ -852,6 +871,7 @@
         });
       }
     }
+    window.populateLawyersDropdown = populateLawyersDropdown;
 
     function openModal() {
       populateLawyersDropdown();
@@ -869,6 +889,9 @@
       document.getElementById('cfCourt').selectedIndex  = 0;
       document.getElementById('cfCity').selectedIndex   = 0;
       document.getElementById('cfLawyer').selectedIndex = 0;
+      window._editRow = null;
+      document.querySelector('#cModal .modal-title').textContent = 'دعوى جديدة';
+      var sb = document.getElementById('cFormSubmit'); if (sb) sb.textContent = 'إنشاء الدعوى';
     }
 
     document.getElementById('btnNewCase').addEventListener('click', openModal);
@@ -944,6 +967,17 @@
             return b.textContent.trim() === 'حذف';
           });
           delBtn ? ra.insertBefore(pwdBtn, delBtn) : ra.appendChild(pwdBtn);
+        }
+        /* تأكد من وجود زر التعديل */
+        if (ra && !ra.querySelector('.btn-edit-case')) {
+          var editBtn = document.createElement('button');
+          editBtn.className = 'row-btn btn-edit-case';
+          editBtn.setAttribute('onclick', 'editCase(this)');
+          editBtn.textContent = '✏️ تعديل';
+          var delBtn2 = Array.from(ra.querySelectorAll('button')).find(function(b) {
+            return b.textContent.trim() === 'حذف';
+          });
+          delBtn2 ? ra.insertBefore(editBtn, delBtn2) : ra.appendChild(editBtn);
         }
         tbody.appendChild(tr);
       });
@@ -1096,6 +1130,47 @@
       if (e.key === 'Escape' && panel.classList.contains('open')) window.closeCasePanel();
     });
   })();
+  </script>
+  <script>
+  /* ══ Edit Case ══════════════════════════════════════════════════ */
+  function _setSelAuto(sel, val) {
+    if (!sel || val == null) return;
+    var v = String(val).trim();
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === v) { sel.selectedIndex = i; return; }
+    }
+    var vl = v.toLowerCase();
+    for (var j = 0; j < sel.options.length; j++) {
+      if (sel.options[j].text.trim().toLowerCase() === vl) { sel.selectedIndex = j; return; }
+    }
+  }
+  window.editCase = function(btn) {
+    var row = btn.closest('tr');
+    if (!row) return;
+    var cells = row.querySelectorAll('td');
+    var clientName = cells[1] ? cells[1].textContent.trim() : '';
+    var caseType   = cells[2] ? cells[2].textContent.trim() : '';
+    var courtVal   = row.getAttribute('data-court')  || '';
+    var lawyerVal  = row.getAttribute('data-lawyer') || '';
+    var dateVal    = row.getAttribute('data-date')   || '';
+    var city = '';
+    if (cells[3]) {
+      var ds = cells[3].querySelectorAll('div');
+      city = ds[1] ? ds[1].textContent.trim() : '';
+    }
+    window._editRow = row;
+    if (typeof window.populateLawyersDropdown === 'function') window.populateLawyersDropdown();
+    document.getElementById('cfClient').value = clientName;
+    _setSelAuto(document.getElementById('cfType'),  caseType);
+    _setSelAuto(document.getElementById('cfCourt'), courtVal);
+    _setSelAuto(document.getElementById('cfCity'),  city);
+    if (dateVal) document.getElementById('cfDate').value = dateVal;
+    setTimeout(function() { _setSelAuto(document.getElementById('cfLawyer'), lawyerVal); }, 60);
+    document.querySelector('#cModal .modal-title').textContent = 'تعديل الدعوى';
+    var sb = document.getElementById('cFormSubmit'); if (sb) sb.textContent = 'حفظ التعديلات';
+    var ov = document.getElementById('cModal');
+    ov.classList.add('open'); ov.scrollTop = 0; document.body.style.overflow = 'hidden';
+  };
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>

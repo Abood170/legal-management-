@@ -580,6 +580,7 @@
           '<td>' + statusPill(e.status) + '</td>' +
           '<td><div style="display:flex;gap:.3rem">' +
             '<button class="row-btn" onclick="editStatus(' + e._idx + ')">تحديث</button>' +
+            '<button class="row-btn" onclick="editExpModal(' + e._idx + ')">✏️ تعديل</button>' +
             '<button class="row-btn danger" onclick="deleteExp(' + e._idx + ')">حذف</button>' +
           '</div></td>';
         tbody.appendChild(tr);
@@ -681,7 +682,12 @@
       document.getElementById('eAmount').style.borderColor = '';
       modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
     }
-    function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+    function closeModal() {
+      modal.classList.remove('open'); document.body.style.overflow = '';
+      window._editExpIdx = null;
+      document.querySelector('#expModal .modal-title').textContent = '📦 تسجيل مصروف جديد';
+      var sb = document.getElementById('modalSave'); if (sb) sb.textContent = '💾 حفظ المصروف';
+    }
 
     document.getElementById('btnNewExp').addEventListener('click', openModal);
     document.getElementById('modalClose').addEventListener('click', closeModal);
@@ -720,10 +726,11 @@
       if (!valid) { showToast('⚠️ يرجى تعبئة الحقول المطلوبة', '#DC2626'); return; }
 
       var btn = this;
+      var editIdx = window._editExpIdx;
       btn.disabled = true; btn.classList.add('btn-loading'); btn.textContent = 'جاري الحفظ...';
 
       setTimeout(function() {
-        expenses.push({
+        var expObj = {
           category : cat,
           desc     : desc,
           caseName : document.getElementById('eCase').value,
@@ -733,16 +740,49 @@
           paidBy   : document.getElementById('ePaidBy').value,
           receipt  : document.getElementById('eReceipt').value.trim(),
           status   : document.getElementById('eStatus').value,
-          notes    : document.getElementById('eNotes').value.trim(),
-          createdAt: Date.now()
-        });
+          notes    : document.getElementById('eNotes').value.trim()
+        };
+        if (editIdx != null && expenses[editIdx]) {
+          expObj.createdAt = expenses[editIdx].createdAt;
+          expenses[editIdx] = expObj;
+          window._editExpIdx = null;
+          showToast('✅ تم تعديل المصروف بنجاح');
+        } else {
+          expObj.createdAt = Date.now();
+          expenses.push(expObj);
+          showToast('✅ تم تسجيل المصروف بنجاح');
+        }
         save();
         renderAll();
         closeModal();
         btn.disabled = false; btn.classList.remove('btn-loading'); btn.textContent = '💾 حفظ المصروف';
-        showToast('✅ تم تسجيل المصروف بنجاح');
       }, 600);
     });
+
+    /* ── Edit Expense (full form) ── */
+    window.editExpModal = function(idx) {
+      var e = expenses[idx];
+      if (!e) return;
+      window._editExpIdx = idx;
+      loadCasesIntoSelect('eCase');
+      document.getElementById('eCategory').value = e.category || '';
+      document.getElementById('eDesc').value     = e.desc     || '';
+      document.getElementById('eCase').value     = e.caseName || '';
+      document.getElementById('eClient').value   = e.client   || '';
+      document.getElementById('eAmount').value   = e.amount   || '';
+      document.getElementById('eDate').value     = e.date     || '';
+      document.getElementById('ePaidBy').value   = e.paidBy   || 'المكتب';
+      document.getElementById('eReceipt').value  = e.receipt  || '';
+      document.getElementById('eStatus').value   = e.status   || 'معلق';
+      document.getElementById('eNotes').value    = e.notes    || '';
+      var amt = parseFloat(e.amount);
+      var preview = document.getElementById('amountPreview');
+      if (amt > 0) { document.getElementById('amountPreviewVal').textContent = fmt(amt) + ' ر.س'; preview.style.display = 'flex'; }
+      else preview.style.display = 'none';
+      document.querySelector('#expModal .modal-title').textContent = '✏️ تعديل المصروف';
+      var sb = document.getElementById('modalSave'); if (sb) sb.textContent = '💾 حفظ التعديلات';
+      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
+    };
 
     /* ── Edit Status ── */
     window.editStatus = function(idx) {

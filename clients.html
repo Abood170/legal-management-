@@ -553,6 +553,9 @@
       nameLabel.textContent = 'الاسم الكامل *';
       document.getElementById('clIdLabel').textContent = 'رقم الهوية الوطنية';
       document.getElementById('clIdNum').placeholder = '10XXXXXXXX';
+      window._editClient = null;
+      document.querySelector('#clientModal .modal-title').textContent = '👥 موكل جديد';
+      var sb = document.getElementById('clSubmit'); if (sb) sb.textContent = 'إضافة الموكل';
     }
 
     document.getElementById('btnNewClient').addEventListener('click', openModal);
@@ -593,6 +596,7 @@
       var idNum = document.getElementById('clIdNum').value.trim() || '—';
       var id    = '#CLT-0' + String(Math.floor(Math.random() * 900) + 100);
 
+      var isEdit = !!window._editClient;
       submitBtn.disabled = true;
       submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
       submitBtn.classList.add('btn-loading');
@@ -600,34 +604,53 @@
       setTimeout(function() {
         var typeLabel = type === 'company' ? 'شركة' : 'فرد';
         var typeCls   = type === 'company' ? 'type-company' : 'type-person';
-        var today = new Date();
-        var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-        var dateStr = today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
 
-        var idx = CLIENTS.length;
-        CLIENTS.push({ name: name, type: type, phone: phone, email: email, cases: [] });
-
-        var tbody = document.getElementById('clientsBody');
-        var noRes = document.getElementById('clNoResults');
-        var tr = document.createElement('tr');
-        tr.setAttribute('data-search', name + ' ' + phone);
-        tr.setAttribute('data-type', type);
-        tr.setAttribute('data-status', 'active');
-        tr.innerHTML =
-          '<td><div class="client-name-cell">' + name + '</div><div class="client-id-cell">' + id + '</div><div class="client-idnum-cell" style="display:none">' + idNum + '</div></td>' +
-          '<td><span class="type-badge ' + typeCls + '">' + typeLabel + '</span></td>' +
-          '<td><div class="phone-cell">' + phone + '</div></td>' +
-          '<td><div class="email-cell">' + email + '</div></td>' +
-          '<td><span class="cases-count no-cases">0</span></td>' +
-          '<td><span style="font-size:0.75rem;color:var(--ink-light)">' + dateStr + '</span></td>' +
-          '<td><span class="pill pill-active">نشط</span></td>' +
-          '<td><div style="display:flex;gap:.35rem">' +
-            '<button class="row-btn" onclick="openPanel(' + idx + ')">عرض</button>' +
-            '<button class="row-btn" style="color:var(--accent);border-color:var(--accent)" onclick="openClientProfile(this)">👤 ملف</button>' +
-          '</div></td>';
-        tbody.insertBefore(tr, tbody.firstChild);
-        tr.classList.add('new-row');
-        saveClients();
+        if (isEdit) {
+          /* ── تعديل موكل موجود ── */
+          var er = window._editClient;
+          var ec = er.querySelectorAll('td');
+          er.setAttribute('data-search', name + ' ' + phone);
+          er.setAttribute('data-type', type);
+          if (ec[0]) {
+            var nc = ec[0].querySelector('.client-name-cell'); if (nc) nc.textContent = name;
+            var ic = ec[0].querySelector('.client-idnum-cell'); if (ic) ic.textContent = idNum;
+          }
+          if (ec[1]) ec[1].innerHTML = '<span class="type-badge ' + typeCls + '">' + typeLabel + '</span>';
+          if (ec[2]) { var ph = ec[2].querySelector('.phone-cell'); if (ph) ph.textContent = phone; }
+          if (ec[3]) { var em = ec[3].querySelector('.email-cell'); if (em) em.textContent = email; }
+          window._editClient = null;
+          saveClients();
+          showToast('تم تعديل الموكل بنجاح');
+        } else {
+          /* ── موكل جديد ── */
+          var today = new Date();
+          var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+          var dateStr = today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
+          var idx = CLIENTS.length;
+          CLIENTS.push({ name: name, type: type, phone: phone, email: email, cases: [] });
+          var tbody = document.getElementById('clientsBody');
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-search', name + ' ' + phone);
+          tr.setAttribute('data-type', type);
+          tr.setAttribute('data-status', 'active');
+          tr.innerHTML =
+            '<td><div class="client-name-cell">' + name + '</div><div class="client-id-cell">' + id + '</div><div class="client-idnum-cell" style="display:none">' + idNum + '</div></td>' +
+            '<td><span class="type-badge ' + typeCls + '">' + typeLabel + '</span></td>' +
+            '<td><div class="phone-cell">' + phone + '</div></td>' +
+            '<td><div class="email-cell">' + email + '</div></td>' +
+            '<td><span class="cases-count no-cases">0</span></td>' +
+            '<td><span style="font-size:0.75rem;color:var(--ink-light)">' + dateStr + '</span></td>' +
+            '<td><span class="pill pill-active">نشط</span></td>' +
+            '<td><div style="display:flex;gap:.35rem">' +
+              '<button class="row-btn" onclick="openPanel(' + idx + ')">عرض</button>' +
+              '<button class="row-btn" style="color:var(--accent);border-color:var(--accent)" onclick="openClientProfile(this)">👤 ملف</button>' +
+              '<button class="row-btn btn-edit-client" onclick="editClient(this)">✏️ تعديل</button>' +
+            '</div></td>';
+          tbody.insertBefore(tr, tbody.firstChild);
+          tr.classList.add('new-row');
+          saveClients();
+          showToast('تمت إضافة الموكل بنجاح');
+        }
         refreshClientCaseCounts();
         updateClientStats();
 
@@ -635,7 +658,6 @@
         submitBtn.innerHTML = 'إضافة الموكل';
         submitBtn.classList.remove('btn-loading');
         closeModal();
-        showToast('تمت إضافة الموكل بنجاح');
       }, 1000);
     });
 
@@ -803,6 +825,15 @@
                 div.appendChild(profileBtn);
               }
             }
+            /* تأكد من وجود زر التعديل */
+            var wrapC = lastTd ? lastTd.querySelector('div[style*="flex"]') : null;
+            if (wrapC && !wrapC.querySelector('.btn-edit-client')) {
+              var editBtnCl = document.createElement('button');
+              editBtnCl.className = 'row-btn btn-edit-client';
+              editBtnCl.setAttribute('onclick', 'editClient(this)');
+              editBtnCl.textContent = '✏️ تعديل';
+              wrapC.appendChild(editBtnCl);
+            }
             tbody.appendChild(tr);
           });
           var nr = document.getElementById('clNoResults');
@@ -863,6 +894,47 @@
   });
   </script>
 
+  <script>
+  /* ══ Edit Client ══════════════════════════════════════════════ */
+  window.editClient = function(btn) {
+    var row = btn.closest('tr');
+    if (!row) return;
+    var cells = row.querySelectorAll('td');
+    var nameEl  = cells[0] ? cells[0].querySelector('.client-name-cell')  : null;
+    var idNumEl = cells[0] ? cells[0].querySelector('.client-idnum-cell') : null;
+    var phoneEl = cells[2] ? cells[2].querySelector('.phone-cell')  : null;
+    var emailEl = cells[3] ? cells[3].querySelector('.email-cell')  : null;
+    var typeEl  = cells[1] ? cells[1].querySelector('.type-badge')  : null;
+    var name    = nameEl  ? nameEl.textContent.trim()  : '';
+    var idNum   = idNumEl ? idNumEl.textContent.trim() : '';
+    var phone   = phoneEl ? phoneEl.textContent.trim() : '';
+    var email   = emailEl ? emailEl.textContent.trim() : '';
+    var isCompany = typeEl && typeEl.classList.contains('type-company');
+    window._editClient = row;
+    /* Pre-fill form */
+    document.getElementById('clName').value  = name;
+    document.getElementById('clPhone').value = phone;
+    document.getElementById('clEmail').value = email !== '—' ? email : '';
+    document.getElementById('clIdNum').value = idNum !== '—' ? idNum : '';
+    var nameLabel = document.querySelector('label[for="clName"]');
+    if (isCompany) {
+      document.getElementById('typeCompany').checked = true;
+      if (nameLabel) nameLabel.textContent = 'اسم الشركة *';
+      document.getElementById('clIdLabel').textContent = 'رقم السجل التجاري';
+    } else {
+      document.getElementById('typePerson').checked = true;
+      if (nameLabel) nameLabel.textContent = 'الاسم الكامل *';
+      document.getElementById('clIdLabel').textContent = 'رقم الهوية الوطنية';
+    }
+    /* Change modal title/button */
+    document.querySelector('#clientModal .modal-title').textContent = '✏️ تعديل الموكل';
+    var sb = document.getElementById('clSubmit'); if (sb) sb.textContent = 'حفظ التعديلات';
+    /* Open modal */
+    var modal = document.getElementById('clientModal');
+    modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
+    setTimeout(function() { document.getElementById('clName').focus(); }, 50);
+  };
+  </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
   <script src="dark-mode.js"></script><script src="notifications.js"></script>
