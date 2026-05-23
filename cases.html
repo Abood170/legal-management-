@@ -946,10 +946,23 @@
           var lawyerTd = tr.querySelectorAll('td')[4];
           var clientTxt = clientTd ? clientTd.textContent.trim() : '';
           var caseIdTxt = caseIdEl ? caseIdEl.textContent.replace('#','').trim() : '';
+          /* استخرج اسم المحامي بدون أحرف الأفاتار */
+          var legacyLawyer = '';
+          if (lawyerTd) {
+            var lChip = lawyerTd.querySelector('.lawyer-chip');
+            if (lChip) {
+              var lClone = lChip.cloneNode(true);
+              var lAv = lClone.querySelector('.lawyer-av');
+              if (lAv) lAv.parentNode.removeChild(lAv);
+              legacyLawyer = lClone.textContent.replace(/\s+/g,' ').trim();
+            } else {
+              legacyLawyer = lawyerTd.textContent.trim();
+            }
+          }
           tr.setAttribute('data-search',  clientTxt + ' ' + caseIdTxt);
           tr.setAttribute('data-status',  'active');
-          tr.setAttribute('data-court',   courtTd  ? courtTd.textContent.trim()  : '');
-          tr.setAttribute('data-lawyer',  lawyerTd ? lawyerTd.textContent.trim() : '');
+          tr.setAttribute('data-court',   courtTd ? courtTd.textContent.trim() : '');
+          tr.setAttribute('data-lawyer',  legacyLawyer);
         }
         /* تأكد من وجود زر العرض */
         tr.querySelectorAll('.row-btn').forEach(function(btn) {
