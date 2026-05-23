@@ -944,12 +944,17 @@
       runFilter();
     });
 
+    /* ═══════════════ تصدير الدوال للاستخدام الخارجي ═══════════════ */
+    window._saveTasks      = saveTasks;
+    window._updateTaskKPIs = updateTaskKPIs;
+    window._rebuildBoard   = rebuildBoard;
+    window._runFilter      = runFilter;
+
     /* ═══════════════ تحميل عند الفتح ═══════════════ */
 
     window.addEventListener('load', function() {
       loadTasks();
       updateTaskKPIs();
-      /* ملء فلتر المسؤول من lawyers_data */
       populateLawyersDropdown();
     });
 
@@ -1025,14 +1030,10 @@
     var tr = btn.closest('tr');
     if (confirm('هل تريد حذف هذه المهمة؟')) {
       tr.parentNode.removeChild(tr);
-      /* إعادة استخدام saveTasks/KPIs من IIFE عبر localStorage */
-      var tasks = [];
-      document.querySelectorAll('#tasksBody tr[data-search]').forEach(function(r) {
-        tasks.push({ html: r.innerHTML, search: r.dataset.search||'', priority: r.dataset.priority||'',
-          assignee: r.dataset.assignee||'', status: r.dataset.status||'new', due: r.dataset.due||'',
-          caseVal: r.dataset.caseVal||'', caseTxt: r.dataset.caseTxt||'' });
-      });
-      localStorage.setItem('tasks_data', JSON.stringify(tasks));
+      if (window._saveTasks)      window._saveTasks();
+      if (window._updateTaskKPIs) window._updateTaskKPIs();
+      if (window._rebuildBoard)   window._rebuildBoard();
+      if (window._runFilter)      window._runFilter();
     }
   };
   </script>
