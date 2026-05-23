@@ -711,12 +711,52 @@
           var cname  = nameEl ? nameEl.textContent.trim() : cells[0].textContent.trim();
           var client = cells[1] ? cells[1].textContent.trim() : '';
           if (!caseId && !client) return;
+
+          /* استخرج المحامي من data-lawyer أو من الخلية */
+          var lawyerName = tr.getAttribute('data-lawyer') || '';
+          if (!lawyerName && cells[4]) {
+            var chip = cells[4].querySelector('.lawyer-chip');
+            if (chip) {
+              var clone = chip.cloneNode(true);
+              var av = clone.querySelector('.lawyer-av');
+              if (av) av.parentNode.removeChild(av);
+              lawyerName = clone.textContent.replace(/\s+/g,' ').trim();
+            } else {
+              lawyerName = cells[4].textContent.replace(/\s+/g,' ').trim();
+            }
+          }
+          if (/اختر|^\.\.\.|^—$/.test(lawyerName)) lawyerName = '';
+
           var opt = document.createElement('option');
           opt.value = caseId;
           opt.textContent = (cname || caseId) + (client ? ' — ' + client : '');
+          opt.setAttribute('data-lawyer', lawyerName);
           sel.appendChild(opt);
         });
       } catch(e) {}
+
+      /* عند تغيير القضية → تعبئة المسؤول تلقائياً */
+      sel.onchange = function() {
+        var opt    = this.options[this.selectedIndex];
+        var lawyer = opt ? (opt.getAttribute('data-lawyer') || '') : '';
+        if (!lawyer) return;
+        var aSel  = document.getElementById('tkAssigneeModal');
+        var normL = lawyer.replace(/\s+/g,' ').trim().toLowerCase();
+        for (var i = 0; i < aSel.options.length; i++) {
+          var optTxt = aSel.options[i].text.replace(/\s+/g,' ').trim().toLowerCase();
+          var optVal = aSel.options[i].value.replace(/\s+/g,' ').trim().toLowerCase();
+          if (optVal === normL || optTxt === normL) {
+            aSel.selectedIndex = i; return;
+          }
+        }
+        /* مطابقة جزئية كاحتياطي */
+        for (var j = 0; j < aSel.options.length; j++) {
+          var jTxt = aSel.options[j].text.replace(/\s+/g,' ').trim().toLowerCase();
+          if (jTxt.includes(normL) || normL.includes(jTxt)) {
+            aSel.selectedIndex = j; return;
+          }
+        }
+      };
     }
 
     function populateLawyersDropdown() {
@@ -997,11 +1037,34 @@
             var cnm    = nmEl ? nmEl.textContent.trim() : cells[0].textContent.trim();
             var cli    = cells[1] ? cells[1].textContent.trim() : '';
             if (!cid && !cli) return;
+            /* استخرج المحامي */
+            var lName = r.getAttribute('data-lawyer') || '';
+            if (!lName && cells[4]) {
+              var chip = cells[4].querySelector('.lawyer-chip');
+              if (chip) {
+                var cl = chip.cloneNode(true); var av = cl.querySelector('.lawyer-av');
+                if (av) av.parentNode.removeChild(av);
+                lName = cl.textContent.replace(/\s+/g,' ').trim();
+              } else { lName = cells[4].textContent.replace(/\s+/g,' ').trim(); }
+            }
+            if (/اختر|^\.\.\.|^—$/.test(lName)) lName = '';
             var o = document.createElement('option'); o.value = cid;
-            o.textContent = (cnm||cid) + (cli ? ' — '+cli : ''); cSel.appendChild(o);
+            o.textContent = (cnm||cid) + (cli ? ' — '+cli : '');
+            o.setAttribute('data-lawyer', lName);
+            cSel.appendChild(o);
           });
         } catch(e) {}
       }
+      /* onchange للتعبئة التلقائية عند التعديل أيضاً */
+      cSel.onchange = function() {
+        var selOpt = this.options[this.selectedIndex];
+        var lw = selOpt ? (selOpt.getAttribute('data-lawyer')||'') : '';
+        if (!lw) return;
+        var norm = lw.replace(/\s+/g,' ').trim().toLowerCase();
+        for (var i = 0; i < aSel.options.length; i++) {
+          if (aSel.options[i].value.replace(/\s+/g,' ').trim().toLowerCase() === norm) { aSel.selectedIndex = i; return; }
+        }
+      };
       var savedL = localStorage.getItem('lawyers_data');
       var names  = [];
       if (savedL) {
