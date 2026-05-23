@@ -336,10 +336,6 @@
           </select>
           <select class="filter-select" id="fLawyer">
             <option value="">المحامي: الكل</option>
-            <option value="خالد العتيبي">خالد العتيبي</option>
-            <option value="سارة المحمد">سارة المحمد</option>
-            <option value="محمد الرشيد">محمد الرشيد</option>
-            <option value="نورة الأحمد">نورة الأحمد</option>
           </select>
           <button class="btn-reset" id="fReset">↺ إعادة تعيين</button>
           <button class="btn-export" onclick="exportFees()" style="margin-right:auto">📤 Excel</button>
@@ -398,10 +394,7 @@
           <div class="form-group">
             <label class="form-label" for="fLawyer2">المحامي المسؤول</label>
             <select class="form-select" id="fLawyer2">
-              <option value="خالد العتيبي">خالد العتيبي</option>
-              <option value="سارة المحمد">سارة المحمد</option>
-              <option value="محمد الرشيد">محمد الرشيد</option>
-              <option value="نورة الأحمد">نورة الأحمد</option>
+              <option value="" disabled selected>اختر المحامي...</option>
             </select>
           </div>
         </div>
@@ -409,29 +402,14 @@
           <div class="form-group">
             <label class="form-label" for="fClient">الموكل</label>
             <select class="form-select" id="fClient">
-              <option value="عبدالرحمن المالكي">عبدالرحمن المالكي</option>
-              <option value="سلطان العامدي">سلطان العامدي</option>
-              <option value="فيصل الشهري">فيصل الشهري</option>
-              <option value="ناصر العمري">ناصر العمري</option>
-              <option value="سعد السيساعي">سعد السيساعي</option>
-              <option value="شركة الفارس للاستثمار">شركة الفارس للاستثمار</option>
-              <option value="مجموعة النور التجارية">مجموعة النور التجارية</option>
-              <option value="شركة الخليج العقارية">شركة الخليج العقارية</option>
-              <option value="منال الزهراني">منال الزهراني</option>
+              <option value="" disabled selected>اختر الموكل...</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label" for="fCase">القضية</label>
             <select class="form-select" id="fCase">
-              <option value="#2025-0142">#2025-0142 — المالكي</option>
-              <option value="#2025-0138">#2025-0138 — العامدي</option>
-              <option value="#2025-0135">#2025-0135 — الشهري</option>
-              <option value="#2025-0130">#2025-0130 — العمري</option>
-              <option value="#2025-0128">#2025-0128 — السيساعي</option>
-              <option value="#2025-0131">#2025-0131 — الغامدي</option>
-              <option value="#2025-0133">#2025-0133 — الخليج العقارية</option>
-              <option value="#2025-0136">#2025-0136 — الزهراني</option>
-              <option value="استشارة">استشارة</option>
+              <option value="">— اختر القضية —</option>
+              <option value="استشارة">استشارة (بدون قضية)</option>
             </select>
           </div>
         </div>
@@ -539,164 +517,300 @@
   <script>
   (function() {
 
-    /* ── Filters ── */
-    var fSearch  = document.getElementById('fSearch');
-    var fType    = document.getElementById('fType');
-    var fStatus  = document.getElementById('fStatus');
-    var fLawyer  = document.getElementById('fLawyer');
+    var months   = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var days     = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    var modal    = document.getElementById('feeModal');
     var noRes    = document.getElementById('fNoResults');
+    var toastTimer;
 
-    function runFilter() {
-      var q   = fSearch.value.trim().toLowerCase();
-      var typ = fType.value;
-      var sts = fStatus.value;
-      var law = fLawyer.value;
-      var rows = document.querySelectorAll('#feesBody tr[data-search]');
-      var vis = 0;
-      rows.forEach(function(tr) {
-        var ok = (!q   || tr.dataset.search.toLowerCase().indexOf(q) > -1)
-              && (!typ || tr.dataset.type   === typ)
-              && (!sts || tr.dataset.status === sts)
-              && (!law || tr.dataset.lawyer === law);
-        tr.style.display = ok ? '' : 'none';
-        if (ok) vis++;
-      });
-      noRes.style.display = vis === 0 ? '' : 'none';
+    /* ── تاريخ التوب‌بار ── */
+    (function(){
+      var d = new Date();
+      var sub = document.querySelector('.topbar-sub');
+      if (sub) sub.innerHTML = days[d.getDay()]+'، '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+' · <span class="firm-name-target">نظام إدارة المحاماة</span>';
+    })();
+
+    /* ══ ملء القوائم من localStorage ══ */
+
+    function populateCasesDropdown() {
+      var sel = document.getElementById('fCase');
+      sel.innerHTML = '<option value="">— اختر القضية —</option><option value="استشارة">استشارة (بدون قضية)</option>';
+      var saved = localStorage.getItem('cases_data');
+      if (!saved) return;
+      try {
+        JSON.parse(saved).forEach(function(html) {
+          var trHtml = html.trimStart().startsWith('<tr') ? html : '<tr>'+html+'</tr>';
+          var doc    = new DOMParser().parseFromString('<table><tbody>'+trHtml+'</tbody></table>','text/html');
+          var tr     = doc.querySelector('tr'); if (!tr) return;
+          var cells  = tr.querySelectorAll('td'); if (cells.length < 2) return;
+          var idEl   = cells[0].querySelector('.case-id');
+          var nmEl   = cells[0].querySelector('.case-name');
+          var cid    = idEl  ? idEl.textContent.trim()  : '';
+          var cname  = nmEl  ? nmEl.textContent.trim()  : cells[0].textContent.trim();
+          var client = cells[1] ? cells[1].textContent.trim() : '';
+          if (!cid && !client) return;
+
+          /* محامي */
+          var lName = tr.getAttribute('data-lawyer') || '';
+          if (!lName && cells[4]) {
+            var chip = cells[4].querySelector('.lawyer-chip');
+            if (chip) {
+              var cl = chip.cloneNode(true); var av = cl.querySelector('.lawyer-av');
+              if (av) av.parentNode.removeChild(av);
+              lName = cl.textContent.replace(/\s+/g,' ').trim();
+            } else { lName = cells[4].textContent.replace(/\s+/g,' ').trim(); }
+          }
+          if (/اختر|^\.\.\.|^—$/.test(lName)) lName = '';
+
+          var opt = document.createElement('option');
+          opt.value = cid;
+          opt.textContent = (cname||cid) + (client ? ' — '+client : '');
+          opt.setAttribute('data-lawyer', lName);
+          opt.setAttribute('data-client', client);
+          sel.appendChild(opt);
+        });
+      } catch(e) {}
+
+      /* عند اختيار قضية → تعبئة المحامي والموكل */
+      sel.onchange = function() {
+        var o = this.options[this.selectedIndex];
+        var lw = o ? (o.getAttribute('data-lawyer')||'') : '';
+        var cl = o ? (o.getAttribute('data-client')||'') : '';
+        /* تعبئة الموكل */
+        if (cl) {
+          var cSel = document.getElementById('fClient');
+          for (var i=0;i<cSel.options.length;i++){
+            if (cSel.options[i].value===cl){cSel.selectedIndex=i;break;}
+          }
+        }
+        /* تعبئة المحامي */
+        if (!lw) return;
+        var lSel  = document.getElementById('fLawyer2');
+        var normL = lw.replace(/\s+/g,' ').trim().toLowerCase();
+        for (var j=0;j<lSel.options.length;j++){
+          var jv = lSel.options[j].value.replace(/\s+/g,' ').trim().toLowerCase();
+          if (jv===normL){lSel.selectedIndex=j;return;}
+        }
+        /* مطابقة جزئية */
+        for (var k=0;k<lSel.options.length;k++){
+          var kt = lSel.options[k].text.replace(/\s+/g,' ').trim().toLowerCase();
+          if (kt.includes(normL)||normL.includes(kt)){lSel.selectedIndex=k;return;}
+        }
+      };
     }
 
-    fSearch.addEventListener('input', runFilter);
-    fType.addEventListener('change', runFilter);
-    fStatus.addEventListener('change', runFilter);
-    fLawyer.addEventListener('change', runFilter);
-    document.getElementById('fReset').addEventListener('click', function() {
-      fSearch.value = ''; fType.value = ''; fStatus.value = ''; fLawyer.value = '';
+    function populateLawyersDropdown() {
+      var sel  = document.getElementById('fLawyer2');
+      var fSel = document.getElementById('fLawyer');
+      sel.innerHTML  = '<option value="" disabled selected>اختر المحامي...</option>';
+      fSel.innerHTML = '<option value="">المحامي: الكل</option>';
+      var saved = localStorage.getItem('lawyers_data');
+      var names = [];
+      if (saved) {
+        try {
+          JSON.parse(saved).forEach(function(html){
+            var d=document.createElement('div');d.innerHTML=html;
+            var n=d.querySelector('.lc-name');if(n)names.push(n.textContent.trim());
+          });
+        } catch(e) {}
+      }
+      if (!names.length) names=['خالد بن عبدالعزيز العتيبي','سارة بنت محمد القحطاني','محمد بن سالم الزهراني','نورة بنت أحمد الشمري'];
+      names.forEach(function(n){
+        var o1=document.createElement('option');o1.value=n;o1.textContent=n;sel.appendChild(o1);
+        var o2=document.createElement('option');o2.value=n;o2.textContent=n;fSel.appendChild(o2);
+      });
+    }
+
+    function populateClientsDropdown() {
+      var sel = document.getElementById('fClient');
+      sel.innerHTML = '<option value="" disabled selected>اختر الموكل...</option>';
+      var saved = localStorage.getItem('clients_data');
+      if (saved) {
+        try {
+          JSON.parse(saved).forEach(function(html){
+            var tr=document.createElement('tr');tr.innerHTML=html;
+            var tds=tr.querySelectorAll('td');
+            var name=tds[0]?tds[0].textContent.trim():'';
+            if(!name)return;
+            var o=document.createElement('option');o.value=name;o.textContent=name;sel.appendChild(o);
+          });
+        } catch(e) {}
+      }
+      /* إذا ما في موكلين محفوظين، استخدم أسماء من القضايا */
+      if (sel.options.length <= 1) {
+        var cSaved = localStorage.getItem('cases_data');
+        if (cSaved) {
+          try {
+            var seen = {};
+            JSON.parse(cSaved).forEach(function(html){
+              var trHtml=html.trimStart().startsWith('<tr')?html:'<tr>'+html+'</tr>';
+              var doc=new DOMParser().parseFromString('<table><tbody>'+trHtml+'</tbody></table>','text/html');
+              var tr=doc.querySelector('tr');if(!tr)return;
+              var cells=tr.querySelectorAll('td');
+              var client=cells[1]?cells[1].textContent.trim():'';
+              if(client&&!seen[client]){
+                seen[client]=1;
+                var o=document.createElement('option');o.value=client;o.textContent=client;sel.appendChild(o);
+              }
+            });
+          } catch(e) {}
+        }
+      }
+    }
+
+    /* ══ Filters ══ */
+
+    function runFilter() {
+      var q   = document.getElementById('fSearch').value.trim().toLowerCase();
+      var typ = document.getElementById('fType').value;
+      var sts = document.getElementById('fStatus').value;
+      var law = document.getElementById('fLawyer').value;
+      var rows = document.querySelectorAll('#feesBody tr[data-search]');
+      var vis = 0;
+      rows.forEach(function(tr){
+        var ok=(!q||tr.dataset.search.toLowerCase().indexOf(q)>-1)
+              &&(!typ||tr.dataset.type===typ)
+              &&(!sts||tr.dataset.status===sts)
+              &&(!law||tr.dataset.lawyer===law);
+        tr.style.display=ok?'':'none';
+        if(ok)vis++;
+      });
+      noRes.style.display=vis===0?'':'none';
+    }
+
+    document.getElementById('fSearch').addEventListener('input', runFilter);
+    document.getElementById('fType').addEventListener('change', runFilter);
+    document.getElementById('fStatus').addEventListener('change', runFilter);
+    document.getElementById('fLawyer').addEventListener('change', runFilter);
+    document.getElementById('fReset').addEventListener('click', function(){
+      document.getElementById('fSearch').value='';
+      document.getElementById('fType').value='';
+      document.getElementById('fStatus').value='';
+      document.getElementById('fLawyer').value='';
       runFilter();
     });
 
-    /* ── Modal ── */
-    var modal     = document.getElementById('feeModal');
-    var toastTimer;
+    /* ══ Modal ══ */
 
     function openModal() {
-      modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
-      setTimeout(function() { document.getElementById('fAmount').focus(); }, 60);
+      populateCasesDropdown();
+      populateLawyersDropdown();
+      populateClientsDropdown();
+      modal.classList.add('open'); modal.scrollTop=0; document.body.style.overflow='hidden';
+      setTimeout(function(){document.getElementById('fAmount').focus();},60);
     }
     function closeModal() {
       modal.classList.remove('open');
-      document.body.style.overflow = '';
-      document.getElementById('fAmount').value = '';
-      document.getElementById('fAmount').style.borderColor = '';
-      document.getElementById('fDue').value = '';
-      document.getElementById('fNotes').value = '';
-      document.getElementById('fType2').selectedIndex = 0;
-      document.getElementById('fLawyer2').selectedIndex = 0;
-      document.getElementById('fClient').selectedIndex = 0;
-      document.getElementById('fCase').selectedIndex = 0;
+      document.body.style.overflow='';
+      document.getElementById('fAmount').value='';
+      document.getElementById('fAmount').style.borderColor='';
+      document.getElementById('fDue').value='';
+      document.getElementById('fNotes').value='';
+      document.getElementById('fType2').selectedIndex=0;
+      document.getElementById('fLawyer2').selectedIndex=0;
+      document.getElementById('fClient').selectedIndex=0;
+      document.getElementById('fCase').selectedIndex=0;
       updateVAT();
     }
     function showToast(msg) {
-      var t = document.getElementById('toast');
-      t.textContent = '✓ ' + msg;
+      var t=document.getElementById('toast');
+      t.textContent='✓ '+msg;
       clearTimeout(toastTimer);
       t.classList.add('show');
-      toastTimer = setTimeout(function() { t.classList.remove('show'); }, 3000);
+      toastTimer=setTimeout(function(){t.classList.remove('show');},3000);
     }
-    window.showToast = showToast;
+    window.showToast=showToast;
 
     document.getElementById('btnNewFee').addEventListener('click', openModal);
     document.getElementById('btnNewFeeTop').addEventListener('click', openModal);
     document.getElementById('modalClose').addEventListener('click', closeModal);
     document.getElementById('modalCancel').addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('open')) closeModal(); });
+    modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
 
-    /* ── Date chips ── */
-    function setDate(offsetDays) {
-      var d = new Date();
-      d.setDate(d.getDate() + offsetDays);
-      var y = d.getFullYear();
-      var m = String(d.getMonth() + 1).padStart(2, '0');
-      var day = String(d.getDate()).padStart(2, '0');
-      document.getElementById('fDue').value = y + '-' + m + '-' + day;
+    /* Date chips */
+    function setDate(off){
+      var d=new Date();d.setDate(d.getDate()+off);
+      document.getElementById('fDue').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     }
-    document.getElementById('chipToday').addEventListener('click', function() { setDate(0); });
-    document.getElementById('chipWeek').addEventListener('click',  function() { setDate(7); });
-    document.getElementById('chipMonth').addEventListener('click', function() { setDate(30); });
+    document.getElementById('chipToday').addEventListener('click',function(){setDate(0);});
+    document.getElementById('chipWeek').addEventListener('click',function(){setDate(7);});
+    document.getElementById('chipMonth').addEventListener('click',function(){setDate(30);});
 
-    /* ── VAT Live Preview ── */
-    function fmt(n) {
-      return n.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+    /* VAT */
+    function fmt(n){return n.toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2})+' ر.س';}
+    function updateVAT(){
+      var raw=parseFloat(document.getElementById('fAmount').value)||0;
+      var vat=Math.round(raw*15)/100;
+      document.getElementById('vatBase').textContent=fmt(raw);
+      document.getElementById('vatAmt').textContent=fmt(vat);
+      document.getElementById('vatTotal').textContent=fmt(raw+vat);
     }
-    function updateVAT() {
-      var raw = parseFloat(document.getElementById('fAmount').value) || 0;
-      var vat = Math.round(raw * 15) / 100;
-      var total = raw + vat;
-      document.getElementById('vatBase').textContent  = fmt(raw);
-      document.getElementById('vatAmt').textContent   = fmt(vat);
-      document.getElementById('vatTotal').textContent = fmt(total);
-    }
-    document.getElementById('fAmount').addEventListener('input', updateVAT);
+    document.getElementById('fAmount').addEventListener('input',updateVAT);
     updateVAT();
 
-    /* ── Submit ── */
-    var submitBtn = document.getElementById('fSubmit');
-    submitBtn.addEventListener('click', function() {
-      var amountEl = document.getElementById('fAmount');
-      var raw = parseFloat(amountEl.value);
-      if (!raw || raw <= 0) {
-        amountEl.style.borderColor = 'var(--red)';
-        amountEl.focus();
-        return;
-      }
-      amountEl.style.borderColor = '';
+    /* ══ Submit ══ */
+    var submitBtn=document.getElementById('fSubmit');
+    submitBtn.addEventListener('click',function(){
+      var amountEl=document.getElementById('fAmount');
+      var raw=parseFloat(amountEl.value);
+      if(!raw||raw<=0){amountEl.style.borderColor='var(--red)';amountEl.focus();return;}
+      amountEl.style.borderColor='';
 
-      var typeVal   = document.getElementById('fType2').value;
-      var lawyer    = document.getElementById('fLawyer2').value;
-      var client    = document.getElementById('fClient').value;
-      var caseVal   = document.getElementById('fCase').value;
-      var months    = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-      var today     = new Date();
-      var dateStr   = today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
+      var typeVal = document.getElementById('fType2').value;
+      var lawyer  = document.getElementById('fLawyer2').value;
+      var client  = document.getElementById('fClient').value;
+      var caseOpt = document.getElementById('fCase');
+      var caseVal = caseOpt.value;
+      var caseTxt = caseOpt.options[caseOpt.selectedIndex]?caseOpt.options[caseOpt.selectedIndex].text:'';
+      var today   = new Date();
+      var dateStr = today.getDate()+' '+months[today.getMonth()]+' '+today.getFullYear();
 
-      var typeLabels = { fee: 'أتعاب محاماة', exp: 'مصاريف نثرية', gov: 'رسوم حكومية', consult: 'استشارة' };
-      var typeCls    = { fee: 'type-fee', exp: 'type-exp', gov: 'type-gov', consult: 'type-consult' };
-      var avMap      = { 'خالد العتيبي': 'خع', 'سارة المحمد': 'سم', 'محمد الرشيد': 'مر', 'نورة الأحمد': 'نا' };
-      var feeId      = '#FEE-' + String(Math.floor(Math.random() * 9000) + 1000);
-      var amtFmt     = raw.toLocaleString('ar-SA');
+      var typeLabels={fee:'أتعاب محاماة',exp:'مصاريف نثرية',gov:'رسوم حكومية',consult:'استشارة'};
+      var typeCls={fee:'type-fee',exp:'type-exp',gov:'type-gov',consult:'type-consult'};
+      var avTxt=lawyer.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('');
+      var feeId='#FEE-'+String(Math.floor(Math.random()*9000)+1000);
+      var amtFmt=raw.toLocaleString('ar-SA');
 
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'جاري الحفظ <span class="loading-dots">...</span>';
+      submitBtn.disabled=true;
+      submitBtn.innerHTML='جاري الحفظ <span class="loading-dots">...</span>';
       submitBtn.classList.add('btn-loading');
 
-      setTimeout(function() {
-        var tbody  = document.getElementById('feesBody');
-        var noRow  = document.getElementById('fNoResults');
-        var tr     = document.createElement('tr');
-        tr.setAttribute('data-search', typeLabels[typeVal] + ' ' + client);
-        tr.setAttribute('data-type',   typeVal);
-        tr.setAttribute('data-status', 'pending');
-        tr.setAttribute('data-lawyer', lawyer);
-        tr.innerHTML =
-          '<td><div class="fee-name">' + typeLabels[typeVal] + ' — ' + client + '</div><div class="fee-id">' + feeId + '</div></td>' +
-          '<td style="font-size:0.78rem">' + client + '</td>' +
-          '<td style="font-size:0.75rem;color:var(--ink-light)">' + caseVal + '</td>' +
-          '<td><div class="lawyer-chip"><div class="av-xs">' + (avMap[lawyer] || '—') + '</div> ' + lawyer + '</div></td>' +
-          '<td data-amount="' + raw + '"><div class="amount-cell amount-gold">' + amtFmt + '</div></td>' +
-          '<td><span class="type-tag ' + typeCls[typeVal] + '">' + typeLabels[typeVal] + '</span></td>' +
-          '<td style="font-size:0.73rem;color:var(--ink-light)">' + dateStr + '</td>' +
-          '<td><span class="pill pill-pending">معلقة</span></td>' +
-          '<td><button class="row-btn">عرض</button></td>';
-        tbody.insertBefore(tr, tbody.firstChild);
+      setTimeout(function(){
+        var tbody=document.getElementById('feesBody');
+        var tr=document.createElement('tr');
+        tr.setAttribute('data-search',(typeLabels[typeVal]||'')+' '+client);
+        tr.setAttribute('data-type',typeVal);
+        tr.setAttribute('data-status','pending');
+        tr.setAttribute('data-lawyer',lawyer);
+        tr.setAttribute('data-amount-raw',raw);
+        tr.innerHTML=
+          '<td><div class="fee-name">'+(typeLabels[typeVal]||typeVal)+' — '+client+'</div><div class="fee-id">'+feeId+'</div></td>'+
+          '<td style="font-size:0.78rem">'+client+'</td>'+
+          '<td style="font-size:0.75rem;color:var(--ink-light)">'+(caseTxt||caseVal||'—')+'</td>'+
+          '<td><div class="lawyer-chip"><div class="av-xs">'+avTxt+'</div> '+lawyer+'</div></td>'+
+          '<td data-amount="'+raw+'"><div class="amount-cell amount-gold">'+amtFmt+'</div></td>'+
+          '<td><span class="type-tag '+(typeCls[typeVal]||'type-fee')+'">'+(typeLabels[typeVal]||typeVal)+'</span></td>'+
+          '<td style="font-size:0.73rem;color:var(--ink-light)">'+dateStr+'</td>'+
+          '<td><span class="pill pill-pending">معلقة</span></td>'+
+          '<td><div class="row-actions">'+
+            '<button class="row-btn btn-collect" onclick="collectFee(this)" title="تحصيل">✓ تحصيل</button>'+
+            '<button class="row-btn btn-view-fee" onclick="openFeeViewBtn(this)">عرض</button>'+
+            '<button class="row-btn" style="color:var(--red);border-color:rgba(220,38,38,0.2)" onclick="deleteFeeRow(this)">حذف</button>'+
+          '</div></td>';
+        tbody.insertBefore(tr,tbody.firstChild);
         tr.classList.add('new-row');
+        document.getElementById('fNoResults').style.display='none';
         saveFees();
         updateFeesKPIs();
+        runFilter();
 
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'تسجيل الأتعاب';
+        submitBtn.disabled=false;
+        submitBtn.innerHTML='تسجيل الأتعاب';
         submitBtn.classList.remove('btn-loading');
         closeModal();
         showToast('تم تسجيل الأتعاب بنجاح');
-      }, 900);
+      },700);
     });
 
   })();
@@ -713,44 +827,54 @@
 
   function loadFees() {
     var saved = localStorage.getItem('fees_data');
-    if (saved) {
-      try {
-        var rows = JSON.parse(saved);
-        if (rows.length > 0) {
-          var tbody = document.getElementById('feesBody');
-          rows.forEach(function(html) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = html;
-            // Restore data-* attrs so runFilter() can find these rows
-            var tds    = tr.querySelectorAll('td');
-            var fnEl   = tr.querySelector('.fee-name');
-            var client = tds[1] ? tds[1].textContent.trim() : '';
-            tr.setAttribute('data-search', (fnEl ? fnEl.textContent.trim() : '') + ' ' + client);
-            var typeTag = tr.querySelector('.type-tag');
-            if (typeTag) {
-              var tk = ['fee','exp','gov','consult'].filter(function(k){ return typeTag.classList.contains('type-'+k); })[0];
-              if (tk) tr.setAttribute('data-type', tk);
-            }
-            var pill = tr.querySelector('.pill');
-            if (pill) {
-              var sm = {'pill-paid':'collected','pill-pending':'pending','pill-late':'late'};
-              var pk = Object.keys(sm).filter(function(k){ return pill.classList.contains(k); })[0];
-              tr.setAttribute('data-status', pk ? sm[pk] : 'pending');
-            }
-            var chip = tr.querySelector('.lawyer-chip');
-            if (chip) {
-              var cl = chip.cloneNode(true);
-              var av = cl.querySelector('.av-xs');
-              if (av) av.remove();
-              tr.setAttribute('data-lawyer', cl.textContent.replace(/\s+/g,' ').trim());
-            }
-            tbody.appendChild(tr);
-          });
-          var nr = document.getElementById('fNoResults');
-          if (nr) nr.style.display = 'none';
+    if (!saved) return;
+    try {
+      var rows = JSON.parse(saved);
+      if (!rows.length) return;
+      var tbody = document.getElementById('feesBody');
+      rows.forEach(function(html) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = html;
+        var tds   = tr.querySelectorAll('td');
+        var fnEl  = tr.querySelector('.fee-name');
+        var client= tds[1] ? tds[1].textContent.trim() : '';
+        tr.setAttribute('data-search',(fnEl?fnEl.textContent.trim():'')+' '+client);
+        var typeTag=tr.querySelector('.type-tag');
+        if(typeTag){
+          var tk=['fee','exp','gov','consult'].filter(function(k){return typeTag.classList.contains('type-'+k);})[0];
+          if(tk) tr.setAttribute('data-type',tk);
         }
-      } catch(e) {}
-    }
+        /* حالة الدفع */
+        var statusPill=tds[7]?tds[7].querySelector('.pill'):null;
+        if(statusPill){
+          var sm={'pill-paid':'collected','pill-pending':'pending','pill-late':'late'};
+          var pk=Object.keys(sm).filter(function(k){return statusPill.classList.contains(k);})[0];
+          tr.setAttribute('data-status',pk?sm[pk]:'pending');
+        }
+        /* المحامي */
+        var chip=tr.querySelector('.lawyer-chip');
+        if(chip){
+          var cl=chip.cloneNode(true);var av=cl.querySelector('.av-xs');
+          if(av)av.remove();
+          tr.setAttribute('data-lawyer',cl.textContent.replace(/\s+/g,' ').trim());
+        }
+        /* إضافة زر التحصيل إن لم يكن موجوداً */
+        var actionsTd=tds[8];
+        if(actionsTd && !actionsTd.querySelector('.btn-collect') && !actionsTd.querySelector('[onclick*="collectFee"]')) {
+          var status=tr.dataset.status||'pending';
+          var collected=status==='collected';
+          var ra=actionsTd.querySelector('.row-actions')||actionsTd;
+          var colBtn=document.createElement('button');
+          colBtn.className='row-btn btn-collect';
+          colBtn.setAttribute('onclick','collectFee(this)');
+          colBtn.textContent=collected?'محصّلة ✓':'✓ تحصيل';
+          if(collected){colBtn.disabled=true;colBtn.style.cssText='border-color:rgba(22,163,74,0.3);color:var(--green);cursor:default';}
+          ra.insertBefore(colBtn,ra.firstChild);
+        }
+        tbody.appendChild(tr);
+      });
+      document.getElementById('fNoResults').style.display='none';
+    } catch(e) {}
   }
 
   function _fmtAr(n) { return n.toLocaleString('en-US', {maximumFractionDigits:0}); }
@@ -877,14 +1001,45 @@
     if (e.key === 'Escape' && document.getElementById('feeViewModal').classList.contains('open')) closeFeeView();
   });
 
+  window.collectFee = function(btn) {
+    var tr = btn.closest('tr');
+    if (!tr) return;
+    tr.dataset.status = 'collected';
+    var pill = tr.querySelector('td:nth-child(8) .pill');
+    if (pill) { pill.className='pill pill-paid'; pill.textContent='محصّلة'; }
+    btn.disabled=true; btn.textContent='محصّلة ✓';
+    btn.style.cssText='border-color:rgba(22,163,74,0.3);color:var(--green);cursor:default';
+    saveFees(); updateFeesKPIs();
+    if(window.showToast) window.showToast('تم تحصيل الأتعاب بنجاح ✓');
+  };
+
+  window.deleteFeeRow = function(btn) {
+    var tr = btn.closest('tr');
+    if (!confirm('هل تريد حذف هذا البند؟')) return;
+    tr.parentNode.removeChild(tr);
+    var rows=document.querySelectorAll('#feesBody tr[data-search]');
+    if(!rows.length) document.getElementById('fNoResults').style.display='';
+    saveFees(); updateFeesKPIs();
+    if(window.showToast) window.showToast('تم حذف البند');
+  };
+
+  window.openFeeViewBtn = function(btn) { openFeeView(btn); };
+
   window.addEventListener('load', function() {
     loadFees();
     updateFeesKPIs();
-    document.getElementById('feesBody').addEventListener('click', function(e) {
-      var btn = e.target.closest('.row-btn');
-      if (btn) openFeeView(btn);
-    });
+    populateLawyersFilterOnly();
   });
+
+  function populateLawyersFilterOnly() {
+    var fSel=document.getElementById('fLawyer');
+    fSel.innerHTML='<option value="">المحامي: الكل</option>';
+    var saved=localStorage.getItem('lawyers_data');
+    var names=[];
+    if(saved){try{JSON.parse(saved).forEach(function(html){var d=document.createElement('div');d.innerHTML=html;var n=d.querySelector('.lc-name');if(n)names.push(n.textContent.trim());});}catch(e){}}
+    if(!names.length)names=['خالد بن عبدالعزيز العتيبي','سارة بنت محمد القحطاني','محمد بن سالم الزهراني','نورة بنت أحمد الشمري'];
+    names.forEach(function(n){var o=document.createElement('option');o.value=n;o.textContent=n;fSel.appendChild(o);});
+  }
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
