@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الصلاحيات والأدوار</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --blue: #2563EB; --blue-dim: rgba(37,99,235,0.07);
+      --purple: #7C3AED; --purple-dim: rgba(124,58,237,0.07);
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+    body { animation: pageIn 0.2s ease both; }
+    @keyframes pageIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Sidebar ── */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s; border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; }
+    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
+    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; }
+    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
+    .btn-save { background: var(--accent); color: white; padding: 0.48rem 1.1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; }
+    .btn-save:hover { background: var(--accent-light); transform: translateY(-1px); }
+
+    .content { flex: 1; padding: 1.6rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.4rem; }
+
+    /* ── Page header ── */
+    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
+    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
+    .ph-sub { font-size: 0.73rem; color: var(--ink-muted); margin-top: 3px; }
+    .ph-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 2rem; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); margin-top: 6px; }
+
+    /* ── Role cards ── */
+    .roles-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.85rem; }
+    .role-card { background: var(--white); border: 2px solid var(--border); border-radius: 14px; padding: 1.1rem; cursor: pointer; transition: all 0.2s; position: relative; text-align: center; }
+    .role-card:hover { border-color: var(--border-mid); box-shadow: 0 4px 16px rgba(15,20,25,0.08); transform: translateY(-2px); }
+    .role-card.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 4px 16px rgba(28,94,62,0.12); }
+    .role-card.selected .role-name { color: var(--accent); }
+    .role-icon { font-size: 1.6rem; margin-bottom: 0.5rem; display: block; }
+    .role-name { font-size: 0.8rem; font-weight: 700; color: var(--ink); margin-bottom: 0.2rem; line-height: 1.3; }
+    .role-desc { font-size: 0.63rem; color: var(--ink-muted); line-height: 1.5; }
+    .role-badge { position: absolute; top: 0.6rem; left: 0.6rem; font-size: 0.55rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .badge-owner { background: rgba(184,149,42,0.12); color: var(--gold); border: 1px solid rgba(184,149,42,0.25); }
+    .badge-partner { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(124,58,237,0.18); }
+    .badge-lawyer { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+    .badge-assist { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(37,99,235,0.18); }
+    .badge-client { background: rgba(100,116,139,0.08); color: var(--ink-light); border: 1px solid rgba(100,116,139,0.18); }
+    .role-selected-check { position: absolute; top: 0.6rem; right: 0.6rem; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: white; font-size: 0.6rem; display: none; align-items: center; justify-content: center; font-weight: 900; }
+    .role-card.selected .role-selected-check { display: flex; }
+
+    /* ── Permissions Table ── */
+    .perm-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.05); }
+    .perm-table { width: 100%; border-collapse: collapse; }
+    .perm-table th { padding: 0.75rem 1rem; font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); text-align: center; white-space: nowrap; }
+    .perm-table th:first-child { text-align: right; min-width: 200px; }
+    .perm-table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+    .perm-table td:first-child { text-align: right; }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .perm-table tbody tr { transition: background 0.1s; }
+    .perm-table tbody tr:hover td { background: rgba(28,94,62,0.02); }
+
+    /* Section rows */
+    .perm-section-row td { background: var(--off-white) !important; padding: 0.45rem 1rem; }
+    .perm-section-label { font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    .feat-name { font-size: 0.82rem; font-weight: 600; color: var(--ink); }
+    .feat-desc { font-size: 0.63rem; color: var(--ink-muted); margin-top: 2px; }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; justify-content: center; }
+    .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: rgba(15,20,25,0.12); border-radius: 20px; transition: 0.25s; }
+    .toggle-slider:before { position: absolute; content: ''; height: 14px; width: 14px; right: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(-16px); }
+    .toggle input:disabled + .toggle-slider { opacity: 0.4; cursor: not-allowed; }
+    .toggle input:disabled:checked + .toggle-slider { background: var(--gold); opacity: 0.7; }
+
+    /* Full access mark */
+    .full-mark { color: var(--gold); font-size: 1rem; }
+    .no-mark { color: rgba(15,20,25,0.15); font-size: 0.85rem; }
+
+    /* Column headers with role color */
+    .col-owner { color: var(--gold) !important; }
+    .col-partner { color: var(--purple) !important; }
+    .col-lawyer { color: var(--accent) !important; }
+    .col-assist { color: var(--blue) !important; }
+    .col-client { color: var(--ink-light) !important; }
+
+    /* ── Active role info banner ── */
+    .role-info-banner { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: 1rem; }
+    .rib-icon { font-size: 1.8rem; }
+    .rib-title { font-size: 0.9rem; font-weight: 700; color: var(--ink); margin-bottom: 0.2rem; }
+    .rib-desc { font-size: 0.76rem; color: var(--ink-light); line-height: 1.5; }
+    .rib-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .rib-chip { font-size: 0.63rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; }
+    .rib-chip-g { background: var(--green-dim); color: var(--green); border: 1px solid rgba(22,163,74,0.18); }
+    .rib-chip-r { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.18); }
+
+    /* Toast */
+    .toast { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-10px); background: var(--accent); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Cairo', sans-serif; box-shadow: 0 4px 20px rgba(28,94,62,0.3); z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+    @media (max-width: 1024px) { .sidebar { display: none; } .roles-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 768px) { .roles-grid { grid-template-columns: repeat(2,1fr); } }
+  </style>
+  <link rel="stylesheet" href="dark-mode.css">
+  <script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">—</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">—</span></a>
+      <a class="nav-item" href="calendar.html"><span class="nav-icon">🗓️</span> التقويم</a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">—</span></a>
+      <a class="nav-item" href="expenses.html"><span class="nav-icon">🧾</span> المصاريف</a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">📄</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item active" href="permissions.html"><span class="nav-icon">🔐</span> الصلاحيات</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av" id="userAv">ع.م</div>
+        <div>
+          <div class="user-name" id="userName">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">الصلاحيات والأدوار</div>
+        <div class="topbar-sub" id="topbarSub">جاري التحميل...</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-icon" style="position:relative">🔔<div class="notif-dot"></div></div>
+        <button class="btn-save" id="btnSave">حفظ التغييرات</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Page Header -->
+      <div class="page-hdr">
+        <div>
+          <div class="ph-title">إدارة الصلاحيات والأدوار</div>
+          <div class="ph-sub">تحكّم بما يستطيع كل دور رؤيته والوصول إليه داخل النظام</div>
+          <div class="ph-badge">🔒 أمان البيانات — عزل كامل بين الأدوار</div>
+        </div>
+      </div>
+
+      <!-- Role Cards -->
+      <div class="roles-grid" id="rolesGrid">
+
+        <div class="role-card selected" data-role="owner" onclick="selectRole(this)">
+          <span class="role-badge badge-owner">مالك</span>
+          <div class="role-selected-check">✓</div>
+          <span class="role-icon">👑</span>
+          <div class="role-name">صاحب المكتب</div>
+          <div class="role-desc">وصول كامل لجميع البيانات والإعدادات</div>
+        </div>
+
+        <div class="role-card" data-role="partner" onclick="selectRole(this)">
+          <span class="role-badge badge-partner">شريك</span>
+          <div class="role-selected-check">✓</div>
+          <span class="role-icon">⚖️</span>
+          <div class="role-name">محامٍ أول / شريك</div>
+          <div class="role-desc">قضاياه + التقارير + إدارة الفريق</div>
+        </div>
+
+        <div class="role-card" data-role="lawyer" onclick="selectRole(this)">
+          <span class="role-badge badge-lawyer">محامٍ</span>
+          <div class="role-selected-check">✓</div>
+          <span class="role-icon">📁</span>
+          <div class="role-name">محامٍ</div>
+          <div class="role-desc">قضاياه المعيّنة فقط + الجلسات + المهام</div>
+        </div>
+
+        <div class="role-card" data-role="assist" onclick="selectRole(this)">
+          <span class="role-badge badge-assist">مساعد</span>
+          <div class="role-selected-check">✓</div>
+          <span class="role-icon">📝</span>
+          <div class="role-name">مساعد قانوني</div>
+          <div class="role-desc">الجلسات والمهام والأرشيف فقط</div>
+        </div>
+
+        <div class="role-card" data-role="client" onclick="selectRole(this)">
+          <span class="role-badge badge-client">موكل</span>
+          <div class="role-selected-check">✓</div>
+          <span class="role-icon">👤</span>
+          <div class="role-name">موكل</div>
+          <div class="role-desc">بوابة الموكل فقط — متابعة قضيته</div>
+        </div>
+
+      </div>
+
+      <!-- Role Info Banner -->
+      <div class="role-info-banner" id="roleInfoBanner"></div>
+
+      <!-- Permissions Table -->
+      <div class="perm-card">
+        <table class="perm-table" id="permTable">
+          <thead>
+            <tr>
+              <th>الميزة / الصفحة</th>
+              <th class="col-owner">👑<br>صاحب المكتب</th>
+              <th class="col-partner">⚖️<br>شريك</th>
+              <th class="col-lawyer">📁<br>محامٍ</th>
+              <th class="col-assist">📝<br>مساعد</th>
+              <th class="col-client">👤<br>موكل</th>
+            </tr>
+          </thead>
+          <tbody id="permBody">
+            <!-- built by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  (function() {
+    var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var DAYS_AR   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+
+    /* ── تحديث التاريخ ── */
+    (function() {
+      var d = new Date();
+      var el = document.getElementById('topbarSub');
+      if (el) el.textContent = DAYS_AR[d.getDay()] + '، ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear() + ' · نظام إدارة المحاماة';
+    })();
+
+    /* ── بيانات الصلاحيات ── */
+    // owner=4, partner=3, lawyer=2, assist=1, client=0
+    // القيمة: true=مفعّل دائماً، false=معطّل دائماً، 'toggle'=يمكن تعديله
+    var PERMS = [
+      { section: 'الإدارة العامة' },
+      { name: 'لوحة التحكم', desc: 'الإحصائيات والتحليلات الكاملة',
+        owner: true, partner: true, lawyer: 'toggle', assist: false, client: false,
+        defaults: { lawyer: false } },
+      { name: 'التقارير والإحصائيات', desc: 'تقارير الأداء والإيرادات',
+        owner: true, partner: true, lawyer: false, assist: false, client: false },
+      { name: 'إعدادات النظام', desc: 'تغيير بيانات المكتب والتكوين',
+        owner: true, partner: false, lawyer: false, assist: false, client: false },
+      { name: 'إدارة الصلاحيات', desc: 'تعديل أدوار المستخدمين',
+        owner: true, partner: false, lawyer: false, assist: false, client: false },
+
+      { section: 'الدعاوى والقضايا' },
+      { name: 'عرض كل الدعاوى', desc: 'الاطلاع على جميع قضايا المكتب',
+        owner: true, partner: true, lawyer: false, assist: false, client: false },
+      { name: 'عرض قضاياه فقط', desc: 'الاطلاع على القضايا المعيّنة له',
+        owner: true, partner: true, lawyer: true, assist: 'toggle', client: false,
+        defaults: { assist: false } },
+      { name: 'إضافة / تعديل دعوى', desc: 'إنشاء قضايا جديدة وتعديلها',
+        owner: true, partner: true, lawyer: 'toggle', assist: false, client: false,
+        defaults: { lawyer: true } },
+      { name: 'حذف دعوى', desc: 'حذف القضايا من النظام',
+        owner: true, partner: 'toggle', lawyer: false, assist: false, client: false,
+        defaults: { partner: false } },
+
+      { section: 'الجلسات والمواعيد' },
+      { name: 'عرض كل الجلسات', desc: 'الاطلاع على جميع جلسات المكتب',
+        owner: true, partner: true, lawyer: 'toggle', assist: true, client: false,
+        defaults: { lawyer: false } },
+      { name: 'إضافة / تعديل جلسة', desc: 'جدولة مواعيد جلسات جديدة',
+        owner: true, partner: true, lawyer: true, assist: 'toggle', client: false,
+        defaults: { assist: true } },
+      { name: 'إرسال تذكيرات', desc: 'إرسال تنبيهات واتساب للموكلين',
+        owner: true, partner: true, lawyer: true, assist: 'toggle', client: false,
+        defaults: { assist: false } },
+      { name: 'التقويم', desc: 'عرض التقويم الشهري للجلسات',
+        owner: true, partner: true, lawyer: true, assist: true, client: false },
+
+      { section: 'الموكلون والملفات' },
+      { name: 'إدارة الموكلين', desc: 'إضافة وتعديل بيانات الموكلين',
+        owner: true, partner: true, lawyer: 'toggle', assist: false, client: false,
+        defaults: { lawyer: false } },
+      { name: 'عرض موكليه فقط', desc: 'الاطلاع على موكلي قضاياه',
+        owner: true, partner: true, lawyer: true, assist: false, client: false },
+      { name: 'الأرشيف والمستندات', desc: 'رفع وتحميل مستندات القضايا',
+        owner: true, partner: true, lawyer: true, assist: true, client: false },
+      { name: 'حذف مستندات', desc: 'حذف الملفات من الأرشيف',
+        owner: true, partner: 'toggle', lawyer: false, assist: false, client: false,
+        defaults: { partner: true } },
+
+      { section: 'المالية والفوترة' },
+      { name: 'عرض الأتعاب', desc: 'الاطلاع على بيانات الأتعاب والمصاريف',
+        owner: true, partner: true, lawyer: 'toggle', assist: false, client: false,
+        defaults: { lawyer: false } },
+      { name: 'إضافة / تعديل أتعاب', desc: 'تسجيل الأتعاب والمصاريف النثرية',
+        owner: true, partner: true, lawyer: 'toggle', assist: false, client: false,
+        defaults: { lawyer: true } },
+      { name: 'إصدار فواتير ZATCA', desc: 'إنشاء فواتير إلكترونية معتمدة',
+        owner: true, partner: true, lawyer: false, assist: false, client: false },
+      { name: 'تقارير الإيرادات', desc: 'عرض تقارير الأرباح والتحصيل',
+        owner: true, partner: true, lawyer: false, assist: false, client: false },
+
+      { section: 'المهام والفريق' },
+      { name: 'إدارة المهام', desc: 'إنشاء وتعديل وإتمام المهام',
+        owner: true, partner: true, lawyer: true, assist: true, client: false },
+      { name: 'عرض كل المهام', desc: 'الاطلاع على مهام الفريق كاملاً',
+        owner: true, partner: true, lawyer: 'toggle', assist: false, client: false,
+        defaults: { lawyer: false } },
+      { name: 'إدارة المحامين', desc: 'إضافة وتعديل بيانات الفريق',
+        owner: true, partner: 'toggle', lawyer: false, assist: false, client: false,
+        defaults: { partner: false } },
+
+      { section: 'بوابة الموكل' },
+      { name: 'متابعة القضية', desc: 'عرض حالة القضية والجلسات القادمة',
+        owner: false, partner: false, lawyer: false, assist: false, client: true },
+      { name: 'تحميل المستندات', desc: 'رفع المستندات المطلوبة من المكتب',
+        owner: false, partner: false, lawyer: false, assist: false, client: true },
+      { name: 'عرض الفواتير', desc: 'الاطلاع على الفواتير الخاصة به',
+        owner: false, partner: false, lawyer: false, assist: false, client: true }
+    ];
+
+    /* ── الحالة الحالية ── */
+    var state = {};
+    var selectedRole = 'owner';
+
+    /* تحميل الإعدادات المحفوظة */
+    function loadState() {
+      try {
+        var saved = JSON.parse(localStorage.getItem('perm_state') || '{}');
+        state = saved;
+      } catch(e) { state = {}; }
+    }
+
+    function getKey(rowIdx, role) { return 'r' + rowIdx + '_' + role; }
+
+    function getVal(rowIdx, row, role) {
+      var key = getKey(rowIdx, role);
+      if (state[key] !== undefined) return state[key];
+      var v = row[role];
+      if (v === true || v === false) return v;
+      /* toggle — use default */
+      return (row.defaults && row.defaults[role] !== undefined) ? row.defaults[role] : true;
+    }
+
+    /* ── بناء الجدول ── */
+    function buildTable() {
+      var tbody = document.getElementById('permBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      var roles = ['owner','partner','lawyer','assist','client'];
+      var rowIdx = 0;
+
+      PERMS.forEach(function(row) {
+        if (row.section) {
+          var tr = document.createElement('tr');
+          tr.className = 'perm-section-row';
+          tr.innerHTML = '<td colspan="6"><span class="perm-section-label">' + row.section + '</span></td>';
+          tbody.appendChild(tr);
+          return;
+        }
+        var tr = document.createElement('tr');
+        var idx = rowIdx++;
+        var cells = '<td><div class="feat-name">' + row.name + '</div><div class="feat-desc">' + row.desc + '</div></td>';
+
+        roles.forEach(function(role) {
+          var v = row[role];
+          if (v === true) {
+            /* دائماً مفعّل */
+            cells += '<td><span class="full-mark" title="مفعّل دائماً">✓</span></td>';
+          } else if (v === false) {
+            /* دائماً معطّل */
+            cells += '<td><span class="no-mark" title="لا صلاحية">—</span></td>';
+          } else {
+            /* toggle */
+            var checked = getVal(idx, row, role);
+            cells += '<td><div class="toggle-wrap"><label class="toggle">' +
+              '<input type="checkbox" data-row="' + idx + '" data-role="' + role + '"' + (checked ? ' checked' : '') + '>' +
+              '<span class="toggle-slider"></span></label></div></td>';
+          }
+        });
+
+        tr.innerHTML = cells;
+        tbody.appendChild(tr);
+      });
+
+      /* ربط أحداث التغيير */
+      tbody.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+          var key = getKey(parseInt(this.dataset.row), this.dataset.role);
+          state[key] = this.checked;
+        });
+      });
+    }
+
+    /* ── بيانات الأدوار للبنر ── */
+    var ROLE_INFO = {
+      owner: {
+        icon: '👑', title: 'صاحب المكتب — وصول كامل',
+        desc: 'يرى ويعدّل كل شيء في النظام: القضايا، الموكلين، المحامين، الماليات، التقارير، والإعدادات. هو الوحيد الذي يستطيع تغيير الصلاحيات.',
+        can: ['كل القضايا والموكلين','التقارير المالية الكاملة','إدارة الفريق والصلاحيات','حذف أي بيانات'],
+        cannot: []
+      },
+      partner: {
+        icon: '⚖️', title: 'محامٍ أول / شريك — وصول واسع',
+        desc: 'يرى قضاياه وقضايا المكتب، ويصل للتقارير، ويستطيع إدارة الفريق — لكن لا يستطيع تغيير الصلاحيات أو الإعدادات.',
+        can: ['قضاياه + كل قضايا المكتب','التقارير وبيانات الإيرادات','إصدار فواتير ZATCA','إدارة الموكلين والجلسات'],
+        cannot: ['الإعدادات','الصلاحيات والأدوار']
+      },
+      lawyer: {
+        icon: '📁', title: 'محامٍ — وصول محدود',
+        desc: 'يرى فقط القضايا المعيّنة له، ويدير جلساته ومهامه، ويسجّل الأتعاب والمصاريف. لا يرى بيانات المكتب المالية الكاملة.',
+        can: ['قضاياه المعيّنة فقط','جلساته ومهامه','تسجيل الأتعاب والمصاريف','الأرشيف الخاص بقضاياه'],
+        cannot: ['قضايا الآخرين','التقارير المالية','إدارة الفريق','الفواتير']
+      },
+      assist: {
+        icon: '📝', title: 'مساعد قانوني — وصول تشغيلي',
+        desc: 'يُساعد في الجلسات والمهام والأرشيف. لا يرى البيانات المالية ولا القضايا بشكل كامل.',
+        can: ['الجلسات والتقويم','إدارة المهام','الأرشيف والمستندات'],
+        cannot: ['الدعاوى والموكلين','الأتعاب والفواتير','التقارير','إدارة الفريق']
+      },
+      client: {
+        icon: '👤', title: 'موكل — بوابة مخصصة فقط',
+        desc: 'لا يدخل النظام الداخلي. يصل فقط لبوابة الموكل ليرى حالة قضيته والجلسات القادمة والمستندات المطلوبة منه.',
+        can: ['حالة قضيته','الجلسات القادمة','المستندات المطلوبة منه','فواتيره الخاصة'],
+        cannot: ['أي بيانات المكتب الداخلية','بيانات موكلين آخرين']
+      }
+    };
+
+    function updateBanner(role) {
+      var info = ROLE_INFO[role];
+      var banner = document.getElementById('roleInfoBanner');
+      if (!banner || !info) return;
+
+      var canHtml = info.can.map(function(c){ return '<span class="rib-chip rib-chip-g">✓ '+c+'</span>'; }).join('');
+      var cantHtml = info.cannot.map(function(c){ return '<span class="rib-chip rib-chip-r">✕ '+c+'</span>'; }).join('');
+
+      banner.innerHTML =
+        '<div class="rib-icon">' + info.icon + '</div>' +
+        '<div style="flex:1">' +
+          '<div class="rib-title">' + info.title + '</div>' +
+          '<div class="rib-desc">' + info.desc + '</div>' +
+          '<div class="rib-chips">' + canHtml + cantHtml + '</div>' +
+        '</div>';
+    }
+
+    function selectRole(card) {
+      document.querySelectorAll('.role-card').forEach(function(c){ c.classList.remove('selected'); });
+      card.classList.add('selected');
+      selectedRole = card.dataset.role;
+      updateBanner(selectedRole);
+    }
+
+    window.selectRole = selectRole;
+
+    /* ── حفظ ── */
+    document.getElementById('btnSave').addEventListener('click', function() {
+      try {
+        localStorage.setItem('perm_state', JSON.stringify(state));
+        var t = document.getElementById('toast');
+        t.textContent = '✓ تم حفظ إعدادات الصلاحيات بنجاح';
+        t.classList.add('show');
+        setTimeout(function(){ t.classList.remove('show'); }, 3000);
+      } catch(e) {}
+    });
+
+    /* ── تهيئة ── */
+    loadState();
+    buildTable();
+    updateBanner('owner');
+
+  })();
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+  <script src="dark-mode.js"></script>
+  <script src="notifications.js"></script>
+  <script src="global-search.js"></script>
+</body>
+</html>
