@@ -483,21 +483,23 @@
     }
 
     /* ── Load cases from localStorage ── */
-    function loadCasesIntoSelect(selId) {
-      var sel = document.getElementById(selId);
-      while (sel.options.length > 1) sel.remove(1);
+    function buildCaseList() {
       var list = [];
+      var seenNames = {};
       try {
         JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
-          var t = document.createElement('table');
-          t.innerHTML = '<tbody><tr>' + html + '</tr></tbody>';
-          var tds = t.querySelectorAll('td');
+          // cases_data stores outerHTML (<tr ...> ... </tr>) — use template to parse
+          var tpl = document.createElement('template');
+          tpl.innerHTML = html.trim();
+          var trEl = tpl.content.firstElementChild;
+          if (!trEl) return;
+          var tds = trEl.querySelectorAll('td');
           var nameEl = tds[0] ? tds[0].querySelector('.case-name') : null;
           var idEl   = tds[0] ? tds[0].querySelector('.case-id')   : null;
-          var clientCell = tds[1] ? tds[1].textContent.replace(/\s+/g,' ').trim() : '';
           var name = nameEl ? nameEl.textContent.trim() : '';
           var id   = idEl   ? idEl.textContent.trim()   : '';
-          if (name) list.push({ name: name, id: id, client: clientCell });
+          var client = tds[1] ? tds[1].textContent.replace(/\s+/g,' ').trim() : '';
+          if (name && !seenNames[name]) { seenNames[name] = true; list.push({ name: name, id: id, client: client }); }
         });
       } catch(e) {}
       try {
@@ -505,27 +507,40 @@
         if (dyn && typeof dyn === 'object') {
           Object.keys(dyn).forEach(function(num) {
             var c = dyn[num];
-            if (c && c.type) list.push({ name: 'قضية ' + c.type, id: num, client: c.client || '' });
+            if (c && c.type) {
+              var dynName = 'قضية ' + c.type;
+              if (!seenNames[dynName]) { seenNames[dynName] = true; list.push({ name: dynName, id: num, client: c.client || '' }); }
+            }
           });
         }
       } catch(e) {}
-      list.forEach(function(c) {
-        var o = document.createElement('option');
-        o.value = c.name;
-        o.setAttribute('data-client', c.client);
-        o.setAttribute('data-id', c.id);
-        o.textContent = c.name + (c.id ? ' (' + c.id + ')' : '') + (c.client ? ' — ' + c.client : '');
-        sel.appendChild(o);
-      });
-      // also filter dropdown
+      return list;
+    }
+
+    function loadCasesIntoSelect(selId) {
+      var list = buildCaseList();
+      // Always refresh the filter dropdown
       var fSel = document.getElementById('fCase');
       while (fSel.options.length > 1) fSel.remove(1);
       list.forEach(function(c) {
-        var o = document.createElement('option');
-        o.value = c.name;
-        o.textContent = c.name + (c.id ? ' (' + c.id + ')' : '');
-        fSel.appendChild(o);
+        var fo = document.createElement('option');
+        fo.value = c.name;
+        fo.textContent = c.name + (c.id ? ' (' + c.id + ')' : '');
+        fSel.appendChild(fo);
       });
+      // Also populate the modal select (eCase) with client data
+      if (selId && selId !== 'fCase') {
+        var sel = document.getElementById(selId);
+        while (sel.options.length > 1) sel.remove(1);
+        list.forEach(function(c) {
+          var o = document.createElement('option');
+          o.value = c.name;
+          o.setAttribute('data-client', c.client);
+          o.setAttribute('data-id', c.id);
+          o.textContent = c.name + (c.id ? ' (' + c.id + ')' : '') + (c.client ? ' — ' + c.client : '');
+          sel.appendChild(o);
+        });
+      }
     }
 
     /* ── Category CSS class ── */
@@ -594,7 +609,7 @@
       expenses.forEach(function(e) {
         var a = parseFloat(e.amount) || 0;
         total += a;
-        if (e.status === 'معلق')                total_pending = (total_pending || 0) + a, pending += a;
+        if (e.status === 'معلق')                pending += a;
         if (e.status === 'مُسترد')              reimbursed += a;
         if (e.status === 'مُدرج في فاتورة')     invoiced += a;
       });

@@ -348,7 +348,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <div class="topbar-title">الأرشيف الرقمي</div>
-        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+        <div class="topbar-sub" id="topbarDate">· <span class="firm-name-target">نظام إدارة المحاماة</span></div>
       </div>
       <div class="topbar-right">
         <div class="topbar-search">🔍 بحث في الأرشيف...</div>
@@ -378,21 +378,21 @@
         </div>
         <div class="kpi-card kpi-gold">
           <div class="kpi-icon">💾</div>
-          <div class="kpi-val">0 GB</div>
+          <div class="kpi-val" id="kpiStorage">0 MB</div>
           <div class="kpi-label">حجم التخزين</div>
           <div class="kpi-trend trend-neu" style="color:var(--gold)">من 100 GB متاح</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-icon">📤</div>
-          <div class="kpi-val">0</div>
+          <div class="kpi-val" id="kpiMonth">0</div>
           <div class="kpi-label">مستندات هذا الشهر</div>
-          <div class="kpi-trend trend-neu">لا توجد مستندات بعد</div>
+          <div class="kpi-trend trend-neu" id="kpiMonthTrend">لا توجد مستندات بعد</div>
         </div>
         <div class="kpi-card kpi-red">
-          <div class="kpi-icon">⏳</div>
-          <div class="kpi-val">0</div>
-          <div class="kpi-label">مستندات معلقة</div>
-          <div class="kpi-trend trend-neu">لا توجد مستندات بعد</div>
+          <div class="kpi-icon">📄</div>
+          <div class="kpi-val" id="kpiPDF">0</div>
+          <div class="kpi-label">ملفات PDF</div>
+          <div class="kpi-trend trend-neu">من إجمالي المستندات</div>
         </div>
       </div>
 
@@ -465,21 +465,9 @@
           </select>
           <select class="filter-select" id="aCase">
             <option value="">القضية — الكل</option>
-            <option>قضية المالكي</option>
-            <option>نزاع الخليج للتجارة</option>
-            <option>قضية السالم</option>
-            <option>استئناف النور</option>
-            <option>قضية العمري</option>
-            <option>قضية الحربي</option>
-            <option>نزاع الورثة</option>
-            <option>قضية الدوسري</option>
           </select>
           <select class="filter-select" id="aLawyer">
             <option value="">المحامي — الكل</option>
-            <option>خالد العتيبي</option>
-            <option>سارة المحمد</option>
-            <option>محمد الرشيد</option>
-            <option>نورة الأحمد</option>
           </select>
           <div class="view-toggle">
             <button class="vt-btn active" id="btnList" title="قائمة">☰</button>
@@ -544,14 +532,6 @@
             <label class="form-label">القضية المرتبطة</label>
             <select class="form-select" id="fDocCase">
               <option value="">— اختر القضية —</option>
-              <option>قضية المالكي</option>
-              <option>نزاع الخليج للتجارة</option>
-              <option>قضية السالم</option>
-              <option>استئناف النور</option>
-              <option>قضية العمري</option>
-              <option>قضية الحربي</option>
-              <option>نزاع الورثة</option>
-              <option>قضية الدوسري</option>
             </select>
           </div>
         </div>
@@ -628,30 +608,109 @@
 
   <script>
   (function(){
-    /* ── Data ── */
-    var DOCS = [
-      { id:0,  name:'لائحة الدعوى الابتدائية',      type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية المالكي',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'2.4 MB',  date:'12 يناير 2025' },
-      { id:1,  name:'عقد الشراكة الأصلي',            type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية المالكي',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'1.8 MB',  date:'10 يناير 2025' },
-      { id:2,  name:'تسجيل جلسة أولى',              type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'نزاع الخليج للتجارة', lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'45 MB',   date:'8 يناير 2025' },
-      { id:3,  name:'صورة صك الملكية',              type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية السالم',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'3.2 MB',  date:'7 يناير 2025' },
-      { id:4,  name:'مذكرة الدفاع الختامية',         type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'استئناف النور',      lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'890 KB',  date:'6 يناير 2025' },
-      { id:5,  name:'وكالة شرعية موثقة',            type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية العمري',        lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'1.1 MB',  date:'5 يناير 2025' },
-      { id:6,  name:'صور الأضرار التجارية',          type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية الحربي',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'7.8 MB',  date:'3 يناير 2025' },
-      { id:7,  name:'حكم المحكمة الابتدائية',        type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'نزاع الورثة',        lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'4.2 MB',  date:'29 ديسمبر 2024' },
-      { id:8,  name:'تسجيل جلسة الصلح',             type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'قضية الدوسري',       lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'28 MB',   date:'27 ديسمبر 2024' },
-      { id:9,  name:'عريضة الاستئناف',              type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'قضية المالكي',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'1.3 MB',  date:'22 ديسمبر 2024' },
-      { id:10, name:'مخطط العقار المتنازع عليه',     type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية السالم',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'5.6 MB',  date:'20 ديسمبر 2024' },
-      { id:11, name:'تقرير الخبير المالي',           type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'استئناف النور',      lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'6.1 MB',  date:'15 ديسمبر 2024' },
-      { id:12, name:'عقد الإيجار التجاري',           type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية الحربي',        lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'2.9 MB',  date:'10 ديسمبر 2024' },
-      { id:13, name:'مسودة اتفاقية التسوية',         type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'نزاع الورثة',        lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'760 KB',  date:'5 ديسمبر 2024' },
-      { id:14, name:'تسجيل اجتماع الموكل',          type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'قضية العمري',        lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'18 MB',   date:'1 ديسمبر 2024' }
+    /* ══ Storage key ══ */
+    var STORAGE_KEY = 'archive_docs';
+
+    /* ══ Demo data (first-time seed) ══ */
+    var DEMO = [
+      { id:1001, name:'لائحة الدعوى الابتدائية',   type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية المالكي',        lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'2.4 MB',  date:'12 يناير 2025',  createdAt:'2025-01-12T10:00:00Z' },
+      { id:1002, name:'عقد الشراكة الأصلي',         type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية المالكي',        lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'1.8 MB',  date:'10 يناير 2025',  createdAt:'2025-01-10T09:00:00Z' },
+      { id:1003, name:'تسجيل جلسة أولى',            type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'نزاع الخليج للتجارة', lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'45 MB',   date:'8 يناير 2025',   createdAt:'2025-01-08T14:00:00Z' },
+      { id:1004, name:'صورة صك الملكية',            type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية السالم',         lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'3.2 MB',  date:'7 يناير 2025',   createdAt:'2025-01-07T11:00:00Z' },
+      { id:1005, name:'مذكرة الدفاع الختامية',       type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'استئناف النور',       lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'890 KB',  date:'6 يناير 2025',   createdAt:'2025-01-06T08:00:00Z' },
+      { id:1006, name:'وكالة شرعية موثقة',          type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية العمري',         lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'1.1 MB',  date:'5 يناير 2025',   createdAt:'2025-01-05T13:00:00Z' },
+      { id:1007, name:'صور الأضرار التجارية',        type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية الحربي',         lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'7.8 MB',  date:'3 يناير 2025',   createdAt:'2025-01-03T10:00:00Z' },
+      { id:1008, name:'حكم المحكمة الابتدائية',      type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'نزاع الورثة',         lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'4.2 MB',  date:'29 ديسمبر 2024', createdAt:'2024-12-29T09:00:00Z' },
+      { id:1009, name:'تسجيل جلسة الصلح',           type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'قضية الدوسري',        lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'28 MB',   date:'27 ديسمبر 2024', createdAt:'2024-12-27T14:00:00Z' },
+      { id:1010, name:'عريضة الاستئناف',            type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'قضية المالكي',        lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'1.3 MB',  date:'22 ديسمبر 2024', createdAt:'2024-12-22T11:00:00Z' },
+      { id:1011, name:'مخطط العقار المتنازع عليه',   type:'JPG',  typeClass:'type-img',   icon:'🖼️', case:'قضية السالم',         lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'5.6 MB',  date:'20 ديسمبر 2024', createdAt:'2024-12-20T10:00:00Z' },
+      { id:1012, name:'تقرير الخبير المالي',         type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'استئناف النور',       lawyer:'سارة المحمد',  lawyerAv:'س.م', size:'6.1 MB',  date:'15 ديسمبر 2024', createdAt:'2024-12-15T09:00:00Z' },
+      { id:1013, name:'عقد الإيجار التجاري',         type:'PDF',  typeClass:'type-pdf',   icon:'📄', case:'قضية الحربي',         lawyer:'نورة الأحمد',  lawyerAv:'ن.أ', size:'2.9 MB',  date:'10 ديسمبر 2024', createdAt:'2024-12-10T08:00:00Z' },
+      { id:1014, name:'مسودة اتفاقية التسوية',       type:'DOCX', typeClass:'type-doc',   icon:'📝', case:'نزاع الورثة',         lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:'760 KB',  date:'5 ديسمبر 2024',  createdAt:'2024-12-05T13:00:00Z' },
+      { id:1015, name:'تسجيل اجتماع الموكل',        type:'MP3',  typeClass:'type-audio', icon:'🎙️', case:'قضية العمري',         lawyer:'محمد الرشيد',  lawyerAv:'م.ر', size:'18 MB',   date:'1 ديسمبر 2024',  createdAt:'2024-12-01T14:00:00Z' }
     ];
-    var totalCount = DOCS.length;
 
-    /* ── Animate storage bar ── */
-    setTimeout(function(){ document.getElementById('storageFill').style.width = '24%'; }, 100);
+    /* ══ Init DOCS from localStorage, seed demo on first load ══ */
+    var DOCS;
+    (function() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { var arr = JSON.parse(raw); if (arr && arr.length) { DOCS = arr; return; } }
+      } catch(e) {}
+      DOCS = DEMO.slice();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DOCS));
+    })();
 
-    /* ── Build grid view ── */
+    function saveDocs() { localStorage.setItem(STORAGE_KEY, JSON.stringify(DOCS)); }
+
+    /* ══ Helpers ══ */
+    var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+    function todayStr() {
+      var d = new Date();
+      return d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear();
+    }
+    function parseSizeMB(str) {
+      if (!str || str === '—') return 0;
+      var n = parseFloat(str);
+      if (str.indexOf('GB') !== -1) return n * 1024;
+      if (str.indexOf('MB') !== -1) return n;
+      if (str.indexOf('KB') !== -1) return n / 1024;
+      return 0;
+    }
+    function getCurrentUser() {
+      try { var fd = JSON.parse(localStorage.getItem('firm_data') || 'null'); return fd ? (fd.ownerName || fd.firmName || 'المسؤول') : 'المسؤول'; } catch(e) { return 'المسؤول'; }
+    }
+    function initials(name) {
+      var p = (name || '').trim().split(/\s+/);
+      return p.length >= 2 ? p[0][0] + '.' + p[1][0] : (p[0] ? p[0][0] : 'م');
+    }
+    function typeInfo(ext) {
+      var map = { pdf:{t:'PDF',c:'type-pdf',i:'📄'}, jpg:{t:'JPG',c:'type-img',i:'🖼️'}, jpeg:{t:'JPG',c:'type-img',i:'🖼️'}, png:{t:'JPG',c:'type-img',i:'🖼️'}, docx:{t:'DOCX',c:'type-doc',i:'📝'}, doc:{t:'DOCX',c:'type-doc',i:'📝'}, mp3:{t:'MP3',c:'type-audio',i:'🎙️'}, mp4:{t:'MP4',c:'type-audio',i:'🎙️'} };
+      return map[ext] || { t: ext.toUpperCase(), c:'type-pdf', i:'📄' };
+    }
+    function showToast(msg, color) {
+      var t = document.getElementById('toast');
+      t.textContent = '✓ ' + msg;
+      t.style.background = color || 'var(--accent)';
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 3000);
+    }
+
+    /* ══ Build row HTML ══ */
+    function buildRowHTML(d) {
+      return '<td><div class="doc-name"><span class="doc-icon">' + d.icon + '</span> ' + d.name + '</div></td>' +
+        '<td><span class="type-tag ' + d.typeClass + '">' + d.type + '</span></td>' +
+        '<td><a class="case-link" href="#">' + (d.case || '—') + '</a></td>' +
+        '<td><span class="lawyer-chip"><span class="lawyer-av">' + (d.lawyerAv || 'م') + '</span> ' + (d.lawyer || '—') + '</span></td>' +
+        '<td><span class="size-cell">' + (d.size || '—') + '</span></td>' +
+        '<td><span class="date-cell">' + (d.date || '—') + '</span></td>' +
+        '<td><div class="row-actions">' +
+          '<button class="row-btn" onclick="openPreview(' + d.id + ')">عرض</button>' +
+          '<button class="row-btn row-btn-dl" onclick="simDownload(this)">تحميل</button>' +
+          '<button class="row-btn row-btn-del" onclick="confirmDelete(this)">حذف</button>' +
+        '</div></td>';
+    }
+
+    /* ══ Render table ══ */
+    function renderTable(docs) {
+      var tbody = document.getElementById('archiveBody');
+      var noRes = document.getElementById('archiveNoResults');
+      Array.from(tbody.querySelectorAll('tr[data-id]')).forEach(function(r){ r.remove(); });
+      if (!docs.length) { noRes.style.display = ''; return; }
+      noRes.style.display = 'none';
+      docs.forEach(function(d) {
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-id', d.id);
+        tr.setAttribute('data-type', d.type);
+        tr.setAttribute('data-case', d.case || '');
+        tr.setAttribute('data-lawyer', d.lawyer || '');
+        tr.innerHTML = buildRowHTML(d);
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ══ Build grid ══ */
     function buildGrid(docs) {
       var gv = document.getElementById('gridView');
       gv.innerHTML = '';
@@ -662,8 +721,8 @@
         card.innerHTML =
           '<div class="fc-icon">' + d.icon + '</div>' +
           '<div class="fc-name">' + d.name + '</div>' +
-          '<div class="fc-case">' + d.case + '</div>' +
-          '<div class="fc-meta"><span>' + d.size + '</span><span>' + d.date.split(' ').slice(-2).join(' ') + '</span></div>' +
+          '<div class="fc-case">' + (d.case || '—') + '</div>' +
+          '<div class="fc-meta"><span>' + (d.size || '—') + '</span><span>' + (d.date || '').split(' ').slice(-2).join(' ') + '</span></div>' +
           '<div class="fc-actions">' +
             '<button class="fc-btn" onclick="openPreview(' + d.id + ')">عرض</button>' +
             '<button class="fc-btn" onclick="simDownload(this)">تحميل</button>' +
@@ -671,69 +730,140 @@
         gv.appendChild(card);
       });
     }
-    buildGrid(DOCS);
 
-    /* ── View toggle ── */
-    var btnList = document.getElementById('btnList');
-    var btnGrid = document.getElementById('btnGrid');
-    var listView = document.getElementById('listView');
-    var gridView = document.getElementById('gridView');
-
-    btnList.addEventListener('click', function(){
-      btnList.classList.add('active'); btnGrid.classList.remove('active');
-      listView.style.display = ''; gridView.classList.remove('active');
-    });
-    btnGrid.addEventListener('click', function(){
-      btnGrid.classList.add('active'); btnList.classList.remove('active');
-      listView.style.display = 'none'; gridView.classList.add('active');
-    });
-
-    /* ── Filters ── */
-    function filterRows() {
-      var q      = document.getElementById('aSearch').value.trim().toLowerCase();
-      var fType  = document.getElementById('aType').value;
-      var fCase  = document.getElementById('aCase').value;
-      var fLawyer= document.getElementById('aLawyer').value;
-      var rows   = document.querySelectorAll('#archiveBody tr[data-type]');
-      var matched = [];
-
-      rows.forEach(function(tr) {
-        var name   = tr.querySelector('.doc-name').textContent.toLowerCase();
-        var type   = tr.getAttribute('data-type');
-        var cas    = tr.getAttribute('data-case');
-        var lawyer = tr.getAttribute('data-lawyer');
-
-        var ok = true;
-        if (q && name.indexOf(q) === -1 && cas.indexOf(q) === -1) ok = false;
-        if (fType && type !== fType) ok = false;
-        if (fCase && cas !== fCase) ok = false;
-        if (fLawyer && lawyer !== fLawyer) ok = false;
-
-        tr.style.display = ok ? '' : 'none';
-        if (ok) matched.push(parseInt(tr.getAttribute('data-id')));
+    /* ══ KPIs ══ */
+    function updateKPIs() {
+      var now = new Date();
+      var thisM = now.getMonth(), thisY = now.getFullYear();
+      var totalSizeMB = 0, pdfCount = 0, monthCount = 0;
+      DOCS.forEach(function(d) {
+        totalSizeMB += parseSizeMB(d.size);
+        if (d.type === 'PDF') pdfCount++;
+        if (d.createdAt) {
+          var dt = new Date(d.createdAt);
+          if (dt.getMonth() === thisM && dt.getFullYear() === thisY) monthCount++;
+        }
       });
+      document.getElementById('kpiTotal').textContent   = DOCS.length;
+      document.getElementById('kpiMonth').textContent   = monthCount;
+      document.getElementById('kpiPDF').textContent     = pdfCount;
 
-      document.getElementById('archiveNoResults').style.display = matched.length === 0 ? '' : 'none';
-      var filteredDocs = DOCS.filter(function(d){ return matched.indexOf(d.id) !== -1; });
-      buildGrid(filteredDocs);
+      var sizeDisplay = totalSizeMB >= 1024 ? (totalSizeMB/1024).toFixed(2) + ' GB' : totalSizeMB.toFixed(0) + ' MB';
+      document.getElementById('kpiStorage').textContent = sizeDisplay;
+
+      // Storage bar
+      var pct = Math.min((totalSizeMB / (100 * 1024)) * 100, 100);
+      setTimeout(function(){ document.getElementById('storageFill').style.width = Math.max(pct, 0.5) + '%'; }, 100);
+      document.querySelector('.storage-pct').textContent = pct.toFixed(1) + '% مستخدم · ' + (100 - totalSizeMB/1024).toFixed(1) + ' GB متبقي';
+      document.querySelector('.storage-nums').innerHTML = '<span>' + sizeDisplay + '</span> من <span>100 GB</span>';
+
+      // Storage type bars
+      var types = { PDF:0, JPG:0, MP3:0, DOCX:0 };
+      DOCS.forEach(function(d){ if (types[d.type] !== undefined) types[d.type] += parseSizeMB(d.size); });
+      var counts = { PDF:0, JPG:0, MP3:0, DOCX:0 };
+      DOCS.forEach(function(d){ if (counts[d.type] !== undefined) counts[d.type]++; });
+      var stItems = document.querySelectorAll('.st-item');
+      var typeKeys = ['PDF','JPG','MP3','DOCX'];
+      var fillClasses = ['st-fill-pdf','st-fill-img','st-fill-audio','st-fill-doc'];
+      stItems.forEach(function(item, i) {
+        var key = typeKeys[i]; if (!key) return;
+        var mb = types[key], cnt = counts[key];
+        item.querySelector('.st-count').textContent = cnt + ' ملف';
+        item.querySelector('.st-size').textContent  = mb >= 1024 ? (mb/1024).toFixed(2) + ' GB' : mb.toFixed(0) + ' MB';
+        var fillPct = totalSizeMB > 0 ? (mb / totalSizeMB) * 100 : 0;
+        item.querySelector('.st-fill').style.width = fillPct + '%';
+      });
     }
 
+    /* ══ Populate case & lawyer dropdowns ══ */
+    function populateDropdowns() {
+      var caseNames = [];
+      var caseClientMap = {}; // اسم القضية → اسم الموكل
+      // From cases_data (localStorage)
+      try {
+        JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
+          var tpl = document.createElement('template'); tpl.innerHTML = html.trim();
+          var trEl = tpl.content.firstElementChild; if (!trEl) return;
+          var tds = trEl.querySelectorAll('td');
+          var nameEl = tds[0] ? tds[0].querySelector('.case-name') : null;
+          var name   = nameEl ? nameEl.textContent.trim() : '';
+          var client = tds[1] ? tds[1].textContent.replace(/\s+/g,' ').trim() : '';
+          if (name && caseNames.indexOf(name) === -1) {
+            caseNames.push(name);
+            caseClientMap[name] = client;
+          }
+        });
+      } catch(e) {}
+      // فقط من الدعاوى الحقيقية — لا نضيف من المستندات التجريبية
+
+      ['aCase','fDocCase'].forEach(function(selId) {
+        var sel = document.getElementById(selId); if (!sel) return;
+        while (sel.options.length > 1) sel.remove(1);
+        caseNames.forEach(function(name) {
+          var o = document.createElement('option');
+          o.value = name;
+          o.textContent = name + (caseClientMap[name] ? ' — ' + caseClientMap[name] : '');
+          sel.appendChild(o);
+        });
+      });
+
+      // Lawyer filter
+      var lawyerSel = document.getElementById('aLawyer');
+      while (lawyerSel.options.length > 1) lawyerSel.remove(1);
+      var lawyerNames = [];
+      try {
+        JSON.parse(localStorage.getItem('lawyers_data') || '[]').forEach(function(html) {
+          var div = document.createElement('div'); div.innerHTML = html;
+          var nameEl = div.querySelector('.lc-name');
+          var name = nameEl ? nameEl.textContent.trim() : null;
+          if (name && lawyerNames.indexOf(name) === -1) lawyerNames.push(name);
+        });
+      } catch(e) {}
+      // فقط من المحامين الحقيقيين — لا نضيف من المستندات التجريبية
+      lawyerNames.forEach(function(name) {
+        var o = document.createElement('option'); o.value = name; o.textContent = name; lawyerSel.appendChild(o);
+      });
+    }
+
+    /* ══ Render all ══ */
+    function renderAll(docs) { renderTable(docs); buildGrid(docs); }
+
+    /* ══ Apply filters ══ */
+    function applyFilters() {
+      var q       = document.getElementById('aSearch').value.trim().toLowerCase();
+      var fType   = document.getElementById('aType').value;
+      var fCase   = document.getElementById('aCase').value;
+      var fLawyer = document.getElementById('aLawyer').value;
+      var filtered = DOCS.filter(function(d) {
+        if (q && (d.name||'').toLowerCase().indexOf(q) === -1 && (d.case||'').toLowerCase().indexOf(q) === -1) return false;
+        if (fType   && d.type   !== fType)   return false;
+        if (fCase   && d.case   !== fCase)   return false;
+        if (fLawyer && d.lawyer !== fLawyer) return false;
+        return true;
+      });
+      renderAll(filtered);
+      document.getElementById('archiveNoResults').style.display = filtered.length ? 'none' : '';
+    }
     ['aSearch','aType','aCase','aLawyer'].forEach(function(id){
-      document.getElementById(id).addEventListener('input', filterRows);
-      document.getElementById(id).addEventListener('change', filterRows);
+      document.getElementById(id).addEventListener('input', applyFilters);
+      document.getElementById(id).addEventListener('change', applyFilters);
     });
 
-    /* ── Modal ── */
-    var overlay = document.getElementById('modalOverlay');
-    document.getElementById('btnUpload').addEventListener('click', function(){ overlay.classList.add('open'); overlay.scrollTop = 0; document.body.style.overflow = 'hidden'; });
-    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
-    document.getElementById('btnCancelUpload').addEventListener('click', closeModal);
-    overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
-    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+    /* ══ View toggle ══ */
+    document.getElementById('btnList').addEventListener('click', function(){
+      this.classList.add('active'); document.getElementById('btnGrid').classList.remove('active');
+      document.getElementById('listView').style.display = ''; document.getElementById('gridView').classList.remove('active');
+    });
+    document.getElementById('btnGrid').addEventListener('click', function(){
+      this.classList.add('active'); document.getElementById('btnList').classList.remove('active');
+      document.getElementById('listView').style.display = 'none'; document.getElementById('gridView').classList.add('active');
+    });
 
+    /* ══ Modal ══ */
+    var overlay = document.getElementById('modalOverlay');
+    function openModal() { populateDropdowns(); overlay.classList.add('open'); overlay.scrollTop = 0; document.body.style.overflow = 'hidden'; }
     function closeModal() {
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
+      overlay.classList.remove('open'); document.body.style.overflow = '';
       document.getElementById('fDocName').value = '';
       document.getElementById('fDocCase').value = '';
       document.getElementById('fDocType').value = '';
@@ -742,175 +872,105 @@
       resetDropZone();
       document.getElementById('uploadProgress').classList.remove('active');
     }
+    document.getElementById('btnUpload').addEventListener('click', openModal);
+    document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+    document.getElementById('btnCancelUpload').addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
 
-    /* ── Drop zone ── */
+    /* ══ Drop zone ══ */
     var dz = document.getElementById('dropZone');
     var fi = document.getElementById('fileInput');
     var selectedFile = null;
-
     dz.addEventListener('click', function(){ fi.click(); });
     dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('dragover'); });
     dz.addEventListener('dragleave', function(){ dz.classList.remove('dragover'); });
-    dz.addEventListener('drop', function(e){
-      e.preventDefault(); dz.classList.remove('dragover');
-      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-    });
+    dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('dragover'); if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); });
     fi.addEventListener('change', function(){ if(fi.files.length) handleFile(fi.files[0]); });
-
     function handleFile(f) {
       selectedFile = f;
       var sizeStr = f.size > 1048576 ? (f.size/1048576).toFixed(1) + ' MB' : Math.round(f.size/1024) + ' KB';
       dz.classList.add('dz-selected');
-      dz.innerHTML =
-        '<div class="dz-icon">✅</div>' +
-        '<div class="dz-file-name">' + f.name + '</div>' +
-        '<div class="dz-file-size">' + sizeStr + '</div>';
+      dz.innerHTML = '<div class="dz-icon">✅</div><div class="dz-file-name">' + f.name + '</div><div class="dz-file-size">' + sizeStr + '</div>';
     }
-
     function resetDropZone() {
-      selectedFile = null;
-      dz.classList.remove('dz-selected','dragover');
-      dz.innerHTML =
-        '<div class="dz-icon">📁</div>' +
-        '<div class="dz-text">اسحب الملف هنا أو انقر للتصفح</div>' +
-        '<div class="dz-sub">PDF · JPG · PNG · DOCX · MP3 · MP4</div>' +
-        '<div class="dz-hint">الحجم الأقصى 50 MB</div>';
+      selectedFile = null; dz.classList.remove('dz-selected','dragover');
+      dz.innerHTML = '<div class="dz-icon">📁</div><div class="dz-text">اسحب الملف هنا أو انقر للتصفح</div><div class="dz-sub">PDF · JPG · PNG · DOCX · MP3 · MP4</div><div class="dz-hint">الحجم الأقصى 50 MB</div>';
     }
 
-    /* ── Submit upload ── */
+    /* ══ Submit upload ══ */
     document.getElementById('btnSubmitUpload').addEventListener('click', function(){
       var name = document.getElementById('fDocName').value.trim();
-      if (!name) { document.getElementById('fDocName').focus(); return; }
+      if (!name) { document.getElementById('fDocName').style.borderColor = 'var(--red)'; return; }
+      document.getElementById('fDocName').style.borderColor = '';
 
       var btn = this;
-      btn.disabled = true;
-      btn.innerHTML = 'جاري الرفع <span class="loading-dots">...</span>';
-      btn.classList.add('btn-loading');
-
+      btn.disabled = true; btn.innerHTML = 'جاري الرفع <span class="loading-dots">...</span>'; btn.classList.add('btn-loading');
       var prog = document.getElementById('uploadProgress');
-      var fill = document.getElementById('upFill');
-      var pct  = document.getElementById('upPct');
-      var fname = document.getElementById('upFileName');
-
+      var fill = document.getElementById('upFill'), pctEl = document.getElementById('upPct');
+      document.getElementById('upFileName').textContent = selectedFile ? selectedFile.name : name;
       prog.classList.add('active');
-      fname.textContent = selectedFile ? selectedFile.name : name;
 
       var pctVal = 0;
       var iv = setInterval(function(){
         pctVal = Math.min(pctVal + Math.random() * 18 + 8, 98);
-        fill.style.width = pctVal + '%';
-        pct.textContent = Math.round(pctVal) + '%';
+        fill.style.width = pctVal + '%'; pctEl.textContent = Math.round(pctVal) + '%';
         if (pctVal >= 98) clearInterval(iv);
       }, 100);
 
       setTimeout(function(){
-        clearInterval(iv);
-        fill.style.width = '100%';
-        pct.textContent = '100%';
-
+        clearInterval(iv); fill.style.width = '100%'; pctEl.textContent = '100%';
         setTimeout(function(){
-          var docCase  = document.getElementById('fDocCase').value || '—';
-          var docTypeVal = document.getElementById('fDocType').value || 'أخرى';
-          var sizeStr  = selectedFile ? (selectedFile.size > 1048576 ? (selectedFile.size/1048576).toFixed(1) + ' MB' : Math.round(selectedFile.size/1024) + ' KB') : '—';
-          var extMap   = { 'pdf':'PDF','jpg':'JPG','jpeg':'JPG','png':'JPG','doc':'DOCX','docx':'DOCX','mp3':'MP3','mp4':'MP4' };
-          var typeStr  = 'PDF';
-          if (selectedFile) {
-            var ext = selectedFile.name.split('.').pop().toLowerCase();
-            typeStr = extMap[ext] || ext.toUpperCase();
-          }
-          var typeClassMap = { 'PDF':'type-pdf','JPG':'type-img','MP3':'type-audio','MP4':'type-audio','DOCX':'type-doc' };
-          var tClass = typeClassMap[typeStr] || 'type-pdf';
-          var iconMap  = { 'PDF':'📄','JPG':'🖼️','MP3':'🎙️','MP4':'🎙️','DOCX':'📝' };
-          var ico = iconMap[typeStr] || '📄';
-
-          var newId = Date.now();
-          var newDoc = { id:newId, name:name, type:typeStr, typeClass:tClass, icon:ico, case:docCase, lawyer:'خالد العتيبي', lawyerAv:'خ.ع', size:sizeStr, date:'الآن' };
+          var docCase = document.getElementById('fDocCase').value || '—';
+          var sizeStr = selectedFile ? (selectedFile.size > 1048576 ? (selectedFile.size/1048576).toFixed(1) + ' MB' : Math.round(selectedFile.size/1024) + ' KB') : '—';
+          var ext = selectedFile ? selectedFile.name.split('.').pop().toLowerCase() : 'pdf';
+          var ti = typeInfo(ext);
+          var user = getCurrentUser(), av = initials(user);
+          var newDoc = { id: Date.now(), name:name, type:ti.t, typeClass:ti.c, icon:ti.i, case:docCase, lawyer:user, lawyerAv:av, size:sizeStr, date:todayStr(), createdAt:new Date().toISOString() };
           DOCS.unshift(newDoc);
-
-          // Add to list
-          var tbody = document.getElementById('archiveBody');
-          var tr = document.createElement('tr');
-          tr.setAttribute('data-type', typeStr);
-          tr.setAttribute('data-case', docCase);
-          tr.setAttribute('data-lawyer', 'خالد العتيبي');
-          tr.setAttribute('data-id', newId);
-          tr.innerHTML =
-            '<td><div class="doc-name"><span class="doc-icon">' + ico + '</span> ' + name + '</div></td>' +
-            '<td><span class="type-tag ' + tClass + '">' + typeStr + '</span></td>' +
-            '<td><a class="case-link" href="#">' + docCase + '</a></td>' +
-            '<td><span class="lawyer-chip"><span class="lawyer-av">خ.ع</span> خالد العتيبي</span></td>' +
-            '<td><span class="size-cell">' + sizeStr + '</span></td>' +
-            '<td><span class="date-cell">الآن</span></td>' +
-            '<td><div class="row-actions">' +
-              '<button class="row-btn" onclick="openPreview(' + newId + ')">عرض</button>' +
-              '<button class="row-btn row-btn-dl" onclick="simDownload(this)">تحميل</button>' +
-              '<button class="row-btn row-btn-del" onclick="confirmDelete(this)">حذف</button>' +
-            '</div></td>';
-          tbody.insertBefore(tr, tbody.firstChild);
-          tr.classList.add('new-row');
-          saveArchive();
-
-          // Update grid
-          buildGrid(DOCS);
-
-          // Update KPI
-          totalCount++;
-          document.getElementById('kpiTotal').textContent = totalCount.toLocaleString('ar');
-
-          btn.disabled = false;
-          btn.innerHTML = 'رفع المستند';
-          btn.classList.remove('btn-loading');
+          saveDocs();
+          renderAll(DOCS);
+          updateKPIs();
+          btn.disabled = false; btn.innerHTML = 'رفع المستند'; btn.classList.remove('btn-loading');
           closeModal();
           showToast('تم رفع المستند بنجاح');
+          // Highlight first row
+          var first = document.querySelector('#archiveBody tr[data-id]');
+          if (first) first.classList.add('new-row');
         }, 300);
       }, 1500);
     });
 
-    /* ── Delete confirm ── */
+    /* ══ Delete ══ */
     var confirmOverlay = document.getElementById('confirmOverlay');
-    var pendingDeleteRow = null;
-
+    var pendingDeleteId = null;
     window.confirmDelete = function(btn) {
-      pendingDeleteRow = btn.closest('tr');
-      confirmOverlay.classList.add('open');
+      var tr = btn.closest('tr');
+      pendingDeleteId = tr ? parseInt(tr.getAttribute('data-id')) : null;
+      if (pendingDeleteId) confirmOverlay.classList.add('open');
     };
-
-    document.getElementById('btnCancelDel').addEventListener('click', function(){
-      confirmOverlay.classList.remove('open');
-      pendingDeleteRow = null;
-    });
-    confirmOverlay.addEventListener('click', function(e){ if(e.target === confirmOverlay){ confirmOverlay.classList.remove('open'); pendingDeleteRow = null; } });
-
+    document.getElementById('btnCancelDel').addEventListener('click', function(){ confirmOverlay.classList.remove('open'); pendingDeleteId = null; });
+    confirmOverlay.addEventListener('click', function(e){ if(e.target === confirmOverlay){ confirmOverlay.classList.remove('open'); pendingDeleteId = null; } });
     document.getElementById('btnConfirmDel').addEventListener('click', function(){
-      if (pendingDeleteRow) {
-        var id = parseInt(pendingDeleteRow.getAttribute('data-id'));
-        pendingDeleteRow.style.transition = 'opacity 0.3s, transform 0.3s';
-        pendingDeleteRow.style.opacity = '0';
-        pendingDeleteRow.style.transform = 'translateX(20px)';
-        setTimeout(function(){
-          pendingDeleteRow.remove();
-          DOCS = DOCS.filter(function(d){ return d.id !== id; });
-          buildGrid(DOCS);
-          totalCount = Math.max(0, totalCount - 1);
-          document.getElementById('kpiTotal').textContent = totalCount.toLocaleString('ar');
-        }, 300);
-        confirmOverlay.classList.remove('open');
-        pendingDeleteRow = null;
-        showToast('تم حذف المستند');
-      }
+      if (pendingDeleteId == null) return;
+      var id = pendingDeleteId;
+      DOCS = DOCS.filter(function(d){ return d.id !== id; });
+      saveDocs();
+      renderAll(DOCS);
+      updateKPIs();
+      confirmOverlay.classList.remove('open');
+      pendingDeleteId = null;
+      showToast('تم حذف المستند', '#DC2626');
     });
 
-    /* ── Preview panel ── */
+    /* ══ Preview panel ══ */
     var panelOverlay = document.getElementById('panelOverlay');
-
     window.openPreview = function(id) {
       var doc = DOCS.find(function(d){ return d.id === id; });
       if (!doc) return;
-      var body = document.getElementById('panelBody');
-      body.innerHTML =
+      document.getElementById('panelBody').innerHTML =
         '<div class="panel-icon">' + doc.icon + '</div>' +
         '<div class="panel-docname">' + doc.name + '</div>' +
-        '<div class="panel-case">' + doc.case + '</div>' +
+        '<div class="panel-case">' + (doc.case || '—') + '</div>' +
         '<div class="panel-meta">' +
           '<div class="pm-row"><span class="pm-key">نوع الملف</span><span class="pm-val">' + doc.type + '</span></div>' +
           '<div class="pm-row"><span class="pm-key">الحجم</span><span class="pm-val">' + doc.size + '</span></div>' +
@@ -919,71 +979,47 @@
           '<div class="pm-row"><span class="pm-key">التشفير</span><span class="pm-val" style="color:var(--green)">AES-256 ✓</span></div>' +
           '<div class="pm-row"><span class="pm-key">الحالة</span><span class="pm-val" style="color:var(--green)">محفوظ ✓</span></div>' +
         '</div>';
-
-      document.getElementById('btnPanelDel').onclick = function(){ closePreview(); confirmDelete({ closest: function(){ return document.querySelector('[data-id="' + id + '"]'); } }); };
-      document.getElementById('btnPanelDl').onclick = function(){ showToast('جاري تحميل ' + doc.name + ' ...'); };
-
-      panelOverlay.classList.add('open'); panelOverlay.scrollTop = 0; document.body.style.overflow = 'hidden';
+      document.getElementById('btnPanelDel').onclick = function(){ closePreview(); pendingDeleteId = id; confirmOverlay.classList.add('open'); };
+      document.getElementById('btnPanelDl').onclick  = function(){ showToast('جاري تحميل ' + doc.name + ' ...'); };
+      panelOverlay.classList.add('open'); document.body.style.overflow = 'hidden';
     };
-
-    function closePreview() {
-      panelOverlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
+    function closePreview(){ panelOverlay.classList.remove('open'); document.body.style.overflow = ''; }
     document.getElementById('btnClosePanel').addEventListener('click', closePreview);
     panelOverlay.addEventListener('click', function(e){ if(e.target === panelOverlay) closePreview(); });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && panelOverlay.classList.contains('open')) closePreview();
-    });
 
-    /* ── Download sim ── */
+    /* ══ Download sim ══ */
     window.simDownload = function(btn) {
       var row = btn.closest('tr');
       var name = row ? row.querySelector('.doc-name').textContent.trim() : 'الملف';
       showToast('جاري تحميل ' + name + ' ...');
     };
 
-    /* ── Toast ── */
-    function showToast(msg) {
-      var t = document.getElementById('toast');
-      t.textContent = '✓ ' + msg;
-      t.classList.add('show');
-      setTimeout(function(){ t.classList.remove('show'); }, 3000);
-    }
+    /* ══ ESC key ══ */
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Escape') return;
+      if (overlay.classList.contains('open'))        closeModal();
+      else if (panelOverlay.classList.contains('open')) closePreview();
+      else if (confirmOverlay.classList.contains('open')){ confirmOverlay.classList.remove('open'); pendingDeleteId = null; }
+    });
+
+    /* ══ Topbar date ══ */
+    (function(){
+      var days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      var d = new Date(), el = document.getElementById('topbarDate');
+      if (el) {
+        var fn = el.querySelector('.firm-name-target');
+        var nm = fn ? fn.textContent : 'نظام إدارة المحاماة';
+        el.innerHTML = days[d.getDay()] + '، ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · <span class="firm-name-target">' + nm + '</span>';
+      }
+    })();
+
+    /* ══ Init ══ */
+    renderAll(DOCS);
+    updateKPIs();
+    populateDropdowns();
 
   })();
-
-  function saveArchive() {
-    var rows = [];
-    document.querySelectorAll('#archiveBody tr').forEach(function(tr) {
-      if (!tr.classList.contains('no-results') && !tr.querySelector('.empty-state') && tr.id !== 'archiveNoResults') {
-        rows.push(tr.innerHTML);
-      }
-    });
-    localStorage.setItem('archive_data', JSON.stringify(rows));
-  }
-
-  function loadArchive() {
-    var saved = localStorage.getItem('archive_data');
-    if (saved) {
-      try {
-        var rows = JSON.parse(saved);
-        if (rows.length > 0) {
-          var tbody = document.getElementById('archiveBody');
-          rows.forEach(function(html) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = html;
-            tbody.appendChild(tr);
-          });
-          var nr = document.getElementById('archiveNoResults');
-          if (nr) nr.style.display = 'none';
-        }
-      } catch(e) {}
-    }
-  }
-
-  window.addEventListener('load', loadArchive);
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>

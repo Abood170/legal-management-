@@ -244,7 +244,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <div class="topbar-title">التقارير والإحصائيات</div>
-        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+        <div class="topbar-sub"><span id="topbarDate"></span> · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
       </div>
       <div class="topbar-right">
         <div class="topbar-search">🔍 بحث في التقارير...</div>
@@ -516,7 +516,20 @@
       try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
     }
     function parseDoc(html) {
-      return new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
+      /* يدعم كلا الصيغتين: outerHTML (يبدأ بـ <tr) و innerHTML */
+      var wrap = html.trimStart().startsWith('<tr') ? '' : '<tr>';
+      var close = wrap ? '</tr>' : '';
+      return new DOMParser().parseFromString('<table><tbody>' + wrap + html + close + '</tbody></table>', 'text/html');
+    }
+    function arabicStrToDate(str) {
+      if (!str) return null;
+      var MM = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
+      var DN = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      var p = str.replace(/،/g,' ').trim().split(/\s+/).filter(function(w){return w&&DN.indexOf(w)===-1;});
+      if (p.length < 2) return null;
+      var d=parseInt(p[0]), m=MM[p[1]], y=p[2]?parseInt(p[2]):new Date().getFullYear();
+      if (isNaN(d)||m===undefined||isNaN(y)) return null;
+      return new Date(y, m, d);
     }
     function fmtMoney(n) {
       return Math.round(n).toLocaleString('en-US') + ' ر.س';
@@ -536,7 +549,7 @@
         var amount = cells[4] ? parseFloat(cells[4].getAttribute('data-amount') || 0) : 0;
         if (isNaN(amount)) amount = 0;
         var pill = cells[7] ? cells[7].querySelector('.pill') : null;
-        var isPaid = pill && pill.className.indexOf('pill-paid') !== -1;
+        var isPaid = pill && (pill.className.indexOf('pill-paid') !== -1 || pill.className.indexOf('pill-collected') !== -1);
         total += amount;
         if (isPaid) paid += amount; else pending += amount;
         /* lawyer */
@@ -599,15 +612,57 @@
 
     /* ── sessions_data ── */
     function parseSessions() {
-      var rows = parseRows('sessions_data'), done = 0, upcoming = 0;
+      var rows = parseRows('sessions_data'), done = 0, upcoming = 0, list = [];
+      var today = new Date(); today.setHours(0,0,0,0);
       rows.forEach(function(html) {
         var doc = parseDoc(html);
         var pill = doc.querySelector('.pill');
-        if (!pill) return;
-        if (pill.className.indexOf('pill-done') !== -1) done++;
-        else upcoming++;
+        var isDone = pill && pill.className.indexOf('pill-done') !== -1;
+        if (isDone) done++; else upcoming++;
+        var dateEl = doc.querySelector('.date-cell');
+        var caseEl = doc.querySelector('.case-name');
+        var d = arabicStrToDate(dateEl ? dateEl.textContent.trim() : '');
+        list.push({ date:d, caseName: caseEl ? caseEl.textContent.trim() : 'جلسة', isDone:isDone });
       });
-      return { total:rows.length, done:done, upcoming:upcoming };
+      return { total:rows.length, done:done, upcoming:upcoming, list:list };
+    }
+
+    /* ── بناء جدول الأسبوع من بيانات الجلسات الفعلية ── */
+    function buildWeekTimeline(sessionList) {
+      var today = new Date(); today.setHours(0,0,0,0);
+      /* أيام العمل في السعودية: السبت→الخميس (dow: 6,0,1,2,3,4) */
+      var WORK_DAYS = [6,0,1,2,3,4];
+      var DAY_NAMES = {6:'السبت',0:'الأحد',1:'الاثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس'};
+      /* ابدأ من السبت السابق */
+      var satOff = (today.getDay() - 6 + 7) % 7;
+      var weekSat = new Date(today); weekSat.setDate(today.getDate() - satOff);
+
+      var row = document.querySelector('.timeline-row');
+      if (!row) return;
+      row.innerHTML = '';
+      WORK_DAYS.forEach(function(dow) {
+        var off = (dow - 6 + 7) % 7;
+        var dayDate = new Date(weekSat); dayDate.setDate(weekSat.getDate() + off);
+        var isToday = dayDate.getTime() === today.getTime();
+        var isPast  = dayDate < today;
+        var daySess = sessionList.filter(function(s) {
+          if (!s.date) return false;
+          var sd = new Date(s.date); sd.setHours(0,0,0,0);
+          return sd.getTime() === dayDate.getTime();
+        });
+        var blockCls, blockTxt = '';
+        if (daySess.length) {
+          blockCls = isToday ? 'day-block db-red' : isPast ? 'day-block db-green' : 'day-block db-gold';
+          blockTxt = daySess.length > 1 ? daySess.length + ' جلسات' : (daySess[0].caseName || 'جلسة');
+        } else {
+          blockCls = 'day-block db-empty';
+        }
+        var col = document.createElement('div');
+        col.className = 'day-col';
+        col.innerHTML = '<div class="day-label' + (isToday?' lbl-active':'') + '">' + DAY_NAMES[dow] + '</div>' +
+          '<div class="' + blockCls + '" title="' + blockTxt + '">' + blockTxt + '</div>';
+        row.appendChild(col);
+      });
     }
 
     /* ── lawyers_data ── */
@@ -743,6 +798,17 @@
       }).join('') : '<div style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد تنبيهات — أضف بيانات لرؤية التحليلات</div>';
     }
 
+    /* ── Topbar date ── */
+    (function() {
+      var d = new Date();
+      var DN = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      var MN = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+      var el = document.getElementById('topbarDate');
+      if (el) el.textContent = DN[d.getDay()] + '، ' + d.getDate() + ' ' + MN[d.getMonth()] + ' ' + d.getFullYear();
+      var sub = document.getElementById('sessSubtitle');
+      if (sub) sub.textContent = MN[d.getMonth()] + ' ' + d.getFullYear();
+    })();
+
     /* ── Init ── */
     function init() {
       var fees     = parseFeesData();
@@ -781,6 +847,7 @@
       document.getElementById('sessTot').textContent      = sessions.total;
       document.getElementById('sessDone').textContent     = sessions.done;
       document.getElementById('sessUpcoming').textContent = sessions.upcoming;
+      buildWeekTimeline(sessions.list);
 
       /* Overdue + Alerts */
       buildOverdueSection(overdue);

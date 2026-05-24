@@ -94,29 +94,33 @@
 
     /* ── Progress bar ── */
     .progress-section { margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid var(--border); }
-    .progress-label { font-size: 0.65rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.9rem; }
-    .progress-track { display: flex; align-items: center; gap: 0; overflow-x: auto; padding-bottom: 0.2rem; }
-    .progress-step { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 80px; position: relative; }
+    .progress-label { font-size: 0.65rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.1rem; }
+    .progress-track { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding: 0.3rem 0 0.5rem; scrollbar-width: none; }
+    .progress-track::-webkit-scrollbar { display: none; }
+    .progress-step { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex: 1; min-width: 76px; position: relative; }
     .progress-step:not(:last-child)::after {
       content: '';
       position: absolute;
-      top: 11px;
-      left: 0;
-      width: 100%;
+      top: 17px;
+      right: calc(50% + 19px);
+      left: calc(-50% + 19px);
       height: 2px;
       background: var(--border-mid);
       z-index: 0;
     }
     .progress-step.done:not(:last-child)::after { background: var(--accent); }
     .progress-step.current:not(:last-child)::after { background: linear-gradient(to left, var(--border-mid), var(--accent)); }
-    .step-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; position: relative; z-index: 1; flex-shrink: 0; }
+    .step-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 800; position: relative; z-index: 1; flex-shrink: 0; }
     .progress-step.done .step-dot { background: var(--accent); color: white; }
-    .progress-step.current .step-dot { background: var(--white); border: 2.5px solid var(--accent); color: var(--accent); box-shadow: 0 0 0 4px var(--accent-dim); }
-    .progress-step.future .step-dot { background: var(--off-white); border: 2px solid var(--border-mid); color: var(--ink-muted); }
-    .step-label { font-size: 0.6rem; color: var(--ink-muted); text-align: center; line-height: 1.3; max-width: 72px; }
-    .progress-step.done .step-label { color: var(--accent); font-weight: 600; }
+    .progress-step.current .step-dot { background: var(--white); border: 2.5px solid var(--accent); color: var(--accent); box-shadow: 0 0 0 5px rgba(28,94,62,0.1); animation: stepPulse 2s ease-in-out infinite; }
+    @keyframes stepPulse { 0%,100%{box-shadow:0 0 0 5px rgba(28,94,62,0.1)} 50%{box-shadow:0 0 0 9px rgba(28,94,62,0.05)} }
+    .progress-step.future .step-dot { background: var(--off-white); border: 2px solid var(--border-mid); color: var(--ink-muted); font-size: 0.72rem; }
+    .step-label { font-size: 0.62rem; color: var(--ink-muted); text-align: center; line-height: 1.4; max-width: 80px; }
+    .step-label-name { display: block; font-weight: 600; }
+    .step-label-status { display: block; font-size: 0.56rem; margin-top: 2px; opacity: 0.75; }
+    .progress-step.done .step-label { color: var(--accent); }
     .progress-step.current .step-label { color: var(--accent); font-weight: 700; }
-    .here-arrow { font-size: 0.55rem; color: var(--accent); font-weight: 700; }
+    .step-here-badge { display: inline-block; background: var(--accent); color: white; font-size: 0.52rem; padding: 1px 6px; border-radius: 3px; font-weight: 700; margin-top: 2px; }
 
     /* ── Info cards row ── */
     .info-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
@@ -129,23 +133,30 @@
     .info-card-sub.ok { color: var(--green); font-weight: 600; }
 
     /* ── Timeline ── */
-    .timeline { display: flex; flex-direction: column; gap: 0; padding: 0.2rem 0; }
-    .tl-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.9rem 0; position: relative; }
-    .tl-item:not(:last-child) { border-bottom: 1px dashed var(--border); }
-    .tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 32px; }
-    .tl-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
-    .tl-icon.done  { background: rgba(22,163,74,0.1); border: 1.5px solid rgba(22,163,74,0.2); color: var(--green); }
-    .tl-icon.next  { background: var(--accent-dim); border: 2px solid var(--accent-border); color: var(--accent); box-shadow: 0 0 0 4px rgba(28,94,62,0.06); }
-    .tl-icon.future { background: var(--off-white); border: 2px dashed var(--border-mid); color: var(--ink-muted); }
-    .tl-content { flex: 1; }
-    .tl-title { font-size: 0.83rem; font-weight: 700; color: var(--ink); margin-bottom: 0.2rem; }
-    .tl-title.muted { color: var(--ink-light); font-weight: 600; }
+    .timeline { display: flex; flex-direction: column; gap: 0.6rem; padding: 0.2rem 0; }
+    .tl-item { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.85rem 1rem; border-radius: 10px; border: 1.5px solid var(--border); background: rgba(247,246,243,0.6); position: relative; overflow: hidden; }
+    .tl-item::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; border-radius: 0 2px 2px 0; }
+    .tl-item.done::after   { background: rgba(100,116,139,0.25); }
+    .tl-item.done          { background: rgba(100,116,139,0.04); }
+    .tl-item.is-next::after { background: var(--accent); }
+    .tl-item.is-next       { background: rgba(28,94,62,0.03); border-color: rgba(28,94,62,0.2); }
+    .tl-item.is-future::after { background: var(--border-mid); }
+    .tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 36px; gap: 0.35rem; }
+    .tl-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
+    .tl-icon.done   { background: rgba(100,116,139,0.1); border: 1.5px solid rgba(100,116,139,0.2); color: var(--ink-muted); }
+    .tl-icon.next   { background: var(--accent-dim); border: 2px solid var(--accent-border); color: var(--accent); box-shadow: 0 0 0 4px rgba(28,94,62,0.07); }
+    .tl-icon.future { background: var(--off-white); border: 2px dashed var(--border-mid); color: var(--ink-muted); font-size: 0.72rem; font-weight: 700; }
+    .tl-sess-num { font-size: 0.54rem; color: var(--ink-muted); font-weight: 600; text-align: center; line-height: 1.3; max-width: 40px; }
+    .tl-content { flex: 1; min-width: 0; }
+    .tl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+    .tl-title { font-size: 0.88rem; font-weight: 700; color: var(--ink); line-height: 1.3; }
+    .tl-title.muted { color: var(--ink-light); font-weight: 600; font-size: 0.83rem; }
+    .tl-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 0.85rem; margin-top: 0.35rem; }
+    .tl-meta-item { font-size: 0.68rem; color: var(--ink-muted); }
+    .tl-meta-item.hl { color: var(--accent); font-weight: 600; }
+    .tl-pill-wrap { flex-shrink: 0; }
     .tl-date { font-size: 0.7rem; color: var(--ink-muted); }
     .tl-date.green { color: var(--accent); font-weight: 600; }
-    .tl-note { font-size: 0.67rem; color: var(--ink-muted); margin-top: 0.2rem; }
-    .tl-pill-wrap { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; }
-    .tl-item.highlighted { background: rgba(28,94,62,0.03); border-radius: 10px; margin: 0 -0.8rem; padding: 0.9rem 0.8rem; border-bottom: none !important; }
-    .tl-item.highlighted + .tl-item { border-top: 1px dashed var(--border); }
 
     /* ── Documents table ── */
     .doc-table { width: 100%; border-collapse: collapse; }
@@ -493,8 +504,11 @@
 
     function parseRows(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; } }
     function parseTr(html) {
-      var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
-      return doc.querySelectorAll('tr > td');
+      var tpl = document.createElement('template');
+      tpl.innerHTML = html.trim();
+      var trEl = tpl.content.firstElementChild;
+      if (!trEl) return [];
+      return trEl.querySelectorAll('td');
     }
     function todayStart() { var d = new Date(); d.setHours(0,0,0,0); return d; }
     function arabicNow() {
@@ -556,7 +570,7 @@
             var ci = cells[3].querySelector('.case-id');
             var m  = d1 ? d1.textContent.trim() : cells[3].textContent.replace(/\s+/g,' ').trim();
             var c  = ci ? ci.textContent.trim() : '';
-            return c ? m + ' — ' + c : m;
+            return (c && m.indexOf(c) === -1) ? m + ' — ' + c : m;
           })(),
           lawyer: lawyerName,
           status: statusEl ? statusEl.textContent.trim() : ''
@@ -569,29 +583,55 @@
     var caseType   = (caseInfo && caseInfo.type)   ? caseInfo.type   : (caseDataSS.type   || '');
     var courtName  = (caseInfo && caseInfo.court)  ? caseInfo.court  : (caseDataSS.court  || '');
     var lawyerName = (caseInfo && caseInfo.lawyer) ? caseInfo.lawyer : (caseDataSS.lawyer || '');
-    var firmEmail  = (firmData && firmData.email)  ? firmData.email  : 'contact@firm.sa';
-    var firmPhone  = (firmData && firmData.phone)  ? firmData.phone  : '920XXXXX';
+    var firmEmail  = 'contact@firm.sa';
+    var firmPhone  = '920XXXXX';
+    /* اجلب بيانات تواصل المحامي من lawyers_data */
+    (function() {
+      if (!lawyerName) return;
+      try {
+        JSON.parse(localStorage.getItem('lawyers_data') || '[]').some(function(cardHtml) {
+          var lt = document.createElement('template');
+          lt.innerHTML = cardHtml.trim();
+          var card = lt.content.firstElementChild;
+          if (!card) return false;
+          var nameEl = card.querySelector('.lc-name');
+          if (!nameEl || nameEl.textContent.trim() !== lawyerName) return false;
+          card.querySelectorAll('.lc-contact-row').forEach(function(row) {
+            var clone = row.cloneNode(true);
+            var icon = clone.querySelector('.lc-contact-icon');
+            var iconTxt = icon ? icon.textContent.trim() : '';
+            if (icon) icon.textContent = '';
+            var txt = clone.textContent.trim();
+            if (txt && txt !== '—') {
+              if (iconTxt === '📞') firmPhone = txt;
+              if (iconTxt === '✉️') firmEmail = txt;
+            }
+          });
+          return true;
+        });
+      } catch(e) {}
+    })();
     var hasData    = !!(caseNum && (clientName || caseInfo || caseDataSS.client));
 
     /* ── Sessions for this case ── */
     var todayD = todayStart();
     var allSessions = [], pastSess = [], futureSess = [];
     if (caseNum) {
+      /* sessions_data stores tr.innerHTML — use createElement (NOT template) */
       parseRows('sessions_data').forEach(function(html) {
         if (html.indexOf(caseNum) === -1) return;
-        var cells = parseTr(html);
-        var dateEl = null;
-        for (var j = 0; j < cells.length; j++) {
-          var dc = cells[j].querySelector('.date-cell');
-          if (dc && !dateEl) { dateEl = dc; break; }
-        }
+        var str = document.createElement('tr');
+        str.innerHTML = html;
+        var cells = str.querySelectorAll('td');
+        if (!cells.length) return;
+        /* cells[0]=date  cells[1]=time  cells[3]=court  cells[4]=hall */
+        var dateEl = cells[0] ? cells[0].querySelector('.date-cell') : null;
+        var timeEl = cells[1] ? cells[1].querySelector('.time-cell') : null;
         var dateText = dateEl ? dateEl.textContent.trim() : '';
-        var detail = '';
-        for (var j = 0; j < cells.length; j++) {
-          var t = cells[j].textContent.replace(/\s+/g,' ').trim();
-          if (t && t !== dateText && t.length > 3 && !/^\d+$/.test(t)) { detail = t; break; }
-        }
-        allSessions.push({ dateText: dateText, detail: detail });
+        var timeText = timeEl ? timeEl.textContent.trim() : '';
+        var court    = cells[3] ? cells[3].textContent.replace(/\s+/g,' ').trim() : '';
+        var hall     = cells[4] ? cells[4].textContent.replace(/\s+/g,' ').trim() : '';
+        allSessions.push({ dateText: dateText, timeText: timeText, court: court, hall: hall });
       });
     }
     allSessions.sort(function(a, b) {
@@ -811,15 +851,20 @@
       /* Progress bar */
       var track = document.querySelector('.progress-track');
       if (track) {
-        track.innerHTML = buildProgressSteps().map(function(s, i) {
-          var dot = s.state === 'done' ? '✓' : s.state === 'current' ? '◉' : '';
-          var lbl = s.state === 'current' ? s.label + ' ←' : s.label;
-          return '<div class="progress-step ' + s.state + '"><div class="step-dot">' + dot + '</div><div class="step-label">' + esc(lbl) + '</div></div>';
+        track.innerHTML = buildProgressSteps().map(function(s, idx) {
+          var n   = idx + 1;
+          var dot = s.state === 'done' ? '✓' : n;
+          var lbl = '<div class="step-label"><span class="step-label-name">' + esc(s.label) + '</span>' +
+            (s.state === 'current'
+              ? '<span class="step-here-badge">أنت هنا</span>'
+              : '<span class="step-label-status">' + (s.state === 'done' ? 'مكتمل' : 'لاحقاً') + '</span>') +
+            '</div>';
+          return '<div class="progress-step ' + s.state + '"><div class="step-dot">' + dot + '</div>' + lbl + '</div>';
         }).join('');
         track.querySelectorAll('.progress-step').forEach(function(step, i) {
-          step.style.opacity = '0'; step.style.transform = 'translateY(8px)';
+          step.style.opacity = '0'; step.style.transform = 'translateY(6px)';
           step.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-          setTimeout(function() { step.style.opacity = '1'; step.style.transform = 'translateY(0)'; }, 100 + i * 70);
+          setTimeout(function() { step.style.opacity = '1'; step.style.transform = 'translateY(0)'; }, 80 + i * 55);
         });
       }
 
@@ -861,21 +906,41 @@
         } else {
           var tlHtml = '';
           var futCount = 0;
-          allSessions.forEach(function(s) {
-            var d = parseArabicDate(s.dateText);
+          var _ord = ['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة','الثامنة','التاسعة','العاشرة'];
+          allSessions.forEach(function(s, idx) {
+            var d      = parseArabicDate(s.dateText);
             var isPast = d && d < todayD;
             var isNext = nextSess && s === nextSess;
             if (!isPast) futCount++;
-            var iconCls   = isPast ? 'done' : isNext ? 'next' : 'future';
-            var iconInner = isPast ? '✓' : isNext ? '→' : '○';
-            tlHtml += '<div class="tl-item ' + (isNext ? 'highlighted' : '') + '">' +
-              '<div class="tl-left"><div class="tl-icon ' + iconCls + '">' + iconInner + '</div></div>' +
-              '<div class="tl-content">' +
-              '<div class="tl-title' + ((!isPast && !isNext) ? ' muted' : '') + '">' + esc(s.dateText || 'موعد غير محدد') + '</div>' +
-              (s.detail ? '<div class="tl-date ' + (isNext ? 'green' : '') + '">' + esc(s.detail) + '</div>' : '') +
-              '<div class="tl-pill-wrap">' +
-              (isNext ? '<span class="pill pill-next">الجلسة القادمة</span>' : isPast ? '<span class="pill pill-done">منتهية</span>' : '<span class="pill pill-done" style="color:var(--ink-muted)">قادمة</span>') +
-              '</div></div></div>';
+            var itemCls  = isPast ? 'done'   : isNext ? 'is-next'  : 'is-future';
+            var iconCls  = isPast ? 'done'   : isNext ? 'next'     : 'future';
+            var iconInner= isPast ? '✓'      : isNext ? '◎'        : (idx + 1);
+            var ordLabel = 'الجلسة ' + (_ord[idx] || (idx + 1));
+            /* Status pill */
+            var pillHtml = isNext
+              ? '<span class="pill pill-next" style="font-size:0.58rem;padding:2px 7px;white-space:nowrap">📅 القادمة</span>'
+              : isPast
+                ? '<span class="pill pill-done" style="font-size:0.58rem;padding:2px 7px">✓ منتهية</span>'
+                : '<span class="pill" style="background:rgba(184,149,42,0.08);color:var(--gold);border:1px solid rgba(184,149,42,0.15);font-size:0.58rem;padding:2px 7px;white-space:nowrap">⏳ قادمة</span>';
+            /* Meta row: time · court · hall */
+            var meta = '';
+            if (s.timeText) meta += '<span class="tl-meta-item' + (isNext?' hl':'') + '">🕐 ' + esc(s.timeText) + '</span>';
+            if (s.court)    meta += '<span class="tl-meta-item">📍 ' + esc(s.court) + '</span>';
+            if (s.hall && s.hall !== s.court) meta += '<span class="tl-meta-item">🚪 ' + esc(s.hall) + '</span>';
+            tlHtml +=
+              '<div class="tl-item ' + itemCls + '">' +
+                '<div class="tl-left">' +
+                  '<div class="tl-icon ' + iconCls + '">' + iconInner + '</div>' +
+                  '<div class="tl-sess-num">' + esc(ordLabel) + '</div>' +
+                '</div>' +
+                '<div class="tl-content">' +
+                  '<div class="tl-head">' +
+                    '<div class="tl-title' + (!isPast && !isNext ? ' muted' : '') + '">' + esc(s.dateText || '—') + '</div>' +
+                    '<div class="tl-pill-wrap">' + pillHtml + '</div>' +
+                  '</div>' +
+                  (meta ? '<div class="tl-meta">' + meta + '</div>' : '') +
+                '</div>' +
+              '</div>';
           });
           tlEl.innerHTML = tlHtml;
           if (tlCard) { var tls2 = tlCard.querySelector('.card-sub'); if (tls2) tls2.textContent = allSessions.length + ' جلسة — ' + futCount + ' قادمة'; }

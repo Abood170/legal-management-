@@ -254,54 +254,40 @@
     localStorage.setItem('dynamicCases', JSON.stringify(dynCases));
     sessionStorage.setItem('dynamicCases', JSON.stringify(dynCases));
 
-    /* tasks_data — Bug #9 */
-    var months = MONTHS_AR;
-    function sd(d) { return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear(); }
+    /* tasks_data — object format (with data-* attrs for filter + board view) */
+    function isoDate(n) {
+      var d = addDays(n);
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+    function taskHTML(title, caseVal, caseTxt, assignee, avTxt, priority, priLabel, priCls, dueIso, status, stLabel, stCls) {
+      var dueTxt = dueIso ? (function(){ var p=dueIso.split('-'); return parseInt(p[2])+' '+MONTHS_AR[parseInt(p[1])-1]+' '+p[0]; })() : 'غير محدد';
+      var isDone = status === 'done';
+      return '<td><div class="task-name' + (isDone?' done':'') + '">' + title + '</div>' +
+        (caseVal ? '<div class="task-case">' + caseVal + '</div>' : '') + '</td>' +
+        '<td style="font-size:0.75rem;color:var(--ink-light)">' + (caseTxt || '—') + '</td>' +
+        '<td><div class="assignee-chip"><div class="av-xs">' + avTxt + '</div> ' + assignee + '</div></td>' +
+        '<td><span class="pill ' + priCls + '">' + priLabel + '</span></td>' +
+        '<td><div class="date-cell">' + dueTxt + '</div></td>' +
+        '<td><span class="pill ' + stCls + '">' + stLabel + '</span></td>' +
+        '<td><div class="row-actions">' +
+          (isDone ? '<button class="row-btn btn-complete" disabled>مكتملة</button>' : '<button class="row-btn btn-complete">✓ إتمام</button>') +
+          '<button class="row-btn" onclick="editTask(this)">✏️ تعديل</button>' +
+          '<button class="row-btn" style="color:var(--red);border-color:rgba(220,38,38,0.2)" onclick="deleteTask(this)">حذف</button>' +
+        '</div></td>';
+    }
     localStorage.setItem('tasks_data', JSON.stringify([
-      /* متأخرة · عالية · خالد العتيبي */
-      '<td><div class="task-name">تقديم لائحة اعتراض</div><div class="task-case">قضية #2026-0001</div></td>' +
-      '<td style="font-size:0.75rem;color:var(--ink-light)">قضية #2026-0001</td>' +
-      '<td><div class="assignee-chip"><div class="av-xs">خع</div> خالد العتيبي</div></td>' +
-      '<td><span class="pill pill-high">عالية</span></td>' +
-      '<td><div class="date-cell">' + sd(addDays(-3)) + '</div></td>' +
-      '<td><span class="pill pill-late">متأخرة</span></td>' +
-      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
-
-      /* قيد التنفيذ · متوسطة · سارة القحطاني */
-      '<td><div class="task-name">تحضير مذكرة استئناف</div><div class="task-case">قضية #2026-0002</div></td>' +
-      '<td style="font-size:0.75rem;color:var(--ink-light)">قضية #2026-0002</td>' +
-      '<td><div class="assignee-chip"><div class="av-xs">سق</div> سارة القحطاني</div></td>' +
-      '<td><span class="pill pill-mid">متوسطة</span></td>' +
-      '<td><div class="date-cell">' + sd(addDays(4)) + '</div></td>' +
-      '<td><span class="pill pill-progress">قيد التنفيذ</span></td>' +
-      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
-
-      /* جديدة · منخفضة · سارة القحطاني */
-      '<td><div class="task-name">اتصال بالموكل — الفارس</div></td>' +
-      '<td style="font-size:0.75rem;color:var(--ink-light)">—</td>' +
-      '<td><div class="assignee-chip"><div class="av-xs">سق</div> سارة القحطاني</div></td>' +
-      '<td><span class="pill pill-low">منخفضة</span></td>' +
-      '<td><div class="date-cell">' + sd(addDays(0)) + '</div></td>' +
-      '<td><span class="pill pill-new">جديدة</span></td>' +
-      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
-
-      /* قيد التنفيذ · منخفضة · نورة الشمري */
-      '<td><div class="task-name">مراجعة عقد — مجموعة النور</div></td>' +
-      '<td style="font-size:0.75rem;color:var(--ink-light)">—</td>' +
-      '<td><div class="assignee-chip"><div class="av-xs">نش</div> نورة الشمري</div></td>' +
-      '<td><span class="pill pill-low">منخفضة</span></td>' +
-      '<td><div class="date-cell">' + sd(addDays(6)) + '</div></td>' +
-      '<td><span class="pill pill-progress">قيد التنفيذ</span></td>' +
-      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>',
-
-      /* مكتملة · منخفضة · محمد الزهراني */
-      '<td><div class="task-name">إيداع رسوم محكمة</div><div class="task-case">قضية #2026-0003</div></td>' +
-      '<td style="font-size:0.75rem;color:var(--ink-light)">قضية #2026-0003</td>' +
-      '<td><div class="assignee-chip"><div class="av-xs">مز</div> محمد الزهراني</div></td>' +
-      '<td><span class="pill pill-low">منخفضة</span></td>' +
-      '<td><div class="date-cell">' + sd(addDays(-5)) + '</div></td>' +
-      '<td><span class="pill pill-done">مكتملة</span></td>' +
-      '<td><div class="row-actions"><button class="row-btn btn-complete">إتمام</button></div></td>'
+      { html: taskHTML('تقديم لائحة اعتراض','#2026-0001','قضية #2026-0001','خالد العتيبي','خع','high','عالية','pill-high',isoDate(-3),'late','متأخرة','pill-late'),
+        search:'تقديم لائحة اعتراض', priority:'high', assignee:'خالد العتيبي', status:'late',  due:isoDate(-3), caseVal:'#2026-0001', caseTxt:'قضية #2026-0001' },
+      { html: taskHTML('تحضير مذكرة استئناف','#2026-0002','قضية #2026-0002','سارة القحطاني','سق','mid','متوسطة','pill-mid',isoDate(4),'progress','قيد التنفيذ','pill-progress'),
+        search:'تحضير مذكرة استئناف', priority:'mid', assignee:'سارة القحطاني', status:'progress', due:isoDate(4), caseVal:'#2026-0002', caseTxt:'قضية #2026-0002' },
+      { html: taskHTML('اتصال بالموكل — الفارس','','—','سارة القحطاني','سق','low','منخفضة','pill-low',isoDate(0),'new','جديدة','pill-new'),
+        search:'اتصال بالموكل الفارس', priority:'low', assignee:'سارة القحطاني', status:'new', due:isoDate(0), caseVal:'', caseTxt:'' },
+      { html: taskHTML('مراجعة عقد — مجموعة النور','','—','نورة الشمري','نش','high','عالية','pill-high',isoDate(2),'progress','قيد التنفيذ','pill-progress'),
+        search:'مراجعة عقد مجموعة النور', priority:'high', assignee:'نورة الشمري', status:'progress', due:isoDate(2), caseVal:'', caseTxt:'' },
+      { html: taskHTML('متابعة موعد جلسة — شهري','#2026-0004','قضية #2026-0004','نورة الشمري','نش','high','عالية','pill-high',isoDate(1),'new','جديدة','pill-new'),
+        search:'متابعة موعد جلسة شهري', priority:'high', assignee:'نورة الشمري', status:'new', due:isoDate(1), caseVal:'#2026-0004', caseTxt:'قضية #2026-0004' },
+      { html: taskHTML('إيداع رسوم محكمة','#2026-0003','قضية #2026-0003','محمد الزهراني','مز','low','منخفضة','pill-low',isoDate(-5),'done','مكتملة','pill-done'),
+        search:'إيداع رسوم محكمة', priority:'low', assignee:'محمد الزهراني', status:'done', due:isoDate(-5), caseVal:'#2026-0003', caseTxt:'قضية #2026-0003' }
     ]));
 
     /* fees_data — Bug #10 */
@@ -360,6 +346,39 @@
       '<td><span class="type-tag type-exp">مصاريف نثرية</span></td>' +
       '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
       '<td><span class="pill pill-paid">مدفوعة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* مصاريف نثرية غير مفوترة — مواصلات · 420 · معلقة */
+      '<td><div class="fee-name">مصاريف نثرية — مواصلات للمحكمة</div><div class="fee-id">#FEE-1007</div></td>' +
+      '<td style="font-size:0.78rem">عبدالرحمن المالكي</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0001</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">خع</div> خالد العتيبي</div></td>' +
+      '<td data-amount="420"><div class="amount-cell amount-gold">420</div></td>' +
+      '<td><span class="type-tag type-exp">مصاريف نثرية</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-pending">معلقة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* مصاريف نثرية غير مفوترة — استشارة سريعة · 650 · معلقة */
+      '<td><div class="fee-name">مصاريف نثرية — رسوم تسجيل وثيقة</div><div class="fee-id">#FEE-1008</div></td>' +
+      '<td style="font-size:0.78rem">شركة الفارس للتجارة</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0003</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">مز</div> محمد الزهراني</div></td>' +
+      '<td data-amount="650"><div class="amount-cell amount-gold">650</div></td>' +
+      '<td><span class="type-tag type-exp">مصاريف نثرية</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-pending">معلقة</span></td>' +
+      '<td><button class="row-btn">عرض</button></td>',
+
+      /* مصاريف نثرية غير مفوترة — تصوير محاضر · 280 · معلقة */
+      '<td><div class="fee-name">مصاريف نثرية — تصوير محاضر جلسة</div><div class="fee-id">#FEE-1009</div></td>' +
+      '<td style="font-size:0.78rem">فيصل الشهري</td>' +
+      '<td style="font-size:0.75rem;color:var(--ink-light)">#2026-0004</td>' +
+      '<td><div class="lawyer-chip"><div class="av-xs">نش</div> نورة الشمري</div></td>' +
+      '<td data-amount="280"><div class="amount-cell amount-gold">280</div></td>' +
+      '<td><span class="type-tag type-exp">مصاريف نثرية</span></td>' +
+      '<td style="font-size:0.73rem;color:var(--ink-light)">' + today + '</td>' +
+      '<td><span class="pill pill-pending">معلقة</span></td>' +
       '<td><button class="row-btn">عرض</button></td>',
 
       /* أتعاب قضية إدارية · النور · 8000 · نورة · مدفوعة · أتعاب */

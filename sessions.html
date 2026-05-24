@@ -324,10 +324,6 @@
           </select>
           <select class="filter-select" id="sLawyer">
             <option value="">المحامي — الكل</option>
-            <option value="khalid">خالد العتيبي</option>
-            <option value="sarah">سارة المحمد</option>
-            <option value="mohammed">محمد الرشيد</option>
-            <option value="noura">نورة الأحمد</option>
           </select>
           <button class="btn-reset" id="sReset">إعادة ضبط</button>
           <span id="sCount" style="font-size:0.7rem;color:var(--ink-muted);margin-right:auto;"></span>
@@ -378,7 +374,6 @@
 
   <script>
   (function() {
-    var rows = document.querySelectorAll('#sessionsBody tr[data-search]');
     var noRes = document.getElementById('sNoResults');
     var countEl = document.getElementById('sCount');
     var search = document.getElementById('sSearch');
@@ -387,13 +382,15 @@
     var reset = document.getElementById('sReset');
 
     function filter() {
+      /* استعلام ديناميكي في كل مرة لضمان شمول الصفوف المحملة من localStorage */
+      var liveRows = document.querySelectorAll('#sessionsBody tr[data-search]');
       var q = search.value.trim().toLowerCase();
       var st = status.value;
       var lw = lawyer.value;
       var visible = 0;
-      for (var i = 0; i < rows.length; i++) {
-        var r = rows[i];
-        var matchQ = !q || r.getAttribute('data-search').toLowerCase().indexOf(q) !== -1;
+      for (var i = 0; i < liveRows.length; i++) {
+        var r = liveRows[i];
+        var matchQ = !q || (r.getAttribute('data-search') || '').toLowerCase().indexOf(q) !== -1;
         var matchSt = !st || r.getAttribute('data-status') === st;
         var matchLw = !lw || r.getAttribute('data-lawyer') === lw;
         var show = matchQ && matchSt && matchLw;
@@ -639,7 +636,7 @@
       var d = new Date(val+'T00:00:00');
       var days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
       var mon  = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-      return days[d.getDay()] + '، ' + d.getDate() + ' ' + mon[d.getMonth()];
+      return days[d.getDay()] + '، ' + d.getDate() + ' ' + mon[d.getMonth()] + ' ' + d.getFullYear();
     }
     function arabicTime(val) {
       var p = val.split(':'), h = parseInt(p[0],10), m = p[1];
@@ -665,10 +662,10 @@
       var cases;
       try { cases = JSON.parse(saved); } catch(e) { return; }
       cases.forEach(function(html) {
-        /* دعم outerHTML (جديد) و innerHTML (قديم) */
-        var trHtml = html.trimStart().startsWith('<tr') ? html : '<tr>' + html + '</tr>';
-        var doc = new DOMParser().parseFromString('<table><tbody>' + trHtml + '</tbody></table>', 'text/html');
-        var tr = doc.querySelector('tr');
+        /* استخدام template للتحليل الصحيح لـ outerHTML */
+        var tpl = document.createElement('template');
+        tpl.innerHTML = html.trim();
+        var tr = tpl.content.firstElementChild;
         if (!tr) return;
         var cells = tr.querySelectorAll('td');
         if (cells.length < 2) return;
@@ -676,8 +673,8 @@
         var idEl     = cells[0].querySelector('.case-id');
         var nameEl   = cells[0].querySelector('.case-name');
         var caseId   = idEl   ? idEl.textContent.trim()   : '';
-        var caseName = nameEl ? nameEl.textContent.trim()  : cells[0].textContent.trim();
-        var client   = cells[1] ? cells[1].textContent.trim() : '';
+        var caseName = nameEl ? nameEl.textContent.trim()  : cells[0].textContent.replace(/\s+/g,' ').trim();
+        var client   = cells[1] ? cells[1].textContent.replace(/\s+/g,' ').trim() : '';
 
         /* استخرج المحامي: من data-lawyer (outerHTML) أو من cells[4] بدون الأفاتار */
         var lawyerName = tr.getAttribute('data-lawyer') || '';
@@ -938,6 +935,23 @@
           rows.forEach(function(html) {
             var tr = document.createElement('tr');
             tr.innerHTML = html;
+            /* استعادة data-attributes للفلتر (saveSessions يخزّن innerHTML بلا attributes) */
+            var cells      = tr.querySelectorAll('td');
+            var caseNameEl = cells[2] ? cells[2].querySelector('.case-name') : null;
+            var caseName   = caseNameEl ? caseNameEl.textContent.trim() : (cells[2] ? cells[2].textContent.replace(/\s+/g,' ').trim() : '');
+            var court      = cells[3] ? cells[3].textContent.replace(/\s+/g,' ').trim() : '';
+            var pillEl     = tr.querySelector('.pill');
+            var sStatus    = pillEl && pillEl.classList.contains('pill-done') ? 'done' : 'upcoming';
+            var lawyerChip = tr.querySelector('.lawyer-chip');
+            var lawyerName = '';
+            if (lawyerChip) {
+              var lc = lawyerChip.cloneNode(true);
+              var av = lc.querySelector('.lawyer-av'); if (av) av.remove();
+              lawyerName = lc.textContent.replace(/\s+/g,' ').trim();
+            }
+            tr.setAttribute('data-search', caseName + ' ' + court);
+            tr.setAttribute('data-status', sStatus);
+            tr.setAttribute('data-lawyer', lawyerName);
             tr.querySelectorAll('.row-btn').forEach(function(btn) {
               if (btn.textContent.trim() === 'تفاصيل') btn.classList.add('view-session-btn');
             });
@@ -972,7 +986,29 @@
     updateSessionStats();
   }
 
-  window.addEventListener('load', loadSessions);
+  function populateLawyerFilterSessions() {
+    var sel = document.getElementById('sLawyer');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">المحامي — الكل</option>';
+    try {
+      JSON.parse(localStorage.getItem('lawyers_data') || '[]').forEach(function(html) {
+        var div = document.createElement('div');
+        div.innerHTML = html;
+        var nameEl = div.querySelector('.lc-name');
+        var name = nameEl ? nameEl.textContent.trim() : '';
+        if (!name) return;
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+    } catch(e) {}
+  }
+
+  window.addEventListener('load', function() {
+    loadSessions();
+    populateLawyerFilterSessions();
+  });
   </script>
 
   <!-- Session Side Panel -->

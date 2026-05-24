@@ -249,7 +249,7 @@
   function saveInvoices() {
     var rows = [];
     document.querySelectorAll('#invoicesBody tr').forEach(function(tr) {
-      if (tr.id !== 'iNoResults' && !tr.querySelector('.no-results')) rows.push(tr.innerHTML);
+      if (tr.id !== 'iNoResults' && !tr.querySelector('.no-results')) rows.push(tr.outerHTML);
     });
     localStorage.setItem('invoices_data', JSON.stringify(rows));
     if (typeof updateSidebarBadges === 'function') updateSidebarBadges();
@@ -263,20 +263,48 @@
         var tbody = document.getElementById('invoicesBody');
         var noRes = document.getElementById('iNoResults');
         rows.forEach(function(html) {
-          var tr = document.createElement('tr');
-          tr.innerHTML = html;
-          var pill = tr.querySelector('.pill');
-          if (pill) {
-            var st = pill.classList.contains('pill-paid') ? 'paid' : pill.classList.contains('pill-overdue') ? 'overdue' : 'pending';
-            tr.setAttribute('data-status', st);
+          var tr;
+          /* support both outerHTML (new) and innerHTML (legacy) */
+          if (html.trimStart().startsWith('<tr')) {
+            var tpl = document.createElement('template');
+            tpl.innerHTML = html.trim();
+            tr = tpl.content.firstElementChild;
+            if (!tr) { tr = document.createElement('tr'); tr.innerHTML = html; }
+          } else {
+            tr = document.createElement('tr');
+            tr.innerHTML = html;
           }
+          /* restore data-status from pill if missing */
+          if (!tr.getAttribute('data-status')) {
+            var pill = tr.querySelector('.pill');
+            if (pill) {
+              var st = pill.classList.contains('pill-paid') ? 'paid' : pill.classList.contains('pill-overdue') ? 'overdue' : 'pending';
+              tr.setAttribute('data-status', st);
+            }
+          }
+          /* restore data-search if missing */
           if (!tr.getAttribute('data-search')) {
             var nm = tr.querySelector('.case-name');
-            tr.setAttribute('data-search', nm ? nm.textContent.trim() : '');
+            var cl = tr.querySelector('td:nth-child(2)');
+            tr.setAttribute('data-search', (nm ? nm.textContent.trim() : '') + ' ' + (cl ? cl.textContent.trim() : ''));
           }
           tr.querySelectorAll('.row-btn').forEach(function(b) {
-            if (b.textContent.trim() === 'عرض') { b.textContent = 'عرض الفاتورة'; b.classList.add('view-invoice-btn'); }
+            var t = b.textContent.trim();
+            if (t === 'عرض' || t === 'عرض الفاتورة') {
+              b.textContent = 'عرض الفاتورة';
+              if (!b.classList.contains('view-invoice-btn')) b.classList.add('view-invoice-btn');
+            }
           });
+          /* أضف زر تعديل إن لم يكن موجوداً */
+          var ap = tr.querySelector('.action-pair');
+          if (ap && !ap.querySelector('[onclick*="editInvoice"]')) {
+            var eb = document.createElement('button');
+            eb.className = 'row-btn';
+            eb.setAttribute('onclick', 'editInvoice(this)');
+            eb.textContent = 'تعديل';
+            var db = ap.querySelector('[onclick*="deleteInvoice"]');
+            if (db) ap.insertBefore(eb, db); else ap.appendChild(eb);
+          }
           tbody.appendChild(tr);
         });
         if (noRes) noRes.style.display = 'none';
@@ -284,7 +312,37 @@
     } catch(e) {}
     updateInvoiceKPIs();
   }
-  window.addEventListener('load', loadInvoices);
+  /* ── Dynamic topbar date ── */
+  (function() {
+    var d = new Date();
+    var days   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var el = document.getElementById('topbarDate');
+    if (el) el.textContent = days[d.getDay()] + '، ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  })();
+
+  /* ── Populate iLawyer filter from lawyers_data ── */
+  function populateLawyerFilter() {
+    var sel = document.getElementById('iLawyer');
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    try {
+      var lawyers = JSON.parse(localStorage.getItem('lawyers_data') || '[]');
+      lawyers.forEach(function(html) {
+        var div = document.createElement('div'); div.innerHTML = html;
+        var nameEl = div.querySelector('.lc-name');
+        var name = nameEl ? nameEl.textContent.trim() : null;
+        if (name) {
+          var o = document.createElement('option');
+          o.value = name;
+          o.textContent = name;
+          sel.appendChild(o);
+        }
+      });
+    } catch(e) {}
+  }
+
+  window.addEventListener('load', function() { loadInvoices(); populateLawyerFilter(); });
 
   /* ── Delete invoice ── */
   function deleteInvoice(btn) {
@@ -342,9 +400,12 @@
     var firmData = null;
     try { firmData = JSON.parse(localStorage.getItem('firm_data') || 'null'); } catch(e) {}
     var firmName  = (firmData && firmData.firmName) ? firmData.firmName : 'نظام إدارة المحاماة';
-    var firmCity  = (firmData && firmData.city)     ? firmData.city     : 'الرياض';
+    var rawCity   = (firmData && firmData.city)     ? firmData.city     : '';
+    /* تحقق من صحة المدينة — إذا كانت القيمة "الجوال" أو أقل من 2 حرف فاستخدم الافتراضي */
+    var BAD_CITY  = ['الجوال','phone','tel','mobile',''];
+    var firmCity  = (rawCity && BAD_CITY.indexOf(rawCity.trim()) === -1) ? rawCity : 'الرياض';
     var firmPhone = (firmData && firmData.phone)    ? firmData.phone    : '05XXXXXXXX';
-    var taxNum    = '3XXXXXXXXXXXXX3';
+    var taxNum    = (firmData && firmData.vatNum)   ? firmData.vatNum   : '3XXXXXXXXXXXXX3';
 
     var timestamp = new Date().toISOString();
     var fakeHash  = genFakeHash(invNum + uuid);
@@ -432,6 +493,7 @@
   /* ── New Invoice Modal ── */
   (function() {
     var overlay = document.getElementById('iModal');
+    window._editInvoice = null;
 
     function dateFmt(d) {
       return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -499,29 +561,60 @@
 
       var allCases = [];
 
-      /* cases_data: array of tr.innerHTML */
+      /* cases_data: array of tr.outerHTML — parse to recover data-lawyer attribute */
       try {
         JSON.parse(localStorage.getItem('cases_data') || '[]').forEach(function(html) {
-          var cells = parseTrCells(html);
+          /* parse via template to preserve tr data-* attributes */
+          var tpl = document.createElement('template');
+          tpl.innerHTML = html.trim();
+          var trEl = tpl.content.firstElementChild;
+          var cells = trEl ? trEl.querySelectorAll('td') : parseTrCells(html);
           var nameEl = cells[0] ? cells[0].querySelector('.case-name') : null;
           var idEl   = cells[0] ? cells[0].querySelector('.case-id')   : null;
           var caseType   = nameEl ? nameEl.textContent.trim() : '';
           var caseId     = idEl   ? idEl.textContent.trim()   : '';
           var clientName = txt(cells[1]);
-          if (caseType) allCases.push({ type: caseType, id: caseId, client: clientName });
+          /* extract lawyer: first from data-lawyer, then from lawyer-chip */
+          var lawyerName = (trEl ? trEl.getAttribute('data-lawyer') : '') || '';
+          if (!lawyerName && cells[4]) {
+            var chip = cells[4].querySelector('.lawyer-chip');
+            if (chip) {
+              var clone = chip.cloneNode(true);
+              var av = clone.querySelector('.lawyer-av');
+              if (av) av.parentNode.removeChild(av);
+              lawyerName = clone.textContent.replace(/\s+/g,' ').trim();
+            } else {
+              lawyerName = cells[4].textContent.replace(/\s+/g,' ').trim();
+            }
+          }
+          if (/اختر|^\.\.\.|^—$/.test(lawyerName)) lawyerName = '';
+          if (caseType) allCases.push({ type: caseType, id: caseId, client: clientName, lawyer: lawyerName });
         });
       } catch(e) {}
 
-      /* dynamicCases: object { caseNum: {client, type, ...} } */
+      /* dynamicCases: object { caseNum: {client, type, ...} } — أضف فقط إذا لم يكن الـ id موجوداً */
       try {
+        var seenIds = {};
+        allCases.forEach(function(c) { if (c.id) seenIds[c.id] = true; });
         var dyn = JSON.parse(localStorage.getItem('dynamicCases') || '{}');
         if (dyn && typeof dyn === 'object' && !Array.isArray(dyn)) {
           Object.keys(dyn).forEach(function(num) {
             var c = dyn[num];
-            if (c && c.type) allCases.push({ type: 'قضية ' + c.type, id: num, client: c.client || '' });
+            if (c && c.type && !seenIds[num]) {
+              allCases.push({ type: 'قضية ' + c.type, id: num, client: c.client || '', lawyer: '' });
+            }
           });
         }
       } catch(e) {}
+
+      /* إزالة التكرار النهائي بالـ id ثم بالنوع */
+      var _seen = {};
+      allCases = allCases.filter(function(c) {
+        var key = c.id ? c.id : c.type;
+        if (_seen[key]) return false;
+        _seen[key] = true;
+        return true;
+      });
 
       /* filter by selected client, fall back to all if no matches */
       var list = filterClient
@@ -540,6 +633,7 @@
         o.value = c.type;
         o.setAttribute('data-id', c.id);
         o.setAttribute('data-client', c.client);
+        o.setAttribute('data-lawyer', c.lawyer || '');
         /* show client name only when not filtered */
         o.textContent = c.type
           + (c.id     ? ' (' + c.id + ')' : '')
@@ -573,14 +667,19 @@
     });
 
     function openModal() {
+      window._editInvoice = null;
       setDefaults();
       populateClients();
       populateCases('');
+      var titleEl = document.querySelector('#iModal .modal-title');
+      if (titleEl) titleEl.textContent = 'فاتورة جديدة';
+      document.getElementById('iFormSubmit').innerHTML = 'إصدار الفاتورة';
       overlay.classList.add('open');
       overlay.scrollTop = 0;
       document.body.style.overflow = 'hidden';
     }
     function closeModal() {
+      window._editInvoice = null;
       overlay.classList.remove('open');
       document.body.style.overflow = '';
       ['ifClient','ifService','ifNotes'].forEach(function(id) { document.getElementById(id).value = ''; });
@@ -592,7 +691,75 @@
       document.getElementById('pvBase').textContent  = '— ر.س';
       document.getElementById('pvVat').textContent   = '— ر.س';
       document.getElementById('pvTotal').textContent = '— ر.س';
+      /* restore modal title & button */
+      var titleEl = document.querySelector('#iModal .modal-title');
+      if (titleEl) titleEl.textContent = 'فاتورة جديدة';
+      document.getElementById('iFormSubmit').innerHTML = 'إصدار الفاتورة';
     }
+
+    /* ── helper: Arabic date → ISO ── */
+    function arabicToISO(str) {
+      if (!str) return '';
+      var mm = {يناير:'01',فبراير:'02',مارس:'03',أبريل:'04',مايو:'05',يونيو:'06',يوليو:'07',أغسطس:'08',سبتمبر:'09',أكتوبر:'10',نوفمبر:'11',ديسمبر:'12'};
+      var p = str.trim().split(/\s+/);
+      if (p.length < 3) return '';
+      return p[2] + '-' + (mm[p[1]] || '01') + '-' + String(p[0]).padStart(2,'0');
+    }
+
+    /* ── Edit Invoice ── */
+    window.editInvoice = function(btn) {
+      var tr = btn.closest ? btn.closest('tr') : btn.parentNode.parentNode.parentNode;
+      if (!tr) return;
+      var cells = tr.querySelectorAll('td');
+      var client      = cells[1] ? cells[1].textContent.trim() : '';
+      var caseTypeEl  = cells[2] ? cells[2].querySelector('.case-name') : null;
+      var baseEl      = cells[3] ? cells[3].querySelector('.amount-cell') : null;
+      var svcEl       = cells[3] ? cells[3].querySelector('.amount-vat')  : null;
+      var issueDateEl = cells[6] ? cells[6].querySelector('.date-cell') : null;
+      var dueDateEl   = cells[7] ? cells[7].querySelector('.date-cell') : null;
+      var pillEl      = cells[8] ? cells[8].querySelector('.pill')      : null;
+      var base      = baseEl   ? parseFloat(baseEl.getAttribute('data-amount') || '0') : 0;
+      var service   = svcEl    ? svcEl.textContent.trim() : '';
+      var caseType  = caseTypeEl ? caseTypeEl.textContent.trim() : '';
+      var statusVal = pillEl
+        ? (pillEl.classList.contains('pill-paid') ? 'paid' : pillEl.classList.contains('pill-overdue') ? 'overdue' : 'pending')
+        : 'pending';
+      var issueISO  = arabicToISO(issueDateEl ? issueDateEl.textContent.trim() : '');
+      var dueISO    = arabicToISO(dueDateEl   ? dueDateEl.textContent.trim()   : '');
+
+      window._editInvoice = tr;
+
+      /* fill dropdowns */
+      populateClients();
+      populateCases(client);
+
+      document.getElementById('ifClient').value  = client;
+      document.getElementById('ifService').value = service;
+      document.getElementById('ifAmount').value  = base;
+      document.getElementById('ifStatus').value  = statusVal;
+      if (issueISO) document.getElementById('ifIssueDate').value = issueISO;
+      if (dueISO)   document.getElementById('ifDueDate').value   = dueISO;
+
+      /* set matching case option */
+      setTimeout(function() {
+        var caseSel = document.getElementById('ifCase');
+        for (var i = 0; i < caseSel.options.length; i++) {
+          if (caseSel.options[i].value === caseType) { caseSel.selectedIndex = i; break; }
+        }
+      }, 0);
+
+      /* trigger amount preview */
+      document.getElementById('ifAmount').dispatchEvent(new Event('input'));
+
+      /* update modal UI */
+      var titleEl = document.querySelector('#iModal .modal-title');
+      if (titleEl) titleEl.textContent = 'تعديل الفاتورة';
+      document.getElementById('iFormSubmit').innerHTML = 'حفظ التعديلات';
+
+      overlay.classList.add('open');
+      overlay.scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+    };
 
     document.getElementById('btnNewInvoice').addEventListener('click',  openModal);
     document.getElementById('btnNewInvoice2').addEventListener('click', openModal);
@@ -625,6 +792,7 @@
       var caseSel   = document.getElementById('ifCase');
       var caseId    = caseSel.options[caseSel.selectedIndex].getAttribute('data-id') || '';
       var caseType  = caseSel.options[caseSel.selectedIndex].value || 'قضية';
+      var lawyerVal = caseSel.options[caseSel.selectedIndex].getAttribute('data-lawyer') || '';
       var service   = document.getElementById('ifService').value.trim() || 'أتعاب محاماة';
       var base      = parseFloat(amountEl.value);
       var vat       = Math.round(base * 15) / 100;
@@ -644,35 +812,63 @@
       var issueFmt   = issueVal ? arabicDate(issueVal) : arabicDate(dateFmt(new Date()));
       var dueFmt     = dueVal   ? arabicDate(dueVal)   : arabicDate(dateFmt(new Date(Date.now()+30*86400000)));
 
+      var actionPairHTML =
+        '<td><div class="action-pair">' +
+          '<button class="row-btn view-invoice-btn">عرض الفاتورة</button>' +
+          '<button class="row-btn" onclick="editInvoice(this)">تعديل</button>' +
+          '<button class="row-btn" style="color:var(--red)" onclick="deleteInvoice(this)">حذف</button>' +
+        '</div></td>';
+
+      var rowInnerHTML =
+        '<td><div class="case-name">{INV}</div><div class="case-id">{UUID}</div></td>' +
+        '<td>' + client + '</td>' +
+        '<td><div class="case-name" style="font-size:0.75rem">' + caseType + '</div><div class="case-id">' + caseId + '</div></td>' +
+        '<td><div class="amount-cell" data-amount="' + base + '">' + fmtNum(base) + '</div><div class="amount-vat">' + service + '</div></td>' +
+        '<td class="amount-cell" data-amount="' + vat + '">' + fmtNum(vat) + '</td>' +
+        '<td><div class="amount-total" data-amount="' + total + '">' + fmtNum(total) + ' ر.س</div></td>' +
+        '<td><div class="date-cell">' + issueFmt + '</div></td>' +
+        '<td><div class="date-cell">' + dueFmt + '</div></td>' +
+        '<td><span class="pill pill-' + statusVal + '">' + statusLabel + '</span></td>' +
+        actionPairHTML;
+
       setTimeout(function() {
         var tbody = document.getElementById('invoicesBody');
-        var tr = document.createElement('tr');
-        tr.setAttribute('data-search', client + ' ' + invNum);
-        tr.setAttribute('data-status', statusVal);
-        tr.setAttribute('data-lawyer', 'khalid');
-        tr.setAttribute('data-month',  issueMonth);
-        tr.innerHTML =
-          '<td><div class="case-name">' + invNum + '</div><div class="case-id">' + uuid + '</div></td>' +
-          '<td>' + client + '</td>' +
-          '<td><div class="case-name" style="font-size:0.75rem">' + caseType + '</div><div class="case-id">' + caseId + '</div></td>' +
-          '<td><div class="amount-cell" data-amount="' + base + '">' + fmtNum(base) + '</div><div class="amount-vat">' + service + '</div></td>' +
-          '<td class="amount-cell" data-amount="' + vat + '">' + fmtNum(vat) + '</td>' +
-          '<td><div class="amount-total" data-amount="' + total + '">' + fmtNum(total) + ' ر.س</div></td>' +
-          '<td><div class="date-cell">' + issueFmt + '</div></td>' +
-          '<td><div class="date-cell">' + dueFmt + '</div></td>' +
-          '<td><span class="pill pill-' + statusVal + '">' + statusLabel + '</span></td>' +
-          '<td><div class="action-pair"><button class="row-btn view-invoice-btn">عرض الفاتورة</button><button class="row-btn" style="color:var(--red)" onclick="deleteInvoice(this)">حذف</button></div></td>';
 
-        document.getElementById('iNoResults').style.display = 'none';
-        tbody.insertBefore(tr, tbody.firstChild);
-        saveInvoices();
-        updateInvoiceKPIs();
-
-        btn.disabled = false;
-        btn.innerHTML = 'إصدار الفاتورة';
-        btn.classList.remove('btn-loading');
-        closeModal();
-        showToast('تم إصدار الفاتورة ' + invNum + ' بنجاح');
+        if (window._editInvoice) {
+          /* ── تعديل صف موجود ── */
+          var tr = window._editInvoice;
+          var existingInvNum = (tr.querySelector('.case-name') || {textContent: invNum}).textContent.trim();
+          var existingUuid   = (tr.querySelector('.case-id')   || {textContent: uuid}).textContent.trim();
+          tr.setAttribute('data-search', client + ' ' + existingInvNum);
+          tr.setAttribute('data-status', statusVal);
+          tr.setAttribute('data-lawyer', lawyerVal);
+          tr.setAttribute('data-month',  issueMonth);
+          tr.innerHTML = rowInnerHTML.replace('{INV}', existingInvNum).replace('{UUID}', existingUuid);
+          saveInvoices();
+          updateInvoiceKPIs();
+          btn.disabled = false;
+          btn.innerHTML = 'إصدار الفاتورة';
+          btn.classList.remove('btn-loading');
+          closeModal();
+          showToast('تم تعديل الفاتورة ' + existingInvNum + ' بنجاح ✓');
+        } else {
+          /* ── إنشاء صف جديد ── */
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-search', client + ' ' + invNum);
+          tr.setAttribute('data-status', statusVal);
+          tr.setAttribute('data-lawyer', lawyerVal);
+          tr.setAttribute('data-month',  issueMonth);
+          tr.innerHTML = rowInnerHTML.replace('{INV}', invNum).replace('{UUID}', uuid);
+          document.getElementById('iNoResults').style.display = 'none';
+          tbody.insertBefore(tr, tbody.firstChild);
+          saveInvoices();
+          updateInvoiceKPIs();
+          btn.disabled = false;
+          btn.innerHTML = 'إصدار الفاتورة';
+          btn.classList.remove('btn-loading');
+          closeModal();
+          showToast('تم إصدار الفاتورة ' + invNum + ' بنجاح');
+        }
       }, 800);
     });
   })();

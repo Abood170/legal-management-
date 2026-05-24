@@ -283,9 +283,16 @@ var openSession  = null;
 
 function parseArabicDate(str) {
   if (!str) return null;
-  var p = String(str).trim().split(/\s+/);
-  if (p.length < 3) return null;
-  var d = parseInt(p[0]), m = MONTHS_MAP[p[1]], y = parseInt(p[2]);
+  /* تنظيف: إزالة الفاصلة العربية ثم التقسيم */
+  var parts = String(str).replace(/،/g, ' ').trim().split(/\s+/);
+  /* حذف أسماء الأيام إن وجدت */
+  var dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  parts = parts.filter(function(w) { return w && dayNames.indexOf(w) === -1; });
+  /* الصيغة المتوقعة الآن: [يوم, شهر] أو [يوم, شهر, سنة] */
+  if (parts.length < 2) return null;
+  var d = parseInt(parts[0]);
+  var m = MONTHS_MAP[parts[1]];
+  var y = parts[2] ? parseInt(parts[2]) : new Date().getFullYear();
   if (isNaN(d) || m === undefined || isNaN(y)) return null;
   return new Date(y, m, d);
 }
@@ -320,8 +327,12 @@ function loadSessions() {
     var status   = txt(statPill || c[6]);
     var statusCls = 'pill-done';
     if (statPill) {
-      if (statPill.className.indexOf('urgent') !== -1) statusCls = 'pill-urgent';
-      else if (statPill.className.indexOf('active') !== -1) statusCls = 'pill-active';
+      var pc = statPill.className;
+      if      (pc.indexOf('today')    !== -1) statusCls = 'pill-urgent';
+      else if (pc.indexOf('urgent')   !== -1) statusCls = 'pill-urgent';
+      else if (pc.indexOf('upcoming') !== -1) statusCls = 'pill-active';
+      else if (pc.indexOf('active')   !== -1) statusCls = 'pill-active';
+      /* pill-done stays pill-done */
     }
     allSessions.push({ date:date, dateStr:dateStr, time:time, caseName:caseName, caseId:caseId, court:court, hall:hall, lawyer:lawyer, status:status, statusCls:statusCls });
   });
@@ -435,7 +446,7 @@ function appendCell(grid, year, month, day, otherMonth, today) {
     var ev = document.createElement('div');
     var cls = 'cal-event ';
     if (isToday) cls += 'ev-today';
-    else if (isPast) cls += (s.statusCls==='pill-active'?'ev-done':'ev-past');
+    else if (isPast) cls += (s.statusCls==='pill-done'?'ev-done':'ev-past');
     else cls += 'ev-upcoming';
     ev.className = cls;
     ev.textContent = (s.time ? s.time + ' · ' : '') + (s.caseName || 'جلسة');

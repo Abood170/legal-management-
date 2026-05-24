@@ -494,37 +494,42 @@
               <div class="set-card-body">
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">اسم المكتب</label>
-                    <input type="text" class="form-input firm-name-input" value="مكتب المطيري للمحاماة">
+                    <label class="form-label">اسم المكتب *</label>
+                    <input type="text" class="form-input firm-name-input" id="sFirmName" placeholder="اسم مكتبك كما يظهر في الفواتير">
                   </div>
                   <div class="form-group">
-                    <label class="form-label">رقم السجل التجاري</label>
-                    <input type="text" class="form-input" value="1010XXXXXX">
+                    <label class="form-label">المدينة</label>
+                    <input type="text" class="form-input" id="sFirmCity" placeholder="الرياض">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <label class="form-label">رقم ترخيص هيئة المحامين</label>
-                    <input type="text" class="form-input" value="SAR-2019-XXXXX">
+                    <label class="form-label">رقم الجوال</label>
+                    <input type="tel" class="form-input" id="sFirmPhone" placeholder="05XXXXXXXX" dir="ltr" style="text-align:right">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">الرقم الضريبي (VAT)</label>
+                    <input type="text" class="form-input" id="sFirmVat" placeholder="3XXXXXXXXXXXXX3" dir="ltr" style="text-align:right">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">رقم السجل التجاري</label>
+                    <input type="text" class="form-input" id="sFirmCR" placeholder="1010XXXXXX">
                   </div>
                   <div class="form-group">
                     <label class="form-label">الموقع الإلكتروني</label>
-                    <input type="url" class="form-input" value="https://almuteiri.law">
+                    <input type="url" class="form-input" id="sFirmWeb" placeholder="https://office.sa">
                   </div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">العنوان</label>
-                  <input type="text" class="form-input" value="طريق الملك فهد، برج المملكة، الدور 18، الرياض">
+                  <input type="text" class="form-input" id="sFirmAddr" placeholder="طريق الملك فهد، الرياض">
                 </div>
-                <div class="form-group">
-                  <label class="form-label">شعار المكتب</label>
-                  <div style="border: 2px dashed var(--border-mid); border-radius: 10px; padding: 1.2rem; text-align: center; cursor: pointer; background: var(--off-white); transition: all 0.15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border-mid)'">
-                    <div style="font-size:1.6rem;margin-bottom:0.35rem;">🏛️</div>
-                    <div style="font-size:0.75rem;font-weight:600;color:var(--ink-mid);">اسحب الشعار أو انقر للرفع</div>
-                    <div style="font-size:0.62rem;color:var(--ink-muted);margin-top:0.2rem;">PNG · SVG · JPG — بحد أقصى 2 MB</div>
-                  </div>
+                <div style="background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:8px;padding:0.7rem 1rem;font-size:0.72rem;color:var(--accent);margin-top:0.3rem;">
+                  💡 اسم المكتب والمدينة والجوال تظهر تلقائياً في كل فاتورة ZATCA بعد الحفظ
                 </div>
-                <button class="btn-save" onclick="saveSection(this)">حفظ التغييرات</button>
+                <button class="btn-save" onclick="saveOffice(this)">💾 حفظ بيانات المكتب</button>
               </div>
             </div>
           </div>
@@ -1214,7 +1219,7 @@
       if (saved && document.getElementById('panel-' + saved)) activateSection(saved);
     } catch(e){}
 
-    /* ── Save button ── */
+    /* ── Save button (generic) ── */
     window.saveSection = function(btn) {
       if (btn.classList.contains('btn-disabled')) return;
       btn.disabled = true;
@@ -1232,6 +1237,71 @@
         }, 2000);
       }, 1200);
     };
+
+    /* ── Office / Firm data ── */
+    function loadOfficeData() {
+      var firmData = null;
+      try { firmData = JSON.parse(localStorage.getItem('firm_data') || 'null'); } catch(e) {}
+      if (!firmData) return;
+      var set = function(id, val) { var el = document.getElementById(id); if (el && val != null) el.value = val; };
+      set('sFirmName', firmData.firmName);
+      set('sFirmCity', firmData.city);
+      set('sFirmPhone', firmData.phone);
+      set('sFirmVat',  firmData.vatNum || firmData.vat || '');
+      set('sFirmCR',   firmData.cr     || firmData.commercialReg || '');
+      set('sFirmWeb',  firmData.website || '');
+      set('sFirmAddr', firmData.address || '');
+    }
+
+    window.saveOffice = function(btn) {
+      var nameEl = document.getElementById('sFirmName');
+      var firmName = nameEl ? nameEl.value.trim() : '';
+      if (!firmName) {
+        nameEl.style.borderColor = 'var(--red)';
+        showToast('⚠️ اسم المكتب مطلوب', '#DC2626');
+        return;
+      }
+      nameEl.style.borderColor = '';
+
+      var firmData = null;
+      try { firmData = JSON.parse(localStorage.getItem('firm_data') || 'null'); } catch(e) {}
+      firmData = firmData || {};
+
+      var g = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+      firmData.firmName = firmName;
+      if (g('sFirmCity'))  firmData.city    = g('sFirmCity');
+      if (g('sFirmPhone')) firmData.phone   = g('sFirmPhone');
+      if (g('sFirmVat'))   firmData.vatNum  = g('sFirmVat');
+      if (g('sFirmCR'))    firmData.cr      = g('sFirmCR');
+      if (g('sFirmWeb'))   firmData.website = g('sFirmWeb');
+      if (g('sFirmAddr'))  firmData.address = g('sFirmAddr');
+
+      localStorage.setItem('firm_data', JSON.stringify(firmData));
+
+      /* تحديث اسم المكتب في الشريط الجانبي فوراً */
+      if (typeof applyFirmName === 'function') applyFirmName();
+      document.querySelectorAll('.firm-name-target').forEach(function(el) { el.textContent = firmName; });
+
+      btn.disabled = true; btn.classList.add('saving'); btn.textContent = 'جاري الحفظ...';
+      setTimeout(function(){
+        btn.classList.remove('saving'); btn.classList.add('saved');
+        btn.textContent = '✓ تم الحفظ';
+        showToast('✅ تم حفظ بيانات المكتب — تظهر في الفواتير مباشرةً');
+        setTimeout(function(){
+          btn.disabled = false; btn.classList.remove('saved');
+          btn.textContent = '💾 حفظ بيانات المكتب';
+        }, 2500);
+      }, 700);
+    };
+
+    /* تحميل بيانات المكتب عند فتح القسم */
+    document.querySelectorAll('.sm-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        if (this.dataset.section === 'office') setTimeout(loadOfficeData, 50);
+      });
+    });
+    /* تحميل فوري إن كان القسم نشطاً */
+    if (document.getElementById('panel-office').classList.contains('active')) loadOfficeData();
 
     /* store original labels */
     document.querySelectorAll('.btn-save').forEach(function(b){

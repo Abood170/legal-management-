@@ -193,6 +193,23 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .kpi-card.accent::before { background: var(--accent); }
 .kpi-val small { font-size: 0.55em; font-weight: 600; color: var(--ink-muted); vertical-align: middle; margin-right: 2px; }
 .security-badge { font-size: 0.62rem; background: rgba(34,139,34,0.08); color: var(--green); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(34,139,34,0.2); margin-right: 0.5rem; display: inline-block; }
+
+/* ── Revenue Leakage Banner ── */
+.leak-banner { background: linear-gradient(135deg,rgba(220,38,38,0.05) 0%,rgba(184,149,42,0.06) 100%); border: 1.5px solid rgba(220,38,38,0.22); border-radius: 14px; padding: 1.1rem 1.4rem; display: none; align-items: center; gap: 1.2rem; flex-wrap: wrap; box-shadow: 0 2px 12px rgba(220,38,38,0.07); }
+.leak-pulse { width: 38px; height: 38px; border-radius: 50%; background: rgba(220,38,38,0.1); border: 1.5px solid rgba(220,38,38,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; animation: leakPulse 2.5s ease-in-out infinite; }
+@keyframes leakPulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.15)} 50%{box-shadow:0 0 0 8px rgba(220,38,38,0)} }
+.leak-body { flex: 1; min-width: 200px; }
+.leak-amount-row { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.25rem; }
+.leak-amount { font-size: 1.65rem; font-weight: 900; color: var(--red); letter-spacing: -1px; line-height: 1; }
+.leak-unit { font-size: 0.72rem; color: var(--red); font-weight: 700; opacity: 0.8; }
+.leak-title { font-size: 0.72rem; font-weight: 700; color: var(--red); letter-spacing: 0.3px; margin-bottom: 0.18rem; }
+.leak-desc { font-size: 0.76rem; color: var(--ink-light); line-height: 1.55; }
+.leak-items { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem; }
+.leak-item { font-size: 0.63rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; background: rgba(220,38,38,0.07); color: var(--red); border: 1px solid rgba(220,38,38,0.15); }
+.leak-cta { background: var(--red); color: white; border: none; padding: 0.55rem 1.1rem; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.76rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; flex-shrink: 0; }
+.leak-cta:hover { background: #b91c1c; transform: translateY(-1px); }
+.leak-dismiss { background: none; border: none; color: var(--ink-muted); font-size: 0.75rem; cursor: pointer; padding: 0.3rem; border-radius: 4px; flex-shrink: 0; line-height: 1; }
+.leak-dismiss:hover { color: var(--red); }
 </style>
 <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
 <link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
@@ -267,6 +284,22 @@ button, a { -webkit-tap-highlight-color: transparent; }
         <button onclick="bannerSeed()" style="background:white;color:#1C5E3E;border:none;border-radius:8px;padding:0.5rem 1rem;font-size:0.8rem;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;">تحميل البيانات التجريبية</button>
         <button onclick="bannerSkip()" style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:0.5rem 0.8rem;font-size:0.8rem;font-family:'Cairo',sans-serif;cursor:pointer;">تخطي</button>
       </div>
+    </div>
+
+    <!-- Revenue Leakage Banner -->
+    <div class="leak-banner" id="leakBanner">
+      <div class="leak-pulse">💸</div>
+      <div class="leak-body">
+        <div class="leak-title">⚠ تسرب الأرباح — أموال في خطر</div>
+        <div class="leak-amount-row">
+          <div class="leak-amount" id="leakAmount">0</div>
+          <div class="leak-unit">ريال</div>
+        </div>
+        <div class="leak-desc" id="leakDesc"></div>
+        <div class="leak-items" id="leakItems"></div>
+      </div>
+      <a class="leak-cta" href="fees.html">عرض الأتعاب ←</a>
+      <button class="leak-dismiss" onclick="document.getElementById('leakBanner').style.display='none'" title="إخفاء">✕</button>
     </div>
 
     <!-- KPI -->
@@ -366,8 +399,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   /* ── Helpers ── */
   function load(key) { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; } }
   function parseRow(html) {
-    var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
-    return doc.querySelectorAll('tr > td');
+    var tpl = document.createElement('template');
+    var trimmed = html.trim();
+    /* يدعم الصيغتين: tr.outerHTML (من الصفحات) وTD-only (من بيانات الـ seed) */
+    tpl.innerHTML = trimmed.startsWith('<tr') ? trimmed : '<tr>' + trimmed + '</tr>';
+    var trEl = tpl.content.firstElementChild;
+    if (!trEl) return [];
+    return trEl.querySelectorAll('td');
   }
   function parseDateCell(text) {
     var s = text.replace(/^[^،]+،\s*/, '').trim().split(/\s+/);
@@ -665,9 +703,51 @@ button, a { -webkit-tap-highlight-color: transparent; }
     if (lbl && totalCollected > 0) lbl.textContent = 'إجمالي: ' + fmtNum(totalCollected) + ' ر.س';
   }
 
+  /* ── Revenue Leakage Banner ── */
+  function updateRevenueLeak() {
+    var banner = document.getElementById('leakBanner');
+    if (!banner) return;
+    var overdue = countOverdueInvoices();
+
+    /* تصنيف الأتعاب: أتعاب محاماة معلقة vs مصاريف نثرية معلقة */
+    var feesPending = 0, incidentals = 0, incidentalCount = 0;
+    load('fees_data').forEach(function(html) {
+      var cells = parseRow(html);
+      if (!cells.length) return;
+      var typeEl = cells[5] ? cells[5].querySelector('.type-tag') : null;
+      var pillEl = cells[7] ? cells[7].querySelector('.pill') : null;
+      var isPending = pillEl && pillEl.className.indexOf('pill-paid') === -1;
+      if (!isPending) return;
+      var amt = cells[4] ? parseFloat(cells[4].getAttribute('data-amount') || 0) : 0;
+      if (isNaN(amt)) return;
+      var isExp = typeEl && (typeEl.textContent.indexOf('نثرية') !== -1 || typeEl.textContent.indexOf('مصاريف') !== -1);
+      if (isExp) { incidentals += amt; incidentalCount++; }
+      else { feesPending += amt; }
+    });
+
+    var totalAtRisk = feesPending + incidentals;
+    if (totalAtRisk <= 0 && overdue === 0) return;
+
+    document.getElementById('leakAmount').textContent = fmtNum(totalAtRisk);
+
+    var items = [];
+    if (feesPending > 0)      items.push('أتعاب غير محصّلة: ' + fmtNum(feesPending) + ' ر.س');
+    if (incidentalCount > 0)  items.push('مصاريف نثرية غير مفوترة: ' + fmtNum(incidentals) + ' ر.س (' + incidentalCount + ' بنود)');
+    if (overdue > 0)          items.push(overdue + ' فاتورة متأخرة');
+
+    var itemsEl = document.getElementById('leakItems');
+    if (itemsEl) itemsEl.innerHTML = items.map(function(t){ return '<span class="leak-item">' + t + '</span>'; }).join('');
+
+    var descEl = document.getElementById('leakDesc');
+    if (descEl) descEl.textContent = 'هذه المبالغ موجودة في النظام لكنها لم تُحصَّل بعد — إجراء واحد يستردّها.';
+
+    banner.style.display = 'flex';
+  }
+
   window.addEventListener('load', function() {
     updateDate();
     updateKPIs();
+    updateRevenueLeak();
     updateInsights();
     updateAlerts();
     updateWorkload();

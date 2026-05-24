@@ -335,10 +335,6 @@
           </select>
           <select class="filter-select" id="cLawyer">
             <option value="">الكل</option>
-            <option value="khalid">خالد العتيبي</option>
-            <option value="sarah">سارة المحمد</option>
-            <option value="mohammed">محمد الرشيد</option>
-            <option value="noura">نورة الأحمد</option>
           </select>
           <button class="btn-reset" id="cReset">إعادة ضبط</button>
         </div>
@@ -1012,8 +1008,28 @@
     if (el) el.textContent = count;
   }
 
+  function populateLawyerFilterCases() {
+    var sel = document.getElementById('cLawyer');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">الكل</option>';
+    try {
+      JSON.parse(localStorage.getItem('lawyers_data') || '[]').forEach(function(html) {
+        var div = document.createElement('div');
+        div.innerHTML = html;
+        var nameEl = div.querySelector('.lc-name');
+        var name = nameEl ? nameEl.textContent.trim() : '';
+        if (!name) return;
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+    } catch(e) {}
+  }
+
   window.addEventListener('load', function() {
     loadCases();
+    populateLawyerFilterCases();
     updateCasesHeader();
   });
   </script>

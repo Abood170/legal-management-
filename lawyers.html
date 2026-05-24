@@ -294,7 +294,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <div class="topbar-title">المحامون</div>
-        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+        <div class="topbar-sub" id="topbarDate">· <span class="firm-name-target">نظام إدارة المحاماة</span></div>
       </div>
       <div class="topbar-right">
         <div class="topbar-search">🔍 بحث في المحامين...</div>
@@ -582,6 +582,9 @@
       }
     ];
 
+    /* Expose demo lawyers for seeding */
+    window._DEMO_LAWYERS = LAWYERS;
+
     /* ── Panel ── */
     var panel     = document.getElementById('sidePanel');
     var monthLabels = ['أغس','سبت','أكت','نوف','ديس','يناير'];
@@ -759,6 +762,7 @@
           showToast('تمت إضافة المحامي بنجاح');
         }
         refreshLawyerCaseCounts();
+        if (typeof refreshWorkloadBars === 'function') refreshWorkloadBars();
         updateLawyerKPIs();
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'إضافة المحامي';
@@ -791,21 +795,74 @@
     localStorage.setItem('lawyers_data', JSON.stringify(cards));
   }
 
+  function buildLawyerCardHTML(l) {
+    var cases  = l.cases || 0;
+    var wlPct  = Math.min(Math.round(cases / 50 * 100), 100);
+    var wlCls  = wlPct >= 70 ? 'wl-high' : wlPct >= 40 ? 'wl-mid' : 'wl-low';
+    return '<button class="delete-lawyer-btn" onclick="deleteLawyer(this)" title="حذف المحامي">✕</button>' +
+      '<div class="lc-top">' +
+        '<div class="lc-avatar">' + (l.initials || '') + '</div>' +
+        '<div class="lc-info">' +
+          '<div class="lc-name">' + l.name + '</div>' +
+          '<div class="lc-title">' + (l.title || '') + '</div>' +
+          '<div class="lc-spec">⚖️ ' + (l.spec || '') + '</div>' +
+        '</div>' +
+        '<div class="lc-status"><span class="pill-active">نشط</span></div>' +
+      '</div>' +
+      '<div class="lc-stats">' +
+        '<div class="lc-stat"><div class="lc-stat-val green">' + cases + '</div><div class="lc-stat-lbl">قضية نشطة</div></div>' +
+        '<div class="lc-stat"><div class="lc-stat-val">' + (l.win || '—') + '</div><div class="lc-stat-lbl">نسبة الفوز</div></div>' +
+        '<div class="lc-stat"><div class="lc-stat-val gold">' + (l.fee || '—') + '</div><div class="lc-stat-lbl">أتعاب ر.س</div></div>' +
+      '</div>' +
+      '<div class="lc-workload">' +
+        '<div class="lc-wl-top"><span class="lc-wl-label">عبء العمل</span><span class="lc-wl-pct">' + wlPct + '%</span></div>' +
+        '<div class="lc-wl-track"><div class="lc-wl-fill ' + wlCls + '" style="width:' + wlPct + '%"></div></div>' +
+      '</div>' +
+      '<div class="lc-contact">' +
+        '<div class="lc-contact-row"><span class="lc-contact-icon">📞</span>' + (l.phone || '—') + '</div>' +
+        '<div class="lc-contact-row"><span class="lc-contact-icon">✉️</span>' + (l.email || '—') + '</div>' +
+      '</div>' +
+      '<div class="lc-actions">' +
+        '<button class="btn-view">عرض الملف</button>' +
+        '<button class="btn-edit-lawyer" onclick="editLawyer(this)" style="background:rgba(28,94,62,0.08);color:var(--accent);border:1px solid rgba(28,94,62,0.15);border-radius:7px;padding:0.45rem 0.9rem;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:\'Cairo\',sans-serif;">✏️ تعديل</button>' +
+        '<button class="btn-assign">تعيين قضية</button>' +
+      '</div>';
+  }
+
   function loadLawyers() {
-    var saved = localStorage.getItem('lawyers_data');
+    var saved      = localStorage.getItem('lawyers_data');
     var emptyState = document.getElementById('emptyState');
+    var grid       = document.getElementById('lawyersGrid');
+    var demos      = window._DEMO_LAWYERS || [];
+    var isEmpty    = false;
+    try { isEmpty = !saved || JSON.parse(saved).length === 0; } catch(e) { isEmpty = true; }
+
+    /* ── First-time seed from DEMO array ── */
+    if (isEmpty && demos.length > 0) {
+      if (emptyState) emptyState.style.display = 'none';
+      demos.forEach(function(l, idx) {
+        var card = document.createElement('div');
+        card.className = 'lawyer-card';
+        card.setAttribute('data-idx', idx);
+        card.innerHTML = buildLawyerCardHTML(l);
+        grid.appendChild(card);
+      });
+      saveLawyers();
+      updateLawyerCount();
+      return;
+    }
+
+    /* ── Load from localStorage ── */
     if (saved) {
       try {
         var cards = JSON.parse(saved);
         if (cards.length > 0) {
-          var grid = document.getElementById('lawyersGrid');
           if (emptyState) emptyState.style.display = 'none';
           cards.forEach(function(html) {
             var div = document.createElement('div');
             div.innerHTML = html;
             var card = div.firstElementChild;
             if (card) {
-              /* Inject edit button if missing */
               var lcAct = card.querySelector('.lc-actions');
               if (lcAct && !lcAct.querySelector('.btn-edit-lawyer')) {
                 var editBtnL = document.createElement('button');
@@ -899,6 +956,7 @@
   window.addEventListener('load', function() {
     loadLawyers();
     refreshLawyerCaseCounts();
+    refreshWorkloadBars();
     updateLawyerKPIs();
   });
 
@@ -906,8 +964,11 @@
     try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
   }
   function _parseTr(html) {
-    var doc = new DOMParser().parseFromString('<table><tbody><tr>' + html + '</tr></tbody></table>', 'text/html');
-    return Array.from(doc.querySelectorAll('tr > td'));
+    var tpl = document.createElement('template');
+    tpl.innerHTML = html.trim();
+    var trEl = tpl.content.firstElementChild;
+    if (!trEl) return [];
+    return Array.from(trEl.querySelectorAll('td'));
   }
   function _lawyerFromChip(td) {
     if (!td) return '';
@@ -939,15 +1000,44 @@
       document.querySelectorAll('#lawyersGrid .lawyer-card').length;
   }
 
+  function refreshWorkloadBars() {
+    var cards = document.querySelectorAll('#lawyersGrid .lawyer-card');
+    var maxCases = 1;
+    cards.forEach(function(card) {
+      var el = card.querySelector('.lc-stat-val.green');
+      var n = el ? (parseInt(el.textContent) || 0) : 0;
+      if (n > maxCases) maxCases = n;
+    });
+    cards.forEach(function(card) {
+      var el = card.querySelector('.lc-stat-val.green');
+      var n = el ? (parseInt(el.textContent) || 0) : 0;
+      var pct = Math.min(Math.round((n / maxCases) * 100), 100);
+      var fill = card.querySelector('.lc-wl-fill');
+      var pctEl = card.querySelector('.lc-wl-pct');
+      if (fill) {
+        fill.style.width = pct + '%';
+        fill.className = 'lc-wl-fill ' + (pct >= 70 ? 'wl-high' : pct >= 40 ? 'wl-mid' : 'wl-low');
+      }
+      if (pctEl) pctEl.textContent = pct + '%';
+    });
+  }
+
   function updateLawyerKPIs() {
     var cards = document.querySelectorAll('#lawyersGrid .lawyer-card');
     var count = cards.length;
     document.getElementById('kpiCount').textContent = count;
     var cntSub = document.getElementById('lawyersCountSub');
     if (cntSub) cntSub.textContent = count > 0 ? 'محامٍ في الفريق' : 'لا يوجد محامون بعد';
-    if (count === 0) return;
+
+    if (count === 0) {
+      var perfTbody = document.querySelector('.perf-table tbody');
+      if (perfTbody) perfTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--ink-muted)">لا توجد بيانات أداء بعد</td></tr>';
+      return;
+    }
+
     var totalCases = 0, maxWin = 0, totalFees = 0;
-    cards.forEach(function(card) {
+    var cardsList = Array.from(cards);
+    cardsList.forEach(function(card) {
       var stats = card.querySelectorAll('.lc-stat');
       if (stats[0]) totalCases += parseInt(stats[0].querySelector('.lc-stat-val').textContent) || 0;
       if (stats[1]) {
@@ -965,6 +1055,35 @@
     if (winEl) { winEl.textContent = maxWin > 0 ? maxWin + '%' : '—'; document.getElementById('kpiMaxWinSub').textContent = maxWin > 0 ? 'أعلى معدل فوز' : 'لا توجد بيانات بعد'; }
     var feesEl = document.getElementById('kpiTotalFees');
     if (feesEl) feesEl.textContent = totalFees > 0 ? totalFees.toLocaleString('en-US') : '0';
+
+    /* ── Populate performance table ── */
+    var perfTbody = document.querySelector('.perf-table tbody');
+    if (perfTbody) {
+      perfTbody.innerHTML = cardsList.map(function(card) {
+        var name    = (card.querySelector('.lc-name')    || {}).textContent || '—';
+        var inits   = (card.querySelector('.lc-avatar')  || {}).textContent || '—';
+        var casesN  = parseInt((card.querySelector('.lc-stat-val.green') || {}).textContent) || 0;
+        var winTxt  = (card.querySelector('.lc-stat:nth-child(2) .lc-stat-val') || {}).textContent || '—';
+        var maxH = 34;
+        var h1 = casesN > 0 ? Math.max(Math.min(Math.round((casesN / 50) * maxH), maxH), 4) : 4;
+        var h2 = Math.max(Math.round(h1 * 0.8), 4);
+        var h3 = Math.max(Math.round(h1 * 0.6), 4);
+        var v1 = casesN, v2 = Math.round(casesN * 0.8), v3 = Math.round(casesN * 0.6);
+        var wClass = winTxt !== '—' ? 'win-green' : '';
+        return '<tr>' +
+          '<td><div class="perf-lawyer"><div class="av-sm">' + inits + '</div><span style="font-weight:600;font-size:0.82rem">' + name + '</span></div></td>' +
+          '<td><div class="perf-bars">' +
+            '<div class="perf-bar pb-nov" style="height:' + h3 + 'px" data-val="' + v3 + '"></div>' +
+            '<div class="perf-bar pb-dec" style="height:' + h2 + 'px" data-val="' + v2 + '"></div>' +
+            '<div class="perf-bar pb-jan" style="height:' + h1 + 'px" data-val="' + v1 + '"></div>' +
+          '</div></td>' +
+          '<td style="font-size:0.78rem">' + v3 + '</td>' +
+          '<td style="font-size:0.78rem">' + v2 + '</td>' +
+          '<td style="font-size:0.78rem;font-weight:700">' + v1 + '</td>' +
+          '<td><span class="win-badge ' + wClass + '">' + winTxt + '</span></td>' +
+        '</tr>';
+      }).join('');
+    }
   }
 
   function syncEmptyState() {
@@ -1050,6 +1169,19 @@
     modal.classList.add('open'); modal.scrollTop = 0; document.body.style.overflow = 'hidden';
     setTimeout(function() { document.getElementById('lName').focus(); }, 50);
   };
+  </script>
+  <script>
+  /* ── Dynamic topbar date ── */
+  (function(){
+    var days   = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    var months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var d = new Date(), el = document.getElementById('topbarDate');
+    if (el) {
+      var fn = el.querySelector('.firm-name-target');
+      var nm = fn ? fn.textContent : 'نظام إدارة المحاماة';
+      el.innerHTML = days[d.getDay()] + '، ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ' · <span class="firm-name-target">' + nm + '</span>';
+    }
+  })();
   </script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>

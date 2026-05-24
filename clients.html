@@ -805,6 +805,18 @@
           rows.forEach(function(html) {
             var tr = document.createElement('tr');
             tr.innerHTML = html;
+            /* استعادة data-attributes للفلتر (saveClients يخزّن innerHTML بلا attributes) */
+            var nameEl    = tr.querySelector('.client-name-cell');
+            var phoneEl   = tr.querySelector('.phone-cell');
+            var typeBadge = tr.querySelector('.type-badge');
+            var pillEl    = tr.querySelector('.pill');
+            var rName   = nameEl   ? nameEl.textContent.trim()   : '';
+            var rPhone  = phoneEl  ? phoneEl.textContent.trim()  : '';
+            var rType   = typeBadge && typeBadge.classList.contains('type-company') ? 'company' : 'person';
+            var rStatus = pillEl && pillEl.classList.contains('pill-closed') ? 'closed' : 'active';
+            tr.setAttribute('data-search', rName + ' ' + rPhone);
+            tr.setAttribute('data-type',   rType);
+            tr.setAttribute('data-status', rStatus);
             /* inject profile button if missing (migration for old saved rows) */
             var lastTd = tr.querySelector('td:last-child');
             if (lastTd && lastTd.querySelector('.row-btn') && !lastTd.querySelector('[onclick*="openClientProfile"]')) {
