@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام إدارة المحاماة — الإشعارات التلقائية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
+      --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
+      --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
+      --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
+      --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
+      --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
+      --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --wa: #25D366; --wa-dark: #128C7E;
+      --sidebar-w: 228px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; animation: pageIn 0.2s ease both; }
+    @keyframes pageIn { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-logo { padding: 1.4rem 1.4rem 1.1rem; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 0.35rem; text-decoration: none; }
+    .sidebar-logo-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--ink); }
+    .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
+    .sidebar-nav { flex: 1; padding: 0.8rem 0; }
+    .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s; border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .nav-badge { margin-right: auto; background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.15); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; }
+    .user-av { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-name { font-size: 0.78rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.65rem; color: var(--ink-muted); }
+
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { height: 56px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.8rem; position: sticky; top: 0; z-index: 10; }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+    .topbar-sub { font-size: 0.68rem; color: var(--ink-muted); }
+    .topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+    .topbar-icon { font-size: 1.1rem; cursor: pointer; position: relative; }
+    .notif-dot { position: absolute; top: -2px; left: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); border: 1.5px solid var(--white); }
+
+    .content { padding: 1.6rem 1.8rem; flex: 1; }
+
+    /* KPI Row */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.4rem; }
+    .kpi { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; display: flex; align-items: flex-start; gap: 0.9rem; }
+    .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .kpi-icon.green { background: var(--green-dim); }
+    .kpi-icon.gold  { background: var(--gold-dim); }
+    .kpi-icon.red   { background: var(--red-dim); }
+    .kpi-icon.wa    { background: rgba(37,211,102,0.1); }
+    .kpi-val { font-size: 1.6rem; font-weight: 900; color: var(--ink); line-height: 1; }
+    .kpi-lbl { font-size: 0.7rem; color: var(--ink-muted); margin-top: 2px; }
+    .kpi-sub { font-size: 0.65rem; color: var(--green); font-weight: 600; margin-top: 3px; }
+
+    /* Two-column layout */
+    .layout { display: grid; grid-template-columns: 1fr 340px; gap: 1.2rem; align-items: start; }
+
+    /* Section card */
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+    .card-title { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+    .card-sub { font-size: 0.7rem; color: var(--ink-muted); }
+
+    /* Session reminder rows */
+    .remind-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    .remind-row:last-child { border-bottom: none; }
+    .remind-row:hover { background: var(--off-white); }
+    .remind-av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .remind-info { flex: 1; min-width: 0; }
+    .remind-name { font-size: 0.83rem; font-weight: 700; color: var(--ink); }
+    .remind-detail { font-size: 0.68rem; color: var(--ink-muted); margin-top: 1px; }
+    .remind-timeline { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+    .tl-step { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .tl-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; border: 1.5px solid; }
+    .tl-dot.sent  { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+    .tl-dot.pending { background: var(--gold-dim); color: var(--gold); border-color: var(--gold); }
+    .tl-dot.off   { background: var(--cream); color: var(--ink-muted); border-color: var(--border-mid); }
+    .tl-lbl { font-size: 0.52rem; color: var(--ink-muted); font-weight: 600; }
+    .tl-line { width: 16px; height: 1.5px; background: var(--border-mid); margin-bottom: 12px; flex-shrink: 0; }
+    .remind-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .btn-wa { background: linear-gradient(135deg, var(--wa), var(--wa-dark)); color: white; border: none; border-radius: 7px; padding: 0.35rem 0.7rem; font-family: 'Cairo', sans-serif; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; transition: all 0.18s; box-shadow: 0 2px 8px rgba(37,211,102,0.2); }
+    .btn-wa:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,211,102,0.3); }
+    .btn-wa:active { transform: translateY(0); }
+    .badge-urgent { background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.15); font-size: 0.58rem; font-weight: 700; padding: 2px 7px; border-radius: 2rem; white-space: nowrap; }
+    .badge-soon { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.58rem; font-weight: 700; padding: 2px 7px; border-radius: 2rem; white-space: nowrap; }
+    .badge-ok { background: var(--green-dim); color: var(--green); border: 1px solid rgba(22,163,74,0.15); font-size: 0.58rem; font-weight: 700; padding: 2px 7px; border-radius: 2rem; white-space: nowrap; }
+
+    /* Settings panel */
+    .settings-stack { display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* Channel card */
+    .channel-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .ch-head { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+    .ch-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); }
+    .ch-sub { font-size: 0.68rem; color: var(--ink-muted); }
+    .ch-body { padding: 0.8rem 1.2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .ch-row { display: flex; align-items: center; justify-content: space-between; }
+    .ch-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--ink); font-weight: 500; }
+    .ch-icon { font-size: 1rem; }
+
+    /* Toggle switch */
+    .toggle { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--border-mid); border-radius: 21px; cursor: pointer; transition: 0.2s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 15px; height: 15px; right: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(-17px); }
+    .toggle.wa input:checked + .toggle-slider { background: var(--wa); }
+
+    /* Timeline settings */
+    .timeline-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .tl-card-head { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+    .tl-card-body { padding: 0.8rem 1.2rem; display: flex; flex-direction: column; gap: 0; }
+    .tl-setting-row { display: flex; align-items: center; gap: 0.8rem; padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
+    .tl-setting-row:last-child { border-bottom: none; }
+    .tl-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 900; flex-shrink: 0; }
+    .tl-num.c1 { background: rgba(220,38,38,0.08); color: var(--red); }
+    .tl-num.c2 { background: var(--gold-dim); color: var(--gold); }
+    .tl-num.c3 { background: var(--green-dim); color: var(--green); }
+    .tl-setting-info { flex: 1; }
+    .tl-setting-title { font-size: 0.8rem; font-weight: 700; color: var(--ink); }
+    .tl-setting-desc { font-size: 0.65rem; color: var(--ink-muted); }
+    .tl-msg-preview { margin: 0.2rem 0 0; font-size: 0.62rem; color: var(--ink-light); background: var(--off-white); border-radius: 6px; padding: 0.3rem 0.5rem; border-right: 2px solid var(--wa); font-style: italic; }
+
+    /* Activity log */
+    .log-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .log-body { padding: 0.5rem 0; max-height: 260px; overflow-y: auto; }
+    .log-row { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.55rem 1.2rem; }
+    .log-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .log-dot.green { background: var(--green); }
+    .log-dot.gold  { background: var(--gold); }
+    .log-dot.red   { background: var(--red); }
+    .log-text { font-size: 0.72rem; color: var(--ink); flex: 1; }
+    .log-time { font-size: 0.62rem; color: var(--ink-muted); white-space: nowrap; }
+
+    /* Save button */
+    .btn-save { width: 100%; background: var(--accent); color: white; border: none; border-radius: 10px; padding: 0.75rem; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.18s; margin-top: 0.2rem; }
+    .btn-save:hover { background: var(--accent-light); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: white; padding: 0.65rem 1.3rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* WA preview modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--white); border-radius: 18px; width: 340px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2); animation: modalIn 0.22s ease; }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+    .modal-head { background: linear-gradient(135deg, var(--wa), var(--wa-dark)); padding: 1rem 1.2rem; display: flex; align-items: center; gap: 0.7rem; }
+    .modal-head-icon { font-size: 1.4rem; }
+    .modal-head-title { font-size: 0.9rem; font-weight: 700; color: white; }
+    .modal-head-sub { font-size: 0.68rem; color: rgba(255,255,255,0.8); }
+    .modal-body { padding: 1.2rem; }
+    .wa-phone { font-size: 0.75rem; color: var(--ink-muted); margin-bottom: 0.7rem; }
+    .wa-bubble { background: #DCF8C6; border-radius: 12px 12px 4px 12px; padding: 0.8rem 1rem; font-size: 0.83rem; color: #0F1419; line-height: 1.7; direction: rtl; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .wa-time { font-size: 0.62rem; color: #9CA3AF; text-align: left; margin-top: 0.35rem; }
+    .modal-footer { padding: 0 1.2rem 1.2rem; display: flex; gap: 0.6rem; }
+    .btn-modal-send { flex: 1; background: var(--wa); color: white; border: none; border-radius: 9px; padding: 0.65rem; font-family: 'Cairo', sans-serif; font-size: 0.83rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
+    .btn-modal-send:hover { background: var(--wa-dark); }
+    .btn-modal-cancel { background: var(--off-white); color: var(--ink-light); border: 1px solid var(--border); border-radius: 9px; padding: 0.65rem 1rem; font-family: 'Cairo', sans-serif; font-size: 0.83rem; cursor: pointer; }
+
+    @media (max-width: 1100px) { .sidebar { display: none; } .layout { grid-template-columns: 1fr; } .kpi-row { grid-template-columns: 1fr 1fr; } }
+  </style>
+  <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
+  <link rel="stylesheet" href="dark-mode.css">
+  <script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
+      <div class="sidebar-logo-dot"></div>
+    </a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">الرئيسية</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> لوحة التحكم</a>
+      <a class="nav-item" href="cases.html"><span class="nav-icon">⚖️</span> الدعاوى <span class="nav-badge" id="casesBadge">142</span></a>
+      <a class="nav-item" href="sessions.html"><span class="nav-icon">📅</span> الجلسات <span class="nav-badge" id="sessionsBadge">7</span></a>
+      <a class="nav-item" href="calendar.html"><span class="nav-icon">🗓️</span> التقويم</a>
+      <a class="nav-item" href="clients.html"><span class="nav-icon">👥</span> الموكلون</a>
+      <a class="nav-item" href="tasks.html"><span class="nav-icon">📋</span> المهام</a>
+      <div class="nav-section" style="margin-top:0.6rem">المالية</div>
+      <a class="nav-item" href="fees.html"><span class="nav-icon">💰</span> الأتعاب <span class="nav-badge-g" id="feesBadge">3 معلقة</span></a>
+      <a class="nav-item" href="expenses.html"><span class="nav-icon">🧾</span> المصاريف</a>
+      <a class="nav-item" href="invoices.html"><span class="nav-icon">📄</span> فوترة ZATCA</a>
+      <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span> التقارير</a>
+      <div class="nav-section" style="margin-top:0.6rem">الفريق</div>
+      <a class="nav-item" href="lawyers.html"><span class="nav-icon">👨‍💼</span> المحامون</a>
+      <a class="nav-item" href="archive.html"><span class="nav-icon">🗂️</span> الأرشيف</a>
+      <div class="nav-section" style="margin-top:0.6rem">النظام</div>
+      <a class="nav-item active" href="notifications.html"><span class="nav-icon">📲</span> الإشعارات</a>
+      <a class="nav-item" href="permissions.html"><span class="nav-icon">🔐</span> الصلاحيات</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> الإعدادات</a>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🌐</span> الموقع الرئيسي</a>
+      <a class="nav-item" href="login.html" style="color:var(--red)"><span class="nav-icon">🚪</span> تسجيل الخروج</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-av">ع.م</div>
+        <div>
+          <div class="user-name">عبدالعزيز المطيري</div>
+          <div class="user-role">شريك مؤسس · صاحب المكتب</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">الإشعارات التلقائية</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-icon wa">📲</div>
+          <div>
+            <div class="kpi-val" id="kpiSent">47</div>
+            <div class="kpi-lbl">رسالة أُرسلت هذا الشهر</div>
+            <div class="kpi-sub">↑ 12% عن الشهر الماضي</div>
+          </div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon green">✅</div>
+          <div>
+            <div class="kpi-val">89%</div>
+            <div class="kpi-lbl">نسبة استلام الموكلين</div>
+            <div class="kpi-sub">من إجمالي الرسائل</div>
+          </div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon gold">⏳</div>
+          <div>
+            <div class="kpi-val" id="kpiPending">3</div>
+            <div class="kpi-lbl">جلسات تحتاج تذكير</div>
+            <div class="kpi-sub">خلال 48 ساعة القادمة</div>
+          </div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon red">🚫</div>
+          <div>
+            <div class="kpi-val">0</div>
+            <div class="kpi-lbl">جلسات بدون تذكير</div>
+            <div class="kpi-sub">جميع الجلسات مغطاة ✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layout -->
+      <div class="layout">
+
+        <!-- Left: Session reminder list -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">📅 الجلسات القادمة — حالة التذكيرات</div>
+              <div class="card-sub">التذكيرات التلقائية تُرسل عبر واتساب قبل كل جلسة</div>
+            </div>
+          </div>
+          <div id="remindList"></div>
+        </div>
+
+        <!-- Right: Settings panel -->
+        <div class="settings-stack">
+
+          <!-- Channel toggles -->
+          <div class="channel-card">
+            <div class="ch-head">
+              <div class="ch-title">📡 قنوات الإرسال</div>
+              <div class="ch-sub">اختر كيف يصل التذكير للموكل</div>
+            </div>
+            <div class="ch-body">
+              <div class="ch-row">
+                <div class="ch-label"><span class="ch-icon">💬</span> واتساب</div>
+                <label class="toggle wa"><input type="checkbox" id="togWa" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="ch-row">
+                <div class="ch-label"><span class="ch-icon">📱</span> رسالة SMS</div>
+                <label class="toggle"><input type="checkbox" id="togSms" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="ch-row">
+                <div class="ch-label"><span class="ch-icon">📧</span> بريد إلكتروني</div>
+                <label class="toggle"><input type="checkbox" id="togEmail"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="ch-row" style="padding-top:0.4rem;border-top:1px solid var(--border);margin-top:0.2rem;">
+                <div class="ch-label" style="font-size:0.73rem;color:var(--ink-muted)">تفعيل التذكيرات التلقائية</div>
+                <label class="toggle"><input type="checkbox" id="togAuto" checked><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline settings -->
+          <div class="timeline-card">
+            <div class="tl-card-head">
+              <div class="ch-title">⏱ جدول التصعيد التلقائي</div>
+              <div class="ch-sub">ثلاث مراحل — النظام يرسل تلقائياً</div>
+            </div>
+            <div class="tl-card-body">
+              <div class="tl-setting-row">
+                <div class="tl-num c1">48</div>
+                <div class="tl-setting-info">
+                  <div class="tl-setting-title">قبل 48 ساعة — تذكير مبكر</div>
+                  <div class="tl-setting-desc">رسالة ودية بموعد الجلسة والمحكمة</div>
+                  <div class="tl-msg-preview">"السلام عليكم [اسم الموكل]، تذكير بجلستكم القادمة يوم [التاريخ] في [المحكمة]. نتطلع لرؤيتكم."</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="tl-setting-row">
+                <div class="tl-num c2">24</div>
+                <div class="tl-setting-info">
+                  <div class="tl-setting-title">قبل 24 ساعة — تأكيد الحضور</div>
+                  <div class="tl-setting-desc">رسالة تطلب تأكيد الحضور مع الوثائق المطلوبة</div>
+                  <div class="tl-msg-preview">"نذكركم بجلسة الغد، يرجى إحضار [الوثائق]. للتأكيد أو الاستفسار تواصلوا معنا."</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="tl-setting-row">
+                <div class="tl-num c3">2</div>
+                <div class="tl-setting-info">
+                  <div class="tl-setting-title">قبل ساعتين — تذكير أخير</div>
+                  <div class="tl-setting-desc">تذكير طارئ قبيل الجلسة مباشرة</div>
+                  <div class="tl-msg-preview">"تذكير: جلستكم اليوم بعد ساعتين في [المحكمة]. نراكم قريباً."</div>
+                </div>
+                <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity log -->
+          <div class="log-card">
+            <div class="card-head" style="padding:0.8rem 1.2rem">
+              <div class="card-title">📋 سجل الإرسال اليوم</div>
+            </div>
+            <div class="log-body">
+              <div class="log-row"><div class="log-dot green"></div><div class="log-text">✓ أُرسل تذكير 48h لـ فهد الحارثي — جلسة الثلاثاء</div><div class="log-time">09:00</div></div>
+              <div class="log-row"><div class="log-dot green"></div><div class="log-text">✓ أُرسل تذكير 24h لـ شركة الفارس — جلسة الاثنين</div><div class="log-time">08:30</div></div>
+              <div class="log-row"><div class="log-dot green"></div><div class="log-text">✓ أُرسل تذكير 2h لـ سلمى الغامدي — جلسة اليوم</div><div class="log-time">08:00</div></div>
+              <div class="log-row"><div class="log-dot green"></div><div class="log-text">✓ أُرسل تذكير 48h لـ محمد الشهري — جلسة الثلاثاء</div><div class="log-time">أمس 09:00</div></div>
+              <div class="log-row"><div class="log-dot gold"></div><div class="log-text">⏳ مجدول: تذكير 24h لـ مجموعة النور — غداً 09:00</div><div class="log-time">مجدول</div></div>
+              <div class="log-row"><div class="log-dot gold"></div><div class="log-text">⏳ مجدول: تذكير 2h لـ نواف السلمي — الثلاثاء 10:00</div><div class="log-time">مجدول</div></div>
+            </div>
+          </div>
+
+          <button class="btn-save" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WA Preview Modal -->
+  <div class="modal-overlay" id="waModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-head-icon">💬</div>
+        <div>
+          <div class="modal-head-title">معاينة رسالة واتساب</div>
+          <div class="modal-head-sub">ستُرسل فور الضغط على إرسال</div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="wa-phone" id="waPhone">إلى: +966 5X XXX XXXX</div>
+        <div class="wa-bubble" id="waBubble"></div>
+        <div class="wa-time">✓✓ · الآن</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-send" onclick="confirmSend()">📲 إرسال الآن</button>
+        <button class="btn-modal-cancel" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var SESSIONS = [
+      { name: 'فهد الحارثي', initials: 'ف.ح', phone: '+966 50 123 4567', caseRef: '#2026-0001', court: 'المحكمة التجارية - الرياض', date: 'الثلاثاء 14 يناير 2025', time: '10:00 ص', urgency: 'urgent', s48: 'sent', s24: 'pending', s2: 'off' },
+      { name: 'شركة الفارس للاستثمار', initials: 'ش.ف', phone: '+966 55 234 5678', caseRef: '#2026-0002', court: 'محكمة الاستئناف - الرياض', date: 'الاثنين 13 يناير 2025', time: '09:00 ص', urgency: 'soon', s48: 'sent', s24: 'sent', s2: 'pending' },
+      { name: 'مجموعة النور العقارية', initials: 'م.ن', phone: '+966 53 345 6789', caseRef: '#2026-0003', court: 'المحكمة العمالية - جدة', date: 'الأربعاء 15 يناير 2025', time: '11:30 ص', urgency: 'soon', s48: 'sent', s24: 'off', s2: 'off' },
+      { name: 'نواف السلمي', initials: 'ن.س', phone: '+966 56 456 7890', caseRef: '#2026-0004', court: 'المحكمة الجزائية - الرياض', date: 'الثلاثاء 14 يناير 2025', time: '12:00 م', urgency: 'urgent', s48: 'sent', s24: 'pending', s2: 'off' },
+      { name: 'سلمى الغامدي', initials: 'س.غ', phone: '+966 59 567 8901', caseRef: '#2026-0002', court: 'محكمة الأحوال الشخصية', date: 'الأحد 13 يناير 2025', time: '10:00 ص', urgency: 'ok', s48: 'sent', s24: 'sent', s2: 'sent' },
+    ];
+
+    var URGENCY_LABEL = { urgent: '<span class="badge-urgent">⚡ خلال 24 ساعة</span>', soon: '<span class="badge-soon">📅 قريباً</span>', ok: '<span class="badge-ok">✓ تم التذكير</span>' };
+    var DOT_LABEL = { sent: 'أُرسل', pending: 'مجدول', off: '—' };
+
+    function buildList() {
+      var html = '';
+      SESSIONS.forEach(function(s, i) {
+        html += '<div class="remind-row">';
+        html += '<div class="remind-av">' + s.initials + '</div>';
+        html += '<div class="remind-info">';
+        html += '<div class="remind-name">' + s.name + ' ' + URGENCY_LABEL[s.urgency] + '</div>';
+        html += '<div class="remind-detail">📁 ' + s.caseRef + ' · 🏛 ' + s.court + ' · 🕐 ' + s.date + ' — ' + s.time + '</div>';
+        html += '</div>';
+        html += '<div class="remind-timeline">';
+        html += tStep(s.s48, '48h');
+        html += '<div class="tl-line"></div>';
+        html += tStep(s.s24, '24h');
+        html += '<div class="tl-line"></div>';
+        html += tStep(s.s2, '2h');
+        html += '</div>';
+        html += '<div class="remind-actions">';
+        html += '<button class="btn-wa" onclick="openModal(' + i + ')">💬 إرسال الآن</button>';
+        html += '</div>';
+        html += '</div>';
+      });
+      document.getElementById('remindList').innerHTML = html;
+    }
+
+    function tStep(state, label) {
+      var icon = state === 'sent' ? '✓' : state === 'pending' ? '⏳' : '—';
+      return '<div class="tl-step"><div class="tl-dot ' + state + '">' + icon + '</div><div class="tl-lbl">' + label + '</div></div>';
+    }
+
+    var currentSession = null;
+    function openModal(i) {
+      currentSession = i;
+      var s = SESSIONS[i];
+      document.getElementById('waPhone').textContent = 'إلى: ' + s.phone;
+      document.getElementById('waBubble').textContent =
+        'السلام عليكم ' + s.name + '،\n\nنذكّركم بموعد جلستكم القادمة:\n📅 ' + s.date + '\n🕐 ' + s.time + '\n🏛 ' + s.court + '\n📁 القضية: ' + s.caseRef + '\n\nيرجى الحضور قبل الموعد بـ 15 دقيقة مع جميع الوثائق.\n\nمكتب المحاماة — نظام إدارة المحاماة';
+      document.getElementById('waModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('waModal').classList.remove('open');
+    }
+
+    function confirmSend() {
+      closeModal();
+      if (currentSession !== null) {
+        var s = SESSIONS[currentSession];
+        showToast('✓ تم إرسال رسالة واتساب إلى ' + s.name);
+        var rows = document.querySelectorAll('.remind-row');
+        if (rows[currentSession]) {
+          var dots = rows[currentSession].querySelectorAll('.tl-dot.off');
+          if (dots.length) { dots[0].className = 'tl-dot sent'; dots[0].textContent = '✓'; }
+        }
+      }
+    }
+
+    function saveSettings() {
+      var state = {
+        wa: document.getElementById('togWa').checked,
+        sms: document.getElementById('togSms').checked,
+        email: document.getElementById('togEmail').checked,
+        auto: document.getElementById('togAuto').checked
+      };
+      try { localStorage.setItem('notif_settings', JSON.stringify(state)); } catch(e) {}
+      showToast('✓ تم حفظ إعدادات الإشعارات');
+    }
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 2800);
+    }
+
+    document.getElementById('waModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    try {
+      var saved = JSON.parse(localStorage.getItem('notif_settings') || '{}');
+      if (saved.wa !== undefined) document.getElementById('togWa').checked = saved.wa;
+      if (saved.sms !== undefined) document.getElementById('togSms').checked = saved.sms;
+      if (saved.email !== undefined) document.getElementById('togEmail').checked = saved.email;
+      if (saved.auto !== undefined) document.getElementById('togAuto').checked = saved.auto;
+    } catch(e) {}
+
+    buildList();
+  </script>
+  <script src="sidebar-badges.js"></script>
+  <script src="firm-name.js"></script>
+  <script src="dark-mode.js"></script>
+  <script src="notifications.js"></script>
+  <script src="global-search.js"></script>
+</body>
+</html>
