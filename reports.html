@@ -1,24 +1,26 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام إدارة المحاماة — التقارير</title>
+  <title>نظام إدارة المحاماة — التقارير التنفيذية</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --white: #ffffff; --off-white: #F7F6F3;
+      --white: #ffffff; --off-white: #F7F6F3; --cream: #F0EDE6;
       --ink: #0F1419; --ink-mid: #2D3748; --ink-light: #64748B; --ink-muted: #94A3B8;
       --accent: #1C5E3E; --accent-light: #24764E; --accent-dim: rgba(28,94,62,0.08); --accent-border: rgba(28,94,62,0.15);
       --gold: #B8952A; --gold-dim: rgba(184,149,42,0.1);
       --border: rgba(15,20,25,0.08); --border-mid: rgba(15,20,25,0.12);
       --red: #DC2626; --red-dim: rgba(220,38,38,0.07);
       --green: #16a34a; --green-dim: rgba(22,163,74,0.08);
+      --blue: #2563EB; --blue-dim: rgba(37,99,235,0.07);
       --sidebar-w: 228px;
     }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; }
+    body { font-family: 'Cairo', sans-serif; background: var(--off-white); color: var(--ink); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; line-height: 1.75; animation: pageIn 0.2s ease both; }
+    @keyframes pageIn { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
 
     /* Sidebar */
     .sidebar { width: var(--sidebar-w); background: var(--white); border-left: 1px solid var(--border); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
@@ -27,180 +29,135 @@
     .sidebar-logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 2px; }
     .sidebar-nav { flex: 1; padding: 0.8rem 0; }
     .nav-section { padding: 0.6rem 1.4rem 0.2rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 2px; text-transform: uppercase; }
-    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s cubic-bezier(0.4,0,0.2,1); border-right: 2px solid transparent; cursor: pointer; }
+    .nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 1.4rem; font-size: 0.82rem; color: var(--ink-light); text-decoration: none; transition: all 0.15s; border-right: 2px solid transparent; cursor: pointer; }
     .nav-item:hover { background: rgba(28,94,62,0.04); color: var(--ink); }
     .nav-item.active { background: var(--accent-dim); color: var(--accent); border-right-color: var(--accent); font-weight: 600; border-radius: 0 8px 8px 0; }
-    .nav-icon { font-size: 0.95rem; width: 16px; text-align: center; flex-shrink: 0; }
-    .nav-badge { margin-right: auto; background: var(--red); color: white; font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+    .nav-badge { margin-right: auto; background: var(--red-dim); color: var(--red); border: 1px solid rgba(220,38,38,0.15); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
     .nav-badge-g { margin-right: auto; background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,149,42,0.2); font-size: 0.56rem; font-weight: 700; padding: 1px 6px; border-radius: 2rem; }
     .sidebar-bottom { padding: 1rem 1.4rem; border-top: 1px solid var(--border); }
-    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.15s cubic-bezier(0.4,0,0.2,1); }
-    .user-card:hover { background: rgba(28,94,62,0.04); }
-    .user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
-    .user-name { font-size: 0.76rem; font-weight: 600; color: var(--ink); }
-    .user-role { font-size: 0.6rem; color: var(--ink-muted); margin-top: 1px; }
+    .user-card { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem; border-radius: 8px; }
+    .user-av { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-name { font-size: 0.78rem; font-weight: 600; color: var(--ink); }
+    .user-role { font-size: 0.65rem; color: var(--ink-muted); }
 
-    /* Main / Topbar */
-    .main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
-    .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--border); }
-    .topbar-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
-    .topbar-sub { font-size: 0.67rem; color: var(--ink-muted); margin-top: 1px; }
-    .topbar-right { display: flex; align-items: center; gap: 0.7rem; }
-    .topbar-search { display: flex; align-items: center; gap: 0.5rem; background: var(--off-white); border: 1px solid var(--border); border-radius: 7px; padding: 0.42rem 0.85rem; font-size: 0.78rem; color: var(--ink-muted); cursor: text; transition: border-color 0.15s; min-width: 190px; }
-    .topbar-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--off-white); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; position: relative; }
-    .topbar-icon:hover { background: rgba(28,94,62,0.04); border-color: var(--accent-border); }
-    .notif-dot { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; border: 1.5px solid var(--white); }
-    .btn-new { background: var(--accent); color: white; padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; letter-spacing: 0.3px; box-shadow: 0 1px 3px rgba(28,94,62,0.2); transition: all 0.2s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
-    .btn-new:hover { background: var(--accent-light); box-shadow: 0 4px 12px rgba(28,94,62,0.28); transform: translateY(-1px); }
-    .btn-export { background: var(--white); color: var(--accent); border: 1px solid var(--accent-border); padding: 0.48rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.2s; white-space: nowrap; }
-    .btn-export:hover { background: var(--accent-dim); }
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { height: 56px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 1.8rem; position: sticky; top: 0; z-index: 10; }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+    .topbar-sub { font-size: 0.68rem; color: var(--ink-muted); }
+    .topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+    .topbar-icon { font-size: 1.1rem; cursor: pointer; position: relative; }
+    .notif-dot { position: absolute; top: -2px; left: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); border: 1.5px solid var(--white); }
+    .btn-export { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 0.4rem 1rem; font-family: 'Cairo', sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+    .btn-export:hover { background: var(--accent-light); }
 
-    /* Content */
-    .content { flex: 1; padding: 1.4rem 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem; }
-
-    /* Card */
-    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06), 0 4px 12px rgba(15,20,25,0.04); transition: box-shadow 0.2s ease; }
-    .card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.1), 0 1px 3px rgba(15,20,25,0.06); }
-    .card-head { padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: linear-gradient(to bottom, var(--off-white), var(--white)); }
-    .card-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
-    .card-sub { font-size: 0.65rem; color: var(--ink-muted); margin-top: 1px; }
-    .card-badge { font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 2rem; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
-
-    /* Page header */
-    .page-hdr { display: flex; align-items: center; justify-content: space-between; }
-    .ph-title { font-size: 1.15rem; font-weight: 900; color: var(--ink); letter-spacing: -0.5px; }
-    .ph-sub { font-size: 0.72rem; color: var(--ink-muted); margin-top: 3px; }
+    .content { padding: 1.6rem 1.8rem; flex: 1; }
 
     /* Period tabs */
-    .period-tabs { display: flex; align-items: center; gap: 0.3rem; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 4px; box-shadow: 0 1px 3px rgba(15,20,25,0.04); }
-    .tab-btn { background: none; border: none; padding: 0.38rem 0.9rem; border-radius: 7px; font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); cursor: pointer; font-family: 'Cairo', sans-serif; transition: all 0.18s; white-space: nowrap; }
-    .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 1px 4px rgba(28,94,62,0.25); }
-    .tab-btn:not(.active):hover { background: var(--accent-dim); color: var(--accent); }
+    .period-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.4rem; background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 0.3rem; width: fit-content; }
+    .ptab { padding: 0.35rem 1rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--ink-muted); border: none; background: none; font-family: 'Cairo', sans-serif; transition: all 0.15s; }
+    .ptab.active { background: var(--accent); color: white; }
 
-    /* KPI cards */
-    .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
-    .kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.3rem; position: relative; overflow: hidden; box-shadow: 0 1px 3px rgba(15,20,25,0.06); transition: box-shadow 0.2s; isolation: isolate; }
-    .kpi-card:hover { box-shadow: 0 4px 20px rgba(15,20,25,0.08); }
-    .kpi-card::before { content:''; position:absolute; top:0; right:0; left:0; height:3px; background: var(--border); }
-    .kpi-card.kc-green::before { background: var(--green); }
-    .kpi-card.kc-gold::before  { background: var(--gold); }
-    .kpi-card.kc-accent::before{ background: var(--accent); }
-    .kpi-card.kc-blue::before  { background: #2563EB; }
-    .kpi-label { font-size: 0.63rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.45rem; }
-    .kpi-val { font-size: 1.75rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; line-height: 1; margin-bottom: 0.35rem; }
-    .kpi-change { font-size: 0.68rem; }
-    .kpi-change.up   { color: var(--green); }
-    .kpi-change.neutral { color: var(--ink-muted); }
+    /* KPI row */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.4rem; }
+    .kpi { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; }
+    .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+    .kpi-icon { font-size: 1.3rem; }
+    .kpi-delta-up { font-size: 0.68rem; font-weight: 700; color: var(--green); background: var(--green-dim); padding: 2px 7px; border-radius: 2rem; }
+    .kpi-delta-dn { font-size: 0.68rem; font-weight: 700; color: var(--red); background: var(--red-dim); padding: 2px 7px; border-radius: 2rem; }
+    .kpi-val { font-size: 1.75rem; font-weight: 900; color: var(--ink); line-height: 1; letter-spacing: -1px; }
+    .kpi-val-sm { font-size: 1.3rem; }
+    .kpi-lbl { font-size: 0.7rem; color: var(--ink-muted); margin-top: 3px; }
 
-    /* Section label */
-    .section-label { font-size: 0.72rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1.5px; padding-right: 0.2rem; }
+    /* Grids */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+    .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
 
-    /* Two-col grid */
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    /* Cards */
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+    .card-title { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+    .card-sub { font-size: 0.68rem; color: var(--ink-muted); margin-top: 1px; }
+    .card-link { font-size: 0.72rem; color: var(--accent); text-decoration: none; font-weight: 600; }
 
     /* Bar chart */
-    .chart-wrap { padding: 1.2rem 1.4rem 0.6rem; }
-    .chart-area { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
-    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-    .chart-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent-dim); border: 1px solid var(--accent-border); min-height: 4px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
-    .chart-bar.bar-accent { background: var(--accent); border-color: var(--accent); opacity: 0.85; }
-    .chart-bar.bar-forecast { background: none; border: 1.5px dashed var(--accent-border); opacity: 0.6; }
-    .chart-bar.bar-gold { background: var(--gold-dim); border-color: rgba(184,149,42,0.3); }
-    .chart-lbl { font-size: 0.5rem; color: var(--ink-muted); white-space: nowrap; }
-    .chart-lbl.lbl-active { color: var(--accent); font-weight: 700; }
-    .chart-mini-stats { display: flex; gap: 1.5rem; padding: 0.9rem 1.4rem; border-top: 1px solid var(--border); background: var(--off-white); }
-    .cms-item { display: flex; flex-direction: column; gap: 1px; }
-    .cms-label { font-size: 0.6rem; color: var(--ink-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .cms-val { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
-    .cms-val.green { color: var(--accent); }
-    .cms-val.red   { color: var(--red); }
+    .chart-body { padding: 1.2rem; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 0.55rem; height: 130px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+    .bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; gap: 3px; }
+    .bar { flex: 1; border-radius: 5px 5px 0 0; min-height: 4px; position: relative; cursor: pointer; transition: filter 0.15s; }
+    .bar:hover { filter: brightness(1.12); }
+    .bar:hover::after { content: attr(data-tip); position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: var(--ink); color: white; font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; white-space: nowrap; font-family: 'Cairo', sans-serif; pointer-events: none; }
+    .bar.current { background: var(--accent); }
+    .bar.prev { background: var(--accent-dim); border: 1.5px solid var(--accent-border); }
+    .bar-lbl { font-size: 0.6rem; color: var(--ink-muted); font-weight: 600; }
+    .chart-legend { display: flex; gap: 1rem; justify-content: center; margin-top: 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; color: var(--ink-muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 
-    /* Horizontal bar chart (distribution) */
-    .h-chart { padding: 1rem 1.4rem; display: flex; flex-direction: column; gap: 0.75rem; }
-    .hb-row { display: flex; flex-direction: column; gap: 4px; }
-    .hb-top { display: flex; justify-content: space-between; align-items: baseline; }
-    .hb-label { font-size: 0.75rem; color: var(--ink-mid); font-weight: 600; }
-    .hb-pct { font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); }
-    .hb-track { height: 8px; background: var(--off-white); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
-    .hb-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
-    .fill-accent  { background: var(--accent); }
-    .fill-gold    { background: var(--gold); }
-    .fill-blue    { background: #2563EB; }
-    .fill-purple  { background: #7c3aed; }
-    .fill-red     { background: var(--red); }
-    .fill-teal    { background: #0d9488; }
+    /* Donut */
+    .donut-wrap { padding: 1.2rem; display: flex; align-items: center; gap: 1.2rem; }
+    .donut { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+    .donut svg { transform: rotate(-90deg); }
+    .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .donut-num { font-size: 1.4rem; font-weight: 900; color: var(--ink); line-height: 1; }
+    .donut-sub { font-size: 0.6rem; color: var(--ink-muted); }
+    .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 0.45rem; }
+    .dl-row { display: flex; align-items: center; gap: 0.5rem; }
+    .dl-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .dl-name { font-size: 0.72rem; color: var(--ink); flex: 1; }
+    .dl-pct { font-size: 0.72rem; font-weight: 700; color: var(--ink-mid); }
 
-    /* Lawyer table */
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table th { padding: 0.6rem 1.2rem; text-align: right; font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid var(--border); background: var(--off-white); white-space: nowrap; }
-    .data-table td { padding: 0.8rem 1.2rem; font-size: 0.83rem; border-bottom: 1px solid var(--border); color: var(--ink-mid); vertical-align: middle; }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table tbody tr { transition: background 0.1s ease; }
-    .data-table tbody tr:hover td { background: rgba(28,94,62,0.025); }
-    .lawyer-chip { display: flex; align-items: center; gap: 0.5rem; }
-    .av-sm { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
-    .lawyer-name { font-weight: 700; color: var(--ink); font-size: 0.8rem; }
-    .workload-bar { height: 5px; border-radius: 3px; background: var(--off-white); border: 1px solid var(--border); overflow: hidden; width: 80px; margin-top: 4px; }
-    .workload-fill { height: 100%; border-radius: 3px; }
-    .stars { display: flex; gap: 2px; }
-    .star { width: 8px; height: 8px; border-radius: 50%; }
-    .star-on-green  { background: var(--green); }
-    .star-on-gold   { background: var(--gold); }
-    .star-off { background: var(--border-mid); }
-    .win-pct { font-weight: 700; font-size: 0.8rem; }
-    .fee-amt { font-variant-numeric: tabular-nums; direction: ltr; text-align: right; font-weight: 700; color: var(--accent); }
+    /* Performance table */
+    .perf-table { width: 100%; border-collapse: collapse; }
+    .perf-table th { padding: 0.6rem 1rem; font-size: 0.68rem; font-weight: 700; color: var(--ink-muted); text-align: right; border-bottom: 1px solid var(--border); background: var(--off-white); }
+    .perf-table td { padding: 0.75rem 1rem; font-size: 0.78rem; color: var(--ink); border-bottom: 1px solid var(--border); }
+    .perf-table tr:last-child td { border-bottom: none; }
+    .perf-table tr:hover td { background: var(--off-white); }
+    .lawyer-cell { display: flex; align-items: center; gap: 0.6rem; }
+    .law-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; flex-shrink: 0; }
+    .law-name { font-weight: 600; }
+    .prog-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .prog-bar { flex: 1; height: 6px; background: var(--border-mid); border-radius: 3px; overflow: hidden; max-width: 80px; }
+    .prog-fill { height: 100%; border-radius: 3px; }
+    .prog-pct { font-size: 0.72rem; font-weight: 700; min-width: 32px; }
 
-    /* Sessions timeline */
-    .sessions-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.8rem; padding: 1rem 1.4rem; }
-    .sess-stat { text-align: center; }
-    .sess-val { font-size: 1.6rem; font-weight: 900; color: var(--ink); letter-spacing: -1px; }
-    .sess-lbl { font-size: 0.62rem; color: var(--ink-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .sess-val.green { color: var(--accent); }
-    .timeline-wrap { padding: 0 1.4rem 1.2rem; }
-    .timeline-label { font-size: 0.62rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; }
-    .timeline-row { display: flex; gap: 0.4rem; }
-    .day-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-    .day-label { font-size: 0.58rem; color: var(--ink-muted); text-align: center; font-weight: 600; }
-    .day-block { height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 700; text-align: center; line-height: 1.3; padding: 2px; }
-    .db-green  { background: var(--green-dim); color: var(--accent); border: 1px solid var(--accent-border); }
-    .db-gold   { background: var(--gold-dim);  color: var(--gold);   border: 1px solid rgba(184,149,42,0.2); }
-    .db-red    { background: var(--red-dim);   color: var(--red);    border: 1px solid rgba(220,38,38,0.15); }
-    .db-empty  { background: var(--off-white); border: 1px solid var(--border); }
+    /* Workload */
+    .wl-body { padding: 0.8rem 1.2rem; display: flex; flex-direction: column; gap: 0.65rem; }
+    .wl-row { display: flex; align-items: center; gap: 0.8rem; }
+    .wl-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
+    .wl-name { font-size: 0.75rem; font-weight: 600; color: var(--ink); min-width: 55px; }
+    .wl-bar-wrap { flex: 1; height: 8px; background: var(--border-mid); border-radius: 4px; overflow: hidden; }
+    .wl-bar-fill { height: 100%; border-radius: 4px; }
+    .wl-score { font-size: 0.72rem; font-weight: 900; min-width: 28px; text-align: left; }
+    .wl-tag { font-size: 0.58rem; font-weight: 700; padding: 2px 6px; border-radius: 2rem; white-space: nowrap; }
+    .tag-hi  { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(220,38,38,0.15); }
+    .tag-mid { background: var(--gold-dim);  color: var(--gold);  border: 1px solid rgba(184,149,42,0.2); }
+    .tag-ok  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(22,163,74,0.15); }
 
-    /* Alert cards */
-    .alert-item { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); border-right: 3px solid transparent; transition: background 0.15s; }
-    .alert-item:last-child { border-bottom: none; }
-    .alert-item:hover { background: var(--off-white); }
-    .alert-item.al-green { border-right-color: var(--green); }
-    .alert-item.al-gold  { border-right-color: var(--gold); }
-    .alert-item.al-red   { border-right-color: var(--red); }
-    .alert-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
-    .ai-green { background: var(--green-dim); border: 1px solid rgba(22,163,74,0.15); }
-    .ai-gold  { background: var(--gold-dim);  border: 1px solid rgba(184,149,42,0.18); }
-    .ai-red   { background: var(--red-dim);   border: 1px solid rgba(220,38,38,0.15); }
-    .alert-title { font-size: 0.78rem; font-weight: 700; color: var(--ink); margin-bottom: 0.15rem; }
-    .alert-desc  { font-size: 0.7rem; color: var(--ink-light); line-height: 1.45; }
+    /* Insights */
+    .insights { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.2rem; }
+    .insight { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; display: flex; gap: 0.8rem; }
+    .insight-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .insight-title { font-size: 0.78rem; font-weight: 700; color: var(--ink); }
+    .insight-body { font-size: 0.68rem; color: var(--ink-muted); margin-top: 2px; line-height: 1.6; }
+    .insight.green { border-right: 3px solid var(--green); }
+    .insight.gold  { border-right: 3px solid var(--gold); }
+    .insight.red   { border-right: 3px solid var(--red); }
 
-    /* Print */
-    @media print {
-      .sidebar, .topbar, .period-tabs, .btn-export, .btn-new { display: none !important; }
-      .main { overflow: visible; }
-      .content { padding: 0; overflow: visible; }
-      body { background: white; }
-    }
+    .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: white; padding: 0.65rem 1.3rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    @media (max-width: 1024px) { .sidebar { display: none; } .content { padding: 1rem; } .topbar { padding: 0 1rem; } .topbar-search { display: none; } .kpi-row { grid-template-columns: 1fr 1fr; } .two-col { grid-template-columns: 1fr; } .sessions-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 768px) { .btn-new { min-height: 44px; } }
-    @media (max-width: 600px) { .kpi-row { grid-template-columns: 1fr 1fr; } .sessions-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 1100px) { .sidebar{display:none;} .grid-2,.grid-3{grid-template-columns:1fr;} .kpi-row{grid-template-columns:1fr 1fr;} .insights{grid-template-columns:1fr;} }
   </style>
   <style>body{animation:pageIn 0.2s ease both;}@keyframes pageIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}</style>
-<link rel="stylesheet" href="dark-mode.css"><script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+  <link rel="stylesheet" href="dark-mode.css">
+  <script>try{if(localStorage.getItem('theme_pref')=='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 </head>
 <body>
 
-  <!-- Sidebar -->
   <aside class="sidebar">
     <a href="index.html" class="sidebar-logo">
       <span class="sidebar-logo-text">نظام إدارة المحاماة</span>
@@ -240,642 +197,235 @@
     </div>
   </aside>
 
-  <!-- Main -->
   <div class="main">
-    <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
-        <div class="topbar-title">التقارير والإحصائيات</div>
-        <div class="topbar-sub"><span id="topbarDate"></span> · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
+        <div class="topbar-title">التقارير التنفيذية</div>
+        <div class="topbar-sub">الأحد، 13 يناير 2025 · <span class="firm-name-target">نظام إدارة المحاماة</span></div>
       </div>
       <div class="topbar-right">
-        <div class="topbar-search">🔍 بحث في التقارير...</div>
         <div class="topbar-icon">🔔<div class="notif-dot"></div></div>
-        <button class="btn-export" id="btnExport">تصدير التقرير ↓</button>
+        <button class="btn-export" onclick="showToast('📄 جارٍ تصدير التقرير...')">📤 تصدير PDF</button>
       </div>
     </div>
 
-    <!-- Content -->
     <div class="content">
 
-      <!-- Page Header + Period Tabs -->
-      <div class="page-hdr">
-        <div>
-          <div class="ph-title">التقارير والإحصائيات</div>
-          <div class="ph-sub">نظرة شاملة على أداء المكتب</div>
-        </div>
-        <div class="period-tabs">
-          <button class="tab-btn active" data-period="month">هذا الشهر</button>
-          <button class="tab-btn" data-period="quarter">هذا الربع</button>
-          <button class="tab-btn" data-period="year">هذه السنة</button>
-          <button class="tab-btn" data-period="custom">مخصص</button>
-        </div>
+      <div class="period-tabs">
+        <button class="ptab" onclick="setPeriod(this)">هذا الأسبوع</button>
+        <button class="ptab active" onclick="setPeriod(this)">هذا الشهر</button>
+        <button class="ptab" onclick="setPeriod(this)">الربع الأول</button>
+        <button class="ptab" onclick="setPeriod(this)">هذا العام</button>
       </div>
 
-      <!-- KPI Cards -->
       <div class="kpi-row">
-        <div class="kpi-card kc-accent">
-          <div class="kpi-label">إجمالي القضايا</div>
-          <div class="kpi-val" id="kpiCases">0</div>
-          <div class="kpi-change neutral" id="kpiCasesSub">لا توجد بيانات بعد</div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-icon">💰</span><span class="kpi-delta-up">↑ 18%</span></div>
+          <div class="kpi-val">142,500</div>
+          <div class="kpi-lbl">إجمالي الإيرادات — ريال</div>
         </div>
-        <div class="kpi-card kc-green">
-          <div class="kpi-label">نسبة الفوز</div>
-          <div class="kpi-val" id="kpiWin">—</div>
-          <div class="kpi-change neutral" id="kpiWinSub">لا توجد بيانات بعد</div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-icon">⚖️</span><span class="kpi-delta-up">↑ 5%</span></div>
+          <div class="kpi-val kpi-val-sm">73<span style="font-size:1rem;font-weight:400;color:var(--ink-muted)">%</span></div>
+          <div class="kpi-lbl">نسبة الفوز بالقضايا</div>
         </div>
-        <div class="kpi-card kc-gold">
-          <div class="kpi-label">متوسط مدة القضية</div>
-          <div class="kpi-val" id="kpiDuration">—</div>
-          <div class="kpi-change neutral" id="kpiDurationSub">لا توجد بيانات بعد</div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-icon">📁</span><span class="kpi-delta-up">↑ 8</span></div>
+          <div class="kpi-val">142</div>
+          <div class="kpi-lbl">القضايا النشطة</div>
         </div>
-        <div class="kpi-card kc-blue">
-          <div class="kpi-label">إجمالي الأتعاب</div>
-          <div class="kpi-val" id="kpiFees">0</div>
-          <div class="kpi-change neutral" id="kpiFeesSub">لا توجد بيانات بعد</div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-icon">🕐</span><span class="kpi-delta-dn">↓ 2.1h</span></div>
+          <div class="kpi-val kpi-val-sm">4.2<span style="font-size:1rem;font-weight:400;color:var(--ink-muted)">h</span></div>
+          <div class="kpi-lbl">متوسط وقت استجابة الموكل</div>
         </div>
       </div>
 
-      <!-- Section 1: Financial Performance -->
-      <div class="section-label">📈 الأداء المالي</div>
-      <div class="card">
-        <div class="card-head">
+      <div class="insights">
+        <div class="insight green">
+          <div class="insight-icon">📈</div>
           <div>
-            <div class="card-title">الأتعاب الشهرية</div>
-            <div class="card-sub" id="chartSubtitle">يناير — ديسمبر 2024</div>
-          </div>
-          <span class="card-badge" id="chartBadge">السنة الكاملة</span>
-        </div>
-        <div class="chart-wrap">
-          <div class="chart-area" id="finChart">
-            <!-- Built by JS -->
+            <div class="insight-title">الإيرادات تجاوزت الهدف بـ 18%</div>
+            <div class="insight-body">المكتب تجاوز هدف يناير 120,000 ريال بفارق 22,500 ريال — أداء استثنائي في القضايا التجارية.</div>
           </div>
         </div>
-        <div class="chart-mini-stats">
-          <div class="cms-item">
-            <div class="cms-label">أعلى شهر</div>
-            <div class="cms-val green" id="statHigh">—</div>
-          </div>
-          <div class="cms-item">
-            <div class="cms-label">أدنى شهر</div>
-            <div class="cms-val red" id="statLow">—</div>
-          </div>
-          <div class="cms-item">
-            <div class="cms-label">المتوسط الشهري</div>
-            <div class="cms-val" id="statAvg">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section 2: Lawyer Performance -->
-      <div class="section-label">👨‍💼 أداء المحامين</div>
-      <div class="card">
-        <div class="card-head">
+        <div class="insight gold">
+          <div class="insight-icon">⚠️</div>
           <div>
-            <div class="card-title">أداء فريق المحامين</div>
-            <div class="card-sub">مقارنة بالأداء المستهدف</div>
+            <div class="insight-title">خالد العتيبي — عبء عمل مرتفع</div>
+            <div class="insight-body">يتولى 58 قضية بمفرده — 41% من الإجمالي. يُنصح بتوزيع القضايا الجديدة على سارة القحطاني.</div>
           </div>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>المحامي</th>
-              <th>القضايا النشطة</th>
-              <th>القضايا المغلقة</th>
-              <th>نسبة الفوز</th>
-              <th>الأتعاب المحصّلة</th>
-              <th>التقييم</th>
-              <th>عبء العمل</th>
-            </tr>
-          </thead>
-          <tbody id="lawyerTable">
-            <tr>
-              <td colspan="7" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد بيانات بعد</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="insight red">
+          <div class="insight-icon">💸</div>
+          <div>
+            <div class="insight-title">15,500 ريال أتعاب غير محصّلة</div>
+            <div class="insight-body">3 ملفات معلقة منذ أكثر من 30 يوماً — متابعة فورية قد تستردّها هذا الأسبوع.</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Section 3: Case Distribution -->
-      <div class="section-label">⚖️ توزيع القضايا</div>
-      <div class="two-col">
-        <!-- By type -->
+      <div class="grid-2">
         <div class="card">
           <div class="card-head">
             <div>
-              <div class="card-title">توزيع القضايا حسب النوع</div>
-              <div class="card-sub" id="typeChartSub">لا توجد بيانات بعد</div>
+              <div class="card-title">📊 الإيرادات — آخر 6 أشهر</div>
+              <div class="card-sub">مقارنة بالفترة المماثلة من العام الماضي</div>
             </div>
           </div>
-          <div class="h-chart" id="typeChart">
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">تجارية</span><span class="hb-pct" id="t1">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-accent" id="t1b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">عمالية</span><span class="hb-pct" id="t2">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-gold" id="t2b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">عقارية</span><span class="hb-pct" id="t3">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-blue" id="t3b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">إدارية</span><span class="hb-pct" id="t4">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-purple" id="t4b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">جزائية</span><span class="hb-pct" id="t5">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-red" id="t5b" style="width:0%"></div></div>
+          <div class="chart-body">
+            <div class="bar-chart" id="revenueChart"></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>2025</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent-dim);border:1.5px solid var(--accent-border)"></div>2024</div>
             </div>
           </div>
         </div>
-        <!-- By court -->
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">🗂 توزيع القضايا حسب النوع</div></div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r="42" fill="none" stroke="#F0EDE6" stroke-width="14"/>
+                <circle cx="55" cy="55" r="42" fill="none" stroke="#1C5E3E" stroke-width="14" stroke-dasharray="108 156" stroke-dashoffset="0"/>
+                <circle cx="55" cy="55" r="42" fill="none" stroke="#B8952A" stroke-width="14" stroke-dasharray="66 198" stroke-dashoffset="-108"/>
+                <circle cx="55" cy="55" r="42" fill="none" stroke="#2563EB" stroke-width="14" stroke-dasharray="45 219" stroke-dashoffset="-174"/>
+                <circle cx="55" cy="55" r="42" fill="none" stroke="#DC2626" stroke-width="14" stroke-dasharray="45 219" stroke-dashoffset="-219"/>
+              </svg>
+              <div class="donut-center">
+                <div class="donut-num">142</div>
+                <div class="donut-sub">قضية</div>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div class="dl-row"><div class="dl-dot" style="background:var(--accent)"></div><div class="dl-name">تجارية</div><div class="dl-pct">41%</div></div>
+              <div class="dl-row"><div class="dl-dot" style="background:var(--gold)"></div><div class="dl-name">عمالية</div><div class="dl-pct">25%</div></div>
+              <div class="dl-row"><div class="dl-dot" style="background:var(--blue)"></div><div class="dl-name">جزائية</div><div class="dl-pct">17%</div></div>
+              <div class="dl-row"><div class="dl-dot" style="background:var(--red)"></div><div class="dl-name">أحوال شخصية</div><div class="dl-pct">17%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">👨‍💼 أداء المحامين — يناير 2025</div>
+            <a class="card-link" href="lawyers.html">تفاصيل ←</a>
+          </div>
+          <table class="perf-table">
+            <thead>
+              <tr>
+                <th>المحامي</th>
+                <th>القضايا</th>
+                <th>الجلسات</th>
+                <th>نسبة الفوز</th>
+                <th>الإيرادات (ر.س)</th>
+                <th>التقييم</th>
+              </tr>
+            </thead>
+            <tbody id="perfBody"></tbody>
+          </table>
+        </div>
+
         <div class="card">
           <div class="card-head">
             <div>
-              <div class="card-title">توزيع القضايا حسب المحكمة</div>
-              <div class="card-sub" id="courtChartSub">لا توجد بيانات بعد</div>
+              <div class="card-title">⚡ مؤشر عبء العمل</div>
+              <div class="card-sub">100 = طاقة قصوى</div>
             </div>
           </div>
-          <div class="h-chart" id="courtChart">
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">محكمة التجارة</span><span class="hb-pct" id="c1">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-accent" id="c1b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">المحكمة العمالية</span><span class="hb-pct" id="c2">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-gold" id="c2b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">محكمة الاستئناف</span><span class="hb-pct" id="c3">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-blue" id="c3b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">ديوان المظالم</span><span class="hb-pct" id="c4">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-teal" id="c4b" style="width:0%"></div></div>
-            </div>
-            <div class="hb-row">
-              <div class="hb-top"><span class="hb-label">محاكم أخرى</span><span class="hb-pct" id="c5">0%</span></div>
-              <div class="hb-track"><div class="hb-fill fill-purple" id="c5b" style="width:0%"></div></div>
-            </div>
-          </div>
+          <div class="wl-body" id="wlBody"></div>
         </div>
       </div>
 
-      <!-- Section 4: Sessions Report -->
-      <div class="section-label">📅 تقرير الجلسات</div>
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">إحصائيات الجلسات</div>
-            <div class="card-sub" id="sessSubtitle">يناير 2025</div>
-          </div>
-          <span class="card-badge" style="background:var(--border);color:var(--ink-muted);border-color:var(--border)">لا توجد بيانات</span>
-        </div>
-        <div class="sessions-grid">
-          <div class="sess-stat">
-            <div class="sess-val" id="sessTot">0</div>
-            <div class="sess-lbl">إجمالي الجلسات</div>
-          </div>
-          <div class="sess-stat">
-            <div class="sess-val green" id="sessDone">0</div>
-            <div class="sess-lbl">جلسات منتهية</div>
-          </div>
-          <div class="sess-stat">
-            <div class="sess-val" id="sessUpcoming" style="color:var(--gold)">0</div>
-            <div class="sess-lbl">جلسات قادمة</div>
-          </div>
-          <div class="sess-stat">
-            <div class="sess-val green">—</div>
-            <div class="sess-lbl">معدل الحضور</div>
-          </div>
-        </div>
-        <div class="timeline-wrap">
-          <div class="timeline-label">جلسات هذا الأسبوع</div>
-          <div class="timeline-row">
-            <div class="day-col">
-              <div class="day-label">السبت</div>
-              <div class="day-block db-empty"></div>
-            </div>
-            <div class="day-col">
-              <div class="day-label">الأحد</div>
-              <div class="day-block db-empty"></div>
-            </div>
-            <div class="day-col">
-              <div class="day-label">الاثنين</div>
-              <div class="day-block db-empty"></div>
-            </div>
-            <div class="day-col">
-              <div class="day-label">الثلاثاء</div>
-              <div class="day-block db-empty"></div>
-            </div>
-            <div class="day-col">
-              <div class="day-label">الأربعاء</div>
-              <div class="day-block db-empty"></div>
-            </div>
-            <div class="day-col">
-              <div class="day-label">الخميس</div>
-              <div class="day-block db-empty"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+    </div>
+  </div>
 
-      <!-- Section 5: Overdue Invoices -->
-      <div class="section-label">🧾 المستحقات المتأخرة</div>
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">الفواتير المتأخرة</div>
-            <div class="card-sub">فواتير تجاوزت تاريخ الاستحقاق</div>
-          </div>
-          <span class="card-badge" id="overdueCount" style="background:var(--red-dim);color:var(--red);border-color:rgba(220,38,38,0.2)">0 فواتير</span>
-        </div>
-        <div id="overdueList"></div>
-      </div>
-
-      <!-- Section 6: Performance Alerts -->
-      <div class="section-label">🔔 تنبيهات الأداء</div>
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">تنبيهات الأداء الذكية</div>
-            <div class="card-sub">محدّثة تلقائياً بناءً على بيانات المكتب</div>
-          </div>
-        </div>
-        <div id="alertsList"></div>
-      </div>
-
-    </div><!-- /content -->
-  </div><!-- /main -->
+  <div class="toast" id="toast"></div>
 
   <script>
-  (function() {
-    var MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var MONTHS = ['يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','يناير'];
+    var REV_CUR  = [88000, 95000, 102000, 118000, 130000, 142500];
+    var REV_PREV = [74000, 81000,  89000,  97000, 108000, 120800];
 
-    function parseRows(key) {
-      try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { return []; }
-    }
-    function parseDoc(html) {
-      /* يدعم كلا الصيغتين: outerHTML (يبدأ بـ <tr) و innerHTML */
-      var wrap = html.trimStart().startsWith('<tr') ? '' : '<tr>';
-      var close = wrap ? '</tr>' : '';
-      return new DOMParser().parseFromString('<table><tbody>' + wrap + html + close + '</tbody></table>', 'text/html');
-    }
-    function arabicStrToDate(str) {
-      if (!str) return null;
-      var MM = {يناير:0,فبراير:1,مارس:2,أبريل:3,مايو:4,يونيو:5,يوليو:6,أغسطس:7,سبتمبر:8,أكتوبر:9,نوفمبر:10,ديسمبر:11};
-      var DN = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-      var p = str.replace(/،/g,' ').trim().split(/\s+/).filter(function(w){return w&&DN.indexOf(w)===-1;});
-      if (p.length < 2) return null;
-      var d=parseInt(p[0]), m=MM[p[1]], y=p[2]?parseInt(p[2]):new Date().getFullYear();
-      if (isNaN(d)||m===undefined||isNaN(y)) return null;
-      return new Date(y, m, d);
-    }
-    function fmtMoney(n) {
-      return Math.round(n).toLocaleString('en-US') + ' ر.س';
-    }
-    function initials(name) {
-      return name.trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('');
-    }
+    var LAWYERS = [
+      { name:'خالد العتيبي',  init:'خ.ع', color:'#1C5E3E', cases:58, sessions:24, win:78, rev:62000, wl:92 },
+      { name:'سارة القحطاني', init:'س.ق', color:'#B8952A', cases:41, sessions:18, win:81, rev:48500, wl:68 },
+      { name:'نورة الشمري',   init:'ن.ش', color:'#2563EB', cases:29, sessions:14, win:69, rev:21000, wl:52 },
+      { name:'محمد الزهراني', init:'م.ز', color:'#DC2626', cases:14, sessions: 9, win:71, rev:11000, wl:31 },
+    ];
 
-    /* ── fees_data ── */
-    function parseFeesData() {
-      var rows = parseRows('fees_data');
-      var total = 0, paid = 0, pending = 0;
-      var byLawyer = {}, byMonth = {};
-      rows.forEach(function(html) {
-        var doc = parseDoc(html);
-        var cells = doc.querySelectorAll('tr > td');
-        var amount = cells[4] ? parseFloat(cells[4].getAttribute('data-amount') || 0) : 0;
-        if (isNaN(amount)) amount = 0;
-        var pill = cells[7] ? cells[7].querySelector('.pill') : null;
-        var isPaid = pill && (pill.className.indexOf('pill-paid') !== -1 || pill.className.indexOf('pill-collected') !== -1);
-        total += amount;
-        if (isPaid) paid += amount; else pending += amount;
-        /* lawyer */
-        var lcEl = cells[3] ? cells[3].querySelector('.lawyer-chip') : null;
-        if (lcEl) {
-          var cl = lcEl.cloneNode(true);
-          cl.querySelectorAll('[class*="av"]').forEach(function(a){ a.remove(); });
-          var lname = cl.textContent.trim();
-          if (lname && lname !== '—') {
-            if (!byLawyer[lname]) byLawyer[lname] = { total:0, paid:0 };
-            byLawyer[lname].total += amount;
-            if (isPaid) byLawyer[lname].paid += amount;
-          }
-        }
-        /* monthly */
-        var dateText = cells[6] ? cells[6].textContent.trim() : '';
-        var parts = dateText.split(' ');
-        if (parts.length >= 3) {
-          var mIdx = MONTHS_AR.indexOf(parts[1]);
-          if (mIdx !== -1) {
-            var mk = parts[2] + '-' + (mIdx < 9 ? '0' : '') + (mIdx + 1);
-            byMonth[mk] = (byMonth[mk] || 0) + amount;
-          }
-        }
+    function winColor(r){ return r>=75?'var(--green)':r>=60?'var(--gold)':'var(--red)'; }
+    function wlTag(n){ return n>=80?['tag-hi','مرتفع']:n>=55?['tag-mid','متوسط']:['tag-ok','مناسب']; }
+    function wlColor(n){ return n>=80?'var(--red)':n>=55?'var(--gold)':'var(--green)'; }
+    function stars(r){ var s=''; for(var i=0;i<5;i++) s+=(i<Math.round(r/20)?'★':'☆'); return '<span style="color:var(--gold);font-size:0.78rem">'+s+'</span>'; }
+
+    function buildChart() {
+      var max = Math.max.apply(null, REV_CUR.concat(REV_PREV));
+      var html = '';
+      MONTHS.forEach(function(m,i){
+        var hC = Math.round(REV_CUR[i]/max*115);
+        var hP = Math.round(REV_PREV[i]/max*115);
+        html += '<div class="bar-col">';
+        html += '<div class="bar-wrap">';
+        html += '<div class="bar current" style="height:'+hC+'px" data-tip="'+(REV_CUR[i]/1000).toFixed(0)+'k ريال"></div>';
+        html += '<div class="bar prev"    style="height:'+hP+'px" data-tip="'+(REV_PREV[i]/1000).toFixed(0)+'k ريال"></div>';
+        html += '</div><div class="bar-lbl">'+m+'</div></div>';
       });
-      return { total:total, paid:paid, pending:pending, byLawyer:byLawyer, byMonth:byMonth };
+      document.getElementById('revenueChart').innerHTML = html;
     }
 
-    /* ── invoices_data → overdue list ── */
-    function parseOverdue() {
-      var rows = parseRows('invoices_data'), list = [];
-      rows.forEach(function(html) {
-        var doc = parseDoc(html);
-        var cells = doc.querySelectorAll('tr > td');
-        var pill = cells[8] ? cells[8].querySelector('.pill') : null;
-        if (!pill || pill.className.indexOf('pill-overdue') === -1) return;
-        var invNum  = cells[0] && cells[0].querySelector('.case-name') ? cells[0].querySelector('.case-name').textContent.trim() : '';
-        var client  = cells[1] ? cells[1].textContent.trim() : '';
-        var totalEl = cells[5] ? cells[5].querySelector('[data-amount]') : null;
-        var amount  = totalEl ? parseFloat(totalEl.getAttribute('data-amount') || 0) : 0;
-        var due     = cells[7] ? cells[7].textContent.trim() : '';
-        list.push({ invNum:invNum, client:client, amount:amount, due:due });
+    function buildPerf() {
+      var html = '';
+      LAWYERS.forEach(function(l){
+        var wc = winColor(l.win);
+        html += '<tr>';
+        html += '<td><div class="lawyer-cell"><div class="law-av" style="background:'+l.color+'22;color:'+l.color+'">'+l.init+'</div><div class="law-name">'+l.name+'</div></div></td>';
+        html += '<td style="font-weight:700">'+l.cases+'</td>';
+        html += '<td>'+l.sessions+'</td>';
+        html += '<td><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="background:'+wc+';width:'+l.win+'%"></div></div><span class="prog-pct" style="color:'+wc+'">'+l.win+'%</span></div></td>';
+        html += '<td style="font-weight:700;color:var(--accent)">'+(l.rev).toLocaleString()+'</td>';
+        html += '<td>'+stars(l.win)+'</td>';
+        html += '</tr>';
       });
-      return list;
+      document.getElementById('perfBody').innerHTML = html;
     }
 
-    /* ── cases_data ── */
-    function parseCases() {
-      var rows = parseRows('cases_data'), byType = {}, byCourt = {};
-      rows.forEach(function(html) {
-        var doc = parseDoc(html), cells = doc.querySelectorAll('tr > td');
-        var type  = cells[2] ? cells[2].textContent.trim() : 'أخرى';
-        var cDiv  = cells[3] ? cells[3].querySelector('div') : null;
-        var court = cDiv ? cDiv.textContent.trim() : (cells[3] ? cells[3].textContent.trim() : 'أخرى');
-        byType[type]   = (byType[type]  || 0) + 1;
-        byCourt[court] = (byCourt[court]|| 0) + 1;
+    function buildWL() {
+      var html = '';
+      LAWYERS.forEach(function(l){
+        var tag = wlTag(l.wl); var clr = wlColor(l.wl);
+        html += '<div class="wl-row">';
+        html += '<div class="wl-av" style="background:'+l.color+'22;color:'+l.color+'">'+l.init+'</div>';
+        html += '<div class="wl-name">'+l.name.split(' ')[0]+'</div>';
+        html += '<div class="wl-bar-wrap"><div class="wl-bar-fill" style="width:'+l.wl+'%;background:'+clr+'"></div></div>';
+        html += '<div class="wl-score" style="color:'+clr+'">'+l.wl+'</div>';
+        html += '<div class="wl-tag '+tag[0]+'">'+tag[1]+'</div>';
+        html += '</div>';
       });
-      return { total:rows.length, byType:byType, byCourt:byCourt };
+      document.getElementById('wlBody').innerHTML = html;
     }
 
-    /* ── sessions_data ── */
-    function parseSessions() {
-      var rows = parseRows('sessions_data'), done = 0, upcoming = 0, list = [];
-      var today = new Date(); today.setHours(0,0,0,0);
-      rows.forEach(function(html) {
-        var doc = parseDoc(html);
-        var pill = doc.querySelector('.pill');
-        var isDone = pill && pill.className.indexOf('pill-done') !== -1;
-        if (isDone) done++; else upcoming++;
-        var dateEl = doc.querySelector('.date-cell');
-        var caseEl = doc.querySelector('.case-name');
-        var d = arabicStrToDate(dateEl ? dateEl.textContent.trim() : '');
-        list.push({ date:d, caseName: caseEl ? caseEl.textContent.trim() : 'جلسة', isDone:isDone });
-      });
-      return { total:rows.length, done:done, upcoming:upcoming, list:list };
+    function setPeriod(el) {
+      document.querySelectorAll('.ptab').forEach(function(t){ t.classList.remove('active'); });
+      el.classList.add('active');
+      showToast('تم تحديث التقرير: ' + el.textContent.trim());
     }
 
-    /* ── بناء جدول الأسبوع من بيانات الجلسات الفعلية ── */
-    function buildWeekTimeline(sessionList) {
-      var today = new Date(); today.setHours(0,0,0,0);
-      /* أيام العمل في السعودية: السبت→الخميس (dow: 6,0,1,2,3,4) */
-      var WORK_DAYS = [6,0,1,2,3,4];
-      var DAY_NAMES = {6:'السبت',0:'الأحد',1:'الاثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس'};
-      /* ابدأ من السبت السابق */
-      var satOff = (today.getDay() - 6 + 7) % 7;
-      var weekSat = new Date(today); weekSat.setDate(today.getDate() - satOff);
-
-      var row = document.querySelector('.timeline-row');
-      if (!row) return;
-      row.innerHTML = '';
-      WORK_DAYS.forEach(function(dow) {
-        var off = (dow - 6 + 7) % 7;
-        var dayDate = new Date(weekSat); dayDate.setDate(weekSat.getDate() + off);
-        var isToday = dayDate.getTime() === today.getTime();
-        var isPast  = dayDate < today;
-        var daySess = sessionList.filter(function(s) {
-          if (!s.date) return false;
-          var sd = new Date(s.date); sd.setHours(0,0,0,0);
-          return sd.getTime() === dayDate.getTime();
-        });
-        var blockCls, blockTxt = '';
-        if (daySess.length) {
-          blockCls = isToday ? 'day-block db-red' : isPast ? 'day-block db-green' : 'day-block db-gold';
-          blockTxt = daySess.length > 1 ? daySess.length + ' جلسات' : (daySess[0].caseName || 'جلسة');
-        } else {
-          blockCls = 'day-block db-empty';
-        }
-        var col = document.createElement('div');
-        col.className = 'day-col';
-        col.innerHTML = '<div class="day-label' + (isToday?' lbl-active':'') + '">' + DAY_NAMES[dow] + '</div>' +
-          '<div class="' + blockCls + '" title="' + blockTxt + '">' + blockTxt + '</div>';
-        row.appendChild(col);
-      });
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 2600);
     }
 
-    /* ── lawyers_data ── */
-    function parseLawyers() {
-      try {
-        return JSON.parse(localStorage.getItem('lawyers_data') || '[]').map(function(html) {
-          var doc = new DOMParser().parseFromString(html, 'text/html');
-          var nameEl   = doc.querySelector('.lc-name');
-          var statVals = doc.querySelectorAll('.lc-stat-val');
-          var wlEl     = doc.querySelector('.lc-wl-pct');
-          return {
-            name:    nameEl      ? nameEl.textContent.trim()      : '—',
-            cases:   statVals[0] ? statVals[0].textContent.trim() : '0',
-            winRate: statVals[1] ? statVals[1].textContent.trim() : '—',
-            fees:    statVals[2] ? statVals[2].textContent.trim() : '—',
-            wl:      wlEl ? (parseInt(wlEl.textContent) || 0) : 0
-          };
-        });
-      } catch(e) { return []; }
-    }
-
-    /* ── Monthly bar chart ── */
-    function buildChart(byMonth) {
-      var now = new Date(), months = [];
-      for (var i = 5; i >= 0; i--) {
-        var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        var mk = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1);
-        months.push({ label:MONTHS_AR[d.getMonth()], val:byMonth[mk]||0, isCur:i===0 });
-      }
-      var max = Math.max.apply(null, months.map(function(m){return m.val;})) || 1;
-      var area = document.getElementById('finChart');
-      area.innerHTML = '';
-      months.forEach(function(m) {
-        var pct = Math.round((m.val/max)*100) || 2;
-        var isMax = m.val === max && !m.isCur;
-        var barCls = m.isCur ? 'chart-bar bar-forecast' : isMax ? 'chart-bar bar-accent' : 'chart-bar';
-        var col = document.createElement('div');
-        col.className = 'chart-col';
-        col.innerHTML = '<div class="' + barCls + '" style="height:' + pct + '%" title="' + (m.val ? fmtMoney(m.val) : '—') + '"></div>' +
-          '<div class="chart-lbl' + (isMax ? ' lbl-active' : '') + '">' + m.label + '</div>';
-        area.appendChild(col);
-      });
-      var vals = months.filter(function(m){return m.val>0;}).map(function(m){return m.val;});
-      document.getElementById('statHigh').textContent = vals.length ? fmtMoney(Math.max.apply(null,vals)) : '—';
-      document.getElementById('statLow').textContent  = vals.length ? fmtMoney(Math.min.apply(null,vals)) : '—';
-      document.getElementById('statAvg').textContent  = vals.length ? fmtMoney(vals.reduce(function(a,b){return a+b;},0)/vals.length) : '—';
-      document.getElementById('chartSubtitle').textContent = months[0].label + ' — ' + months[5].label;
-      document.getElementById('chartBadge').textContent = 'آخر 6 أشهر';
-    }
-
-    /* ── Horizontal distribution charts (dynamic labels) ── */
-    function buildHChart(containerId, dataObj, total) {
-      var sorted = Object.keys(dataObj).sort(function(a,b){return dataObj[b]-dataObj[a];});
-      var rows = document.querySelectorAll('#' + containerId + ' .hb-row');
-      rows.forEach(function(row, i) {
-        var entry = sorted[i];
-        var count = entry ? (dataObj[entry]||0) : 0;
-        var pct = (total && count) ? Math.round((count/total)*100) : 0;
-        var lblEl  = row.querySelector('.hb-label');
-        var pctEl  = row.querySelector('.hb-pct');
-        var fillEl = row.querySelector('.hb-fill');
-        if (lblEl && entry) lblEl.textContent = entry;
-        if (pctEl)  pctEl.textContent  = pct + '%';
-        if (fillEl) fillEl.style.width = pct + '%';
-      });
-    }
-
-    /* ── Lawyer performance table ── */
-    function buildLawyerTable(lawyers, byLawyerFees) {
-      var tbody = document.getElementById('lawyerTable');
-      if (!lawyers.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد بيانات بعد — فعّل وضع العرض من الإعدادات</td></tr>';
-        return;
-      }
-      tbody.innerHTML = lawyers.map(function(l) {
-        var fd = byLawyerFees[l.name] || { total:0, paid:0 };
-        var feeDisplay = fd.total ? fmtMoney(fd.total) : (l.fees + ' ر.س');
-        var wlCls = l.wl >= 70 ? 'fill-red' : l.wl >= 40 ? 'fill-gold' : 'fill-accent';
-        var wr = parseInt(l.winRate) || 0;
-        var stars = '';
-        for (var s = 0; s < 5; s++) {
-          stars += '<div class="star ' + (s < Math.round(wr/20) ? (wr>=80?'star-on-gold':'star-on-green') : 'star-off') + '"></div>';
-        }
-        return '<tr>' +
-          '<td><div class="lawyer-chip"><div class="av-sm">' + initials(l.name) + '</div><div><div class="lawyer-name">' + l.name + '</div></div></div></td>' +
-          '<td style="font-weight:700;color:var(--accent);text-align:center">' + l.cases + '</td>' +
-          '<td style="color:var(--ink-muted);text-align:center">—</td>' +
-          '<td class="win-pct" style="color:var(--green);text-align:center">' + l.winRate + '</td>' +
-          '<td class="fee-amt">' + feeDisplay + '</td>' +
-          '<td><div class="stars">' + stars + '</div></td>' +
-          '<td><div class="workload-bar"><div class="workload-fill ' + wlCls + '" style="width:' + l.wl + '%"></div></div>' +
-          '<div style="font-size:0.6rem;color:var(--ink-muted);margin-top:2px">' + l.wl + '%</div></td>' +
-          '</tr>';
-      }).join('');
-    }
-
-    /* ── Overdue section ── */
-    function buildOverdueSection(list) {
-      var el = document.getElementById('overdueList');
-      var badge = document.getElementById('overdueCount');
-      if (badge) badge.textContent = list.length + ' فواتير';
-      if (!el) return;
-      if (!list.length) {
-        el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green);font-size:0.82rem;font-weight:600">✅ لا توجد فواتير متأخرة — ممتاز!</div>';
-        return;
-      }
-      el.innerHTML = list.map(function(inv) {
-        return '<div class="alert-item al-red">' +
-          '<div class="alert-icon ai-red">🧾</div>' +
-          '<div style="flex:1"><div class="alert-title">' + inv.client + '</div>' +
-          '<div class="alert-desc">' + inv.invNum + ' · استحقاق: ' + inv.due + '</div></div>' +
-          '<div style="font-weight:800;font-size:0.85rem;color:var(--red);white-space:nowrap">' + fmtMoney(inv.amount) + '</div>' +
-          '</div>';
-      }).join('');
-    }
-
-    /* ── Performance alerts ── */
-    function buildAlerts(fees, cases, sessions) {
-      var el = document.getElementById('alertsList');
-      if (!el) return;
-      var alerts = [];
-      if (fees.pending > 0) alerts.push({ t:'gold', i:'💰', title:'مستحقات غير محصّلة', desc:fmtMoney(fees.pending) + ' بانتظار التحصيل' });
-      if (sessions.upcoming > 0) alerts.push({ t:'green', i:'📅', title:sessions.upcoming + ' جلسة قادمة', desc:'تأكّد من إرسال تذكيرات واتساب للموكلين' });
-      if (fees.total > 0) {
-        var rate = Math.round((fees.paid/fees.total)*100);
-        alerts.push({ t:(rate>=70?'green':'gold'), i:'📊', title:'نسبة التحصيل: ' + rate + '%', desc:'محصّل ' + fmtMoney(fees.paid) + ' من إجمالي ' + fmtMoney(fees.total) });
-      }
-      if (cases.total > 0) alerts.push({ t:'green', i:'⚖️', title:cases.total + ' قضية نشطة', desc:'موزّعة على ' + Object.keys(cases.byCourt).length + ' محاكم' });
-      el.innerHTML = alerts.length ? alerts.map(function(a) {
-        return '<div class="alert-item al-' + a.t + '">' +
-          '<div class="alert-icon ai-' + a.t + '">' + a.i + '</div>' +
-          '<div><div class="alert-title">' + a.title + '</div><div class="alert-desc">' + a.desc + '</div></div></div>';
-      }).join('') : '<div style="text-align:center;padding:2rem;color:var(--ink-muted);font-size:0.82rem">لا توجد تنبيهات — أضف بيانات لرؤية التحليلات</div>';
-    }
-
-    /* ── Topbar date ── */
-    (function() {
-      var d = new Date();
-      var DN = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-      var MN = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-      var el = document.getElementById('topbarDate');
-      if (el) el.textContent = DN[d.getDay()] + '، ' + d.getDate() + ' ' + MN[d.getMonth()] + ' ' + d.getFullYear();
-      var sub = document.getElementById('sessSubtitle');
-      if (sub) sub.textContent = MN[d.getMonth()] + ' ' + d.getFullYear();
-    })();
-
-    /* ── Init ── */
-    function init() {
-      var fees     = parseFeesData();
-      var cases    = parseCases();
-      var sessions = parseSessions();
-      var lawyers  = parseLawyers();
-      var overdue  = parseOverdue();
-
-      /* KPIs */
-      document.getElementById('kpiCases').textContent    = cases.total || '0';
-      document.getElementById('kpiCasesSub').textContent = cases.total ? cases.total + ' قضية مسجلة في النظام' : 'لا توجد بيانات بعد';
-
-      var avgWin = lawyers.length ? (Math.round(lawyers.reduce(function(s,l){return s+(parseInt(l.winRate)||0);},0)/lawyers.length)+'%') : '—';
-      document.getElementById('kpiWin').textContent      = avgWin;
-      document.getElementById('kpiWinSub').textContent   = lawyers.length ? 'متوسط الفريق · أعلى: ' + (lawyers[0]||{}).winRate : 'لا توجد بيانات بعد';
-
-      document.getElementById('kpiDuration').textContent    = cases.total ? '~45 يوم' : '—';
-      document.getElementById('kpiDurationSub').textContent = cases.total ? 'متوسط مدة إغلاق القضية' : 'لا توجد بيانات بعد';
-
-      document.getElementById('kpiFees').textContent    = fees.total ? fmtMoney(fees.total) : '0';
-      document.getElementById('kpiFeesSub').textContent = fees.total ? ('محصّل: ' + fmtMoney(fees.paid) + ' · معلق: ' + fmtMoney(fees.pending)) : 'لا توجد بيانات بعد';
-
-      /* Chart */
-      buildChart(fees.byMonth);
-
-      /* Lawyer table */
-      buildLawyerTable(lawyers, fees.byLawyer);
-
-      /* Distributions */
-      buildHChart('typeChart',  cases.byType,  cases.total);
-      buildHChart('courtChart', cases.byCourt, cases.total);
-      document.getElementById('typeChartSub').textContent  = cases.total ? cases.total + ' قضية' : 'لا توجد بيانات بعد';
-      document.getElementById('courtChartSub').textContent = cases.total ? cases.total + ' قضية' : 'لا توجد بيانات بعد';
-
-      /* Sessions */
-      document.getElementById('sessTot').textContent      = sessions.total;
-      document.getElementById('sessDone').textContent     = sessions.done;
-      document.getElementById('sessUpcoming').textContent = sessions.upcoming;
-      buildWeekTimeline(sessions.list);
-
-      /* Overdue + Alerts */
-      buildOverdueSection(overdue);
-      buildAlerts(fees, cases, sessions);
-    }
-
-    /* Period tabs — visual only */
-    document.querySelectorAll('.tab-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-        btn.classList.add('active');
-      });
-    });
-
-    document.getElementById('btnExport').addEventListener('click', function() { window.print(); });
-
-    init();
-  })();
+    buildChart(); buildPerf(); buildWL();
   </script>
-  <script src="demo-data.js"></script>
   <script src="sidebar-badges.js"></script>
   <script src="firm-name.js"></script>
-  <script src="dark-mode.js"></script><script src="notifications.js"></script>
+  <script src="dark-mode.js"></script>
+  <script src="notifications.js"></script>
   <script src="global-search.js"></script>
 </body>
 </html>
-
-
-
